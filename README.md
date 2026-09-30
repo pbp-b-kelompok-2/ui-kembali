@@ -90,7 +90,7 @@ UIKembali menggunakan **UI SSO** sebagai mekanisme autentikasi pengguna. Dengan 
 Desain antarmuka UIKembali dibuat menggunakan Figma.
 
 **Figma:**  
-[Masukkan tautan Figma di sini]
+[LINK](https://www.figma.com/design/rTVD1SeON4Oi2QX6KCMLmN/UIKembali?node-id=0-1&p=f&t=z9WZO9P8ZcTj0RiZ-0)
 
 ---
 
