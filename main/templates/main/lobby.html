@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UIKembali - Barang bekas anak UI, dipakai lagi</title>
+  <meta name="description" content="Platform bagi mahasiswa UI untuk memberikan atau menjual barang bekas layak pakai, supaya barang tidak terbuang dan kebutuhan kost lebih murah.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Django: ganti dengan {% load static %} lalu href="{% static 'css/lobby.css' %}" -->
+  <link rel="stylesheet" href="{% static 'css/lobby.css' %}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#" aria-label="UIKembali, beranda">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="16" fill="#ffc800"/>
+          <path d="M16 7.5a8.5 8.5 0 1 0 8.2 10.7" fill="none" stroke="#14213d" stroke-width="3" stroke-linecap="round"/>
+          <path d="M20 4.5l5.2 3.4-4.6 4.6z" fill="#14213d"/>
+        </svg>
+        <span>UIKembali</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigasi utama">
+        <a href="#cara-kerja">Cara kerja</a>
+        <a href="#fitur">Fitur</a>
+        <a href="#" class="btn btn-small">Masuk dengan SSO UI</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <h1>Barang lamamu masih berguna buat anak UI lain.</h1>
+          <p class="hero-sub">
+            UIKembali mempertemukan mahasiswa UI yang ingin memberikan atau menjual barang bekas
+            dengan teman yang sedang mencarinya, dari perabot kost sampai buku kuliah.
+          </p>
+          <div class="hero-actions">
+            <a href="#" class="btn">Masuk dengan SSO UI</a>
+            <a href="#" class="btn btn-ghost">Lihat katalog</a>
+          </div>
+          <p class="hero-note">Masuk memakai akun SSO UI-mu. Tidak perlu daftar terpisah.</p>
+        </div>
+
+        <div class="hero-visual" aria-label="Contoh barang di UIKembali">
+          <div class="rope" aria-hidden="true"></div>
+          <ul class="tags">
+            <li class="tag" style="--tilt:-4deg; --delay:0s">
+              <span class="badge badge-free">Gratis</span>
+              <h3>Kipas angin mini</h3>
+              <p>Kondisi baik, masih kencang.</p>
+              <p class="tag-place">Kukusan</p>
+            </li>
+            <li class="tag tag-raised" style="--tilt:3deg; --delay:.12s">
+              <span class="badge badge-price">Rp 60.000</span>
+              <h3>Rak buku lipat</h3>
+              <p>Tiga tingkat, ada lecet kecil.</p>
+              <p class="tag-place">Beji</p>
+            </li>
+            <li class="tag" style="--tilt:-2deg; --delay:.24s">
+              <span class="badge badge-free">Gratis</span>
+              <h3>Setrika uap</h3>
+              <p>Sering dipakai, semua fungsi normal.</p>
+              <p class="tag-place">Pondok Cina</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARA KERJA -->
+    <section class="section" id="cara-kerja">
+      <div class="container">
+        <h2>Cara kerjanya</h2>
+        <ol class="steps">
+          <li>
+            <h3>Masuk dengan SSO UI</h3>
+            <p>Pakai akun UI-mu. Lengkapi profil dengan fakultas dan angkatan.</p>
+          </li>
+          <li>
+            <h3>Pasang atau cari barang</h3>
+            <p>Unggah barang yang mau kamu lepas, atau telusuri katalog berdasarkan kategori, kondisi, dan lokasi.</p>
+          </li>
+          <li>
+            <h3>Ajukan adopsi atau beli</h3>
+            <p>Pemilik menerima atau menolak permintaan, lalu kalian sepakat lewat chat.</p>
+          </li>
+          <li>
+            <h3>Beri ulasan</h3>
+            <p>Setelah barang berpindah tangan, saling beri rating supaya yang lain bisa percaya.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- FITUR -->
+    <section class="section section-alt" id="fitur">
+      <div class="container features">
+        <div class="features-intro">
+          <h2>Satu akun, dua peran</h2>
+          <p>
+            Kamu bisa jadi pemberi sekaligus pencari. Barang yang kamu lepas hari ini
+            tidak menghalangi kamu mengadopsi barang orang lain besok.
+          </p>
+        </div>
+
+        <dl class="feature-list">
+          <div class="feature">
+            <dt>Katalog dan pencarian</dt>
+            <dd>Cari barang, saring berdasarkan kategori, kondisi, jenis transaksi, dan lokasi.</dd>
+          </div>
+          <div class="feature">
+            <dt>Peta lokasi</dt>
+            <dd>Lihat di mana barang berada lewat OpenStreetMap sebelum memutuskan mengajukan.</dd>
+          </div>
+          <div class="feature">
+            <dt>Chat</dt>
+            <dd>Bicara langsung dengan pemilik atau calon pengadopsi untuk atur waktu dan tempat.</dd>
+          </div>
+          <div class="feature">
+            <dt>Forum</dt>
+            <dd>Tanya tips kehidupan kost, bagikan pengalaman, dan diskusi soal memakai kembali barang.</dd>
+          </div>
+          <div class="feature">
+            <dt>Ulasan dan laporan</dt>
+            <dd>Beri rating setelah transaksi, dan laporkan barang atau akun yang bermasalah.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="container cta-inner">
+        <h2>Mulai dari barang yang ada di kamarmu.</h2>
+        <a href="#" class="btn btn-on-dark">Masuk dengan SSO UI</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>UIKembali, proyek PBP kelas B Kelompok 2.</p>
+      <p>Kurangi sampah, perpanjang umur barang.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

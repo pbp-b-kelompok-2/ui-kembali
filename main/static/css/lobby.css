@@ -1,0 +1,425 @@
+/* ===== UIKembali - Lobby ===== */
+
+:root {
+  --ink: #14213d;
+  --ink-soft: #4a5468;
+  --paper: #f6f7f9;
+  --white: #ffffff;
+  --yellow: #ffc800;
+  --green: #1f7a4d;
+  --green-tint: #dff1e6;
+  --line: #d8dce4;
+
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+
+  --radius: 10px;
+  --maxw: 1120px;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+p { margin: 0; }
+ul, ol, dl, dd { margin: 0; padding: 0; }
+li { list-style: none; }
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+/* ===== Tombol ===== */
+.btn {
+  display: inline-block;
+  padding: 0.8rem 1.4rem;
+  background: var(--yellow);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.btn-ghost {
+  background: transparent;
+  box-shadow: none;
+}
+.btn-ghost:hover {
+  background: var(--white);
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn-on-dark {
+  border-color: var(--yellow);
+  box-shadow: 3px 3px 0 rgba(255, 200, 0, 0.45);
+}
+.btn-on-dark:hover { box-shadow: 1px 1px 0 rgba(255, 200, 0, 0.45); }
+
+/* ===== Header ===== */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.9rem;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.brand-mark { width: 32px; height: 32px; }
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.main-nav a:not(.btn) {
+  text-decoration: none;
+  font-weight: 500;
+}
+.main-nav a:not(.btn):hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ===== Hero ===== */
+.hero { padding-block: 4rem 5rem; }
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2.3rem, 4.6vw, 3.6rem);
+  font-weight: 800;
+  max-width: 15ch;
+}
+.hero-sub {
+  margin-top: 1.25rem;
+  max-width: 52ch;
+  color: var(--ink-soft);
+  font-size: 1.15rem;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.hero-note {
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+/* Label barang yang menggantung di tali */
+.hero-visual { position: relative; padding-top: 1rem; }
+
+.rope {
+  height: 3px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+.tags {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 3.5rem; /* ruang untuk tali gantungan */
+}
+
+.tag {
+  --tilt: 0deg;
+  position: relative;
+  flex: 1 1 0;
+  max-width: 190px;
+  padding: 2.1rem 1rem 1rem;
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 6px 6px 16px 16px;
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(var(--tilt));
+  transform-origin: 50% -3.5rem;
+  animation: swing 1.8s ease-out var(--delay, 0s) 1 both;
+}
+.tag-raised { margin-top: 1.5rem; }
+
+/* tali dari lubang label ke tali utama */
+.tag::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 0.6rem);
+  width: 2px;
+  height: 3.5rem;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+/* lubang label */
+.tag::after {
+  content: "";
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.tag h3 {
+  margin-top: 0.7rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.tag p {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.tag .tag-place {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--line);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.badge-free { background: var(--green-tint); color: var(--green); }
+.badge-price { background: var(--yellow); color: var(--ink); }
+
+/* Satu gerakan saat halaman dimuat: label berayun lalu diam */
+@keyframes swing {
+  0%   { transform: rotate(calc(var(--tilt) + 14deg)); }
+  30%  { transform: rotate(calc(var(--tilt) - 8deg)); }
+  55%  { transform: rotate(calc(var(--tilt) + 4deg)); }
+  78%  { transform: rotate(calc(var(--tilt) - 1.5deg)); }
+  100% { transform: rotate(var(--tilt)); }
+}
+
+/* ===== Section umum ===== */
+.section { padding-block: 4.5rem; }
+.section-alt {
+  background: var(--white);
+  border-block: 1px solid var(--line);
+}
+.section h2 {
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-weight: 800;
+}
+
+/* ===== Cara kerja ===== */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+  counter-reset: langkah;
+}
+.steps li {
+  position: relative;
+  padding-top: 3.4rem;
+  counter-increment: langkah;
+}
+.steps li::before {
+  content: counter(langkah);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+/* garis penghubung antar langkah */
+.steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 1.25rem;
+  left: 3.1rem;
+  right: -1.5rem;
+  border-top: 2px dashed var(--line);
+}
+.steps h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.steps p {
+  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+}
+
+/* ===== Fitur ===== */
+.features {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 4rem;
+  align-items: start;
+}
+.features-intro { position: sticky; top: 2rem; }
+.features-intro p {
+  margin-top: 1rem;
+  max-width: 42ch;
+  color: var(--ink-soft);
+}
+
+.feature {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  gap: 1.5rem;
+  padding-block: 1.25rem;
+  border-top: 2px solid var(--ink);
+}
+.feature:last-child { border-bottom: 2px solid var(--ink); }
+.feature dt {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.feature dd { color: var(--ink-soft); }
+
+/* ===== CTA ===== */
+.cta {
+  background: var(--ink);
+  color: var(--white);
+  padding-block: 4rem;
+}
+.cta-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.cta h2 {
+  max-width: 20ch;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  font-weight: 800;
+}
+
+/* ===== Footer ===== */
+.site-footer {
+  padding-block: 1.5rem;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+}
+
+/* ===== Responsif ===== */
+@media (max-width: 900px) {
+  .hero { padding-block: 2.5rem 3.5rem; }
+  .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .hero-copy h1 { max-width: 18ch; }
+
+  .steps { grid-template-columns: repeat(2, 1fr); gap: 2.5rem 2rem; }
+  .steps li:nth-child(2)::after { display: none; }
+
+  .features { grid-template-columns: 1fr; gap: 2rem; }
+  .features-intro { position: static; }
+}
+
+@media (max-width: 600px) {
+  .main-nav a:not(.btn) { display: none; }
+
+  .tag { padding-inline: 0.75rem; }
+  .tag h3 { font-size: 1rem; }
+  .tags { gap: 0.5rem; }
+  .tags .tag:nth-child(3) { display: none; }
+  .tag { max-width: none; }
+
+  .steps { grid-template-columns: 1fr; }
+  .steps li::after { display: none; }
+
+  .feature { grid-template-columns: 1fr; gap: 0.35rem; }
+
+  .cta-inner { flex-direction: column; align-items: flex-start; }
+  .section { padding-block: 3.25rem; }
+}
+
+/* ===== Aksesibilitas gerak ===== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tag { animation: none; }
+  .btn { transition: none; }
+}
