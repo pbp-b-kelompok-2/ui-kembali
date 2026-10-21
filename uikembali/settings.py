@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
-    'authenticate',
+    'auth_ssoui',
 ]
 
 MIDDLEWARE = [
@@ -154,4 +154,3 @@ MAILERS = {
 }
 
 SSO_UI_URL="https://sso.ui.ac.id/cas2/"
-SSO_UI_FORCE_SERVICE_HTTPS=True
