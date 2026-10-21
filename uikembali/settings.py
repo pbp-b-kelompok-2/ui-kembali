@@ -9,6 +9,10 @@ https://docs.djangoproject.com/en/6.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
+import sys
+import six
+
+sys.modules["django.utils.six.moves"] = six.moves
 
 from pathlib import Path
 import os
@@ -40,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'auth_ssoui',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +152,5 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+SSO_UI_URL="https://sso.ui.ac.id/cas2/"
