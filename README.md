@@ -20,11 +20,11 @@ A web platform for UI students to give away or sell reusable second-hand items, 
 
 | No. | Nama Modul | Deskripsi | Anggota |
 |---|---|---|---|
-| 1 | **Profile** | Menangani autentikasi pengguna yang terintegrasi dengan **SSO UI**, serta pengelolaan data profil pengguna seperti nama, fakultas, angkatan, foto profil, dan informasi lainnya. | **Padjri** |
+| 1 | **Profile** | Menangani autentikasi pengguna yang terintegrasi dengan **SSO UI**, serta pengelolaan data profil pengguna seperti nama, fakultas, angkatan, foto profil, dan informasi lainnya. | **Elvis** |
 | 2 | **Posting & Katalog Barang** | Menangani CRUD posting barang yang ingin diberikan atau dijual, termasuk nama, deskripsi, kategori, kondisi, foto, lokasi, jenis transaksi (adopsi/jual), dan harga. Modul ini juga menyediakan katalog, pencarian, filter, halaman detail barang, serta pengelolaan permintaan adopsi atau pembelian. | **Owen** |
 | 3 | **Chat** | Menangani komunikasi antar pengguna, khususnya antara pemilik/penjual dengan calon pengadopsi/pembeli. Modul mencakup pembuatan percakapan, pengiriman pesan, dan pengelolaan pesan. | **Axel** |
 | 4 | **Forum** | Menyediakan ruang diskusi bagi pengguna untuk berbagi informasi, pengalaman, tips, dan pertanyaan seputar barang bekas, kehidupan kost, serta penggunaan kembali barang. Modul mencakup CRUD posting forum dan interaksi pengguna pada forum. | **Dimas** |
-| 5 | **Review & Report** | Menangani pemberian rating dan ulasan setelah proses adopsi atau pembelian selesai, serta pelaporan terhadap barang atau pengguna yang bermasalah. | **Elvis** |
+| 5 | **Review & Report** | Menangani pemberian rating dan ulasan setelah proses adopsi atau pembelian selesai, serta pelaporan terhadap barang atau pengguna yang bermasalah. | **Padjri** |
 
 ---
 
