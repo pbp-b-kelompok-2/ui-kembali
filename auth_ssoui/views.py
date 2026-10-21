@@ -4,7 +4,9 @@ from django_sso_ui.decorators import with_sso_ui
 from django_sso_ui.utils import get_service_url, get_cas_client
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth.decorators import login_required
 from .models import *
+from .forms import *
 import json
 
 # Create your views here.
@@ -13,9 +15,9 @@ def login_sso(request, sso_profile):
     username = sso_profile["username"]
     attrs = sso_profile["attributes"]
 
-    user, created = get_user_model().objects.get_or_create(username=username)
+    user, created = get_user_model().objects.get_or_create(username=sso_profile["username"])
     if created:
-        user.set_unusable_password()   # login hanya lewat SSO
+        user.set_unusable_password()
         user.save()
 
     Profile.objects.update_or_create(
@@ -23,10 +25,14 @@ def login_sso(request, sso_profile):
         defaults={
             "nama": attrs.get("nama", ""),
             "peran": "Mahasiswa",
+            "faculty": attrs.get("faculty", ""),
         },
     )
 
     login(request, user)
+
+    if not user.profile.is_complete:
+        return redirect("auth_ssoui:lengkapi_profil")
     return redirect("main:lobby")   # ganti sesuai nama url kamu
 
 def logout_sso(request):
@@ -35,6 +41,22 @@ def logout_sso(request):
     service_url = get_service_url(request)
     client = get_cas_client(service_url)
     return redirect(client.get_logout_url(request.build_absolute_uri(reverse("main:lobby"))))
+
+@login_required(login_url="main:login")
+def lengkapi_profil(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.is_complete = True
+            profile.save()
+            return redirect("main:lobby")
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(request, "form_user.html", {"form": form})
 
 @with_sso_ui()
 def get_login_cred(request, sso_profile):
