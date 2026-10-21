@@ -18,6 +18,7 @@ media/
 # Rahasia dan konfigurasi lokal
 .env
 .env.*
+!.env.example
 local_settings.py
 
 # Editor dan sistem operasi

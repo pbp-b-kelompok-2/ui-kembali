@@ -17,21 +17,42 @@ sys.modules["django.utils.six.moves"] = six.moves
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Local overrides live in .env (see .env.example); PWS sets real env vars.
+load_dotenv(BASE_DIR / '.env')
+
+
+def env_list(name, default):
+    return [v.strip() for v in os.getenv(name, default).split(',') if v.strip()]
+
+
+PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8n$*)#9aex83^^v9@d6r=w864e$km@rsnyxrmr8y&%44*(^0t)'
+# The fallback is for local dev only; set SECRET_KEY on PWS.
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    'django-insecure-8n$*)#9aex83^^v9@d6r=w864e$km@rsnyxrmr8y&%44*(^0t)',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', str(not PRODUCTION)).lower() == 'true'
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "elvis-sestomi-ui-kembali.pws.cs.ui.ac.id"]
-PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+ALLOWED_HOSTS = env_list(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,elvis-sestomi-ui-kembali.pws.cs.ui.ac.id',
+)
+CSRF_TRUSTED_ORIGINS = env_list(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://elvis-sestomi-ui-kembali.pws.cs.ui.ac.id',
+)
 
 
 # Application definition
