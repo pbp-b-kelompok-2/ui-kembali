@@ -10,10 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/lobby.css' %}">
+  <link rel="stylesheet" href="{% static 'css/toast.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
   {% block meta %}
   {% endblock meta %}
+  {% block extra_css %}
+  {% endblock extra_css %}
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
   <header class="site-header">
     <div class="container header-inner">
@@ -43,6 +47,11 @@
       <p>Kurangi sampah, perpanjang umur barang.</p>
     </div>
   </footer>
+
+  <div id="toast-stack" class="toast-stack" role="status" aria-live="polite"></div>
+  <script src="{% static 'js/toast.js' %}" defer></script>
+  {% block extra_js %}
+  {% endblock extra_js %}
 
 </body>
 </html>
