@@ -28,9 +28,9 @@ class Item(models.Model):
         LAINNYA = "LAINNYA", "Lainnya"
 
     class Condition(models.TextChoices):
-        BARU = "BARU", "Baru"
         SEPERTI_BARU = "SEPERTI_BARU", "Seperti baru"
         BAIK = "BAIK", "Baik"
+        CUKUP_BAIK = "CUKUP_BAIK", "Cukup baik"
         LAYAK_PAKAI = "LAYAK_PAKAI", "Layak pakai"
 
     class TransactionType(models.TextChoices):
