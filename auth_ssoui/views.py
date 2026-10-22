@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django_sso_ui.decorators import with_sso_ui
-from django_sso_ui.utils import get_service_url, get_cas_client
+from .sso_compat import with_sso_ui, get_service_url, get_cas_client
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
@@ -42,7 +41,7 @@ def logout_sso(request):
     client = get_cas_client(service_url)
     return redirect(client.get_logout_url(request.build_absolute_uri(reverse("main:lobby"))))
 
-@login_required(login_url="main:login")
+@login_required(login_url="/auth/login/")
 def lengkapi_profil(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
