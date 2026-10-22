@@ -86,6 +86,12 @@ class ItemModelTests(TestCase):
         self.assertIsNone(item.deleted_at)
         self.assertTrue(Item.objects.filter(pk=item.pk).exists())
 
+    def test_condition_choices_match_design(self):
+        self.assertEqual(
+            Item.Condition.labels,
+            ["Seperti baru", "Baik", "Cukup baik", "Layak pakai"],
+        )
+
     def test_indexes_declared(self):
         index_fields = [tuple(index.fields) for index in Item._meta.indexes]
         self.assertIn(("status", "created_at"), index_fields)
