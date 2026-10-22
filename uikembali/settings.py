@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'auth_ssoui',
+    'katalog',
 ]
 
 MIDDLEWARE = [
