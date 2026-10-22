@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -93,6 +95,9 @@ class ItemModelTests(TestCase):
     def test_default_ordering_is_newest_first(self):
         older = make_item(self.owner, name="Lama")
         newer = make_item(self.owner, name="Baru")
+        Item.objects.filter(pk=older.pk).update(
+            created_at=newer.created_at - timedelta(hours=1)
+        )
         self.assertEqual(list(Item.objects.all()), [newer, older])
 
 
