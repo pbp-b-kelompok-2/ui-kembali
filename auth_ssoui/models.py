@@ -32,3 +32,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.nama} ({self.user.username})"
+
+    def inisial(self):
+        return f"{self.nama.split()[0][0]}{self.nama.split()[-1][0]}"

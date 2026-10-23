@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from .sso_compat import with_sso_ui, get_service_url, get_cas_client
 from django.http import JsonResponse, HttpResponse
@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import *
 from .forms import *
+from .decorators import *
 import json
 
 # Create your views here.
@@ -49,15 +50,27 @@ def lengkapi_profil(request):
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             profile = form.save(commit=False)
+            profile.peran = "Mahasiswa"
             profile.is_complete = True
             profile.save()
             return redirect("main:lobby")
     else:
         form = ProfileForm(instance=profile)
-
-    return render(request, "form_user.html", {"form": form})
+    context = {
+        "form" : form,
+        "profile" : profile,
+    }
+    return render(request, "form_user.html", context)
 
 @with_sso_ui()
 def get_login_cred(request, sso_profile):
     print(json.dumps(sso_profile, indent=2, ensure_ascii=False))
     return JsonResponse(sso_profile)
+
+@profile_required
+def profile_page(request):
+    profile = get_object_or_404(Profile, user=request.user)
+    context = {
+        "profile" : profile,
+    }
+    return render(request, "profile.html", context)

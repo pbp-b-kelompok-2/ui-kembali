@@ -2,15 +2,20 @@
 from django import forms
 from .models import Profile
 
-SSO_FIELDS = ["nama", "peran", "faculty"]
-USER_FIELDS = ["pfp", "nama_panggilan", "no_hp", "angkatan", "bio", "titik_favorit"]
+SSO_FIELDS = ["nama", "faculty"]
+USER_FIELDS = ["pfp", "nama_panggilan", "no_hp", "angkatan", "titik_favorit", "bio"]
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = SSO_FIELDS + USER_FIELDS
+        labels = {
+            "pfp": "Foto profil",
+            "no_hp": "Nomor Whatsapp",
+            "titik_favorit": "Titik temu favorit",
+        }
         widgets = {
-            "bio": forms.Textarea(attrs={"rows": 1, "maxlength": 160}),
+            "bio": forms.Textarea(attrs={"rows": 1}),
             "pfp": forms.ClearableFileInput(attrs={"accept": "image/*"}),
             "titik_favorit": forms.TextInput(attrs={"placeholder": "Contoh: Perpustakaan UI, Danau Kenanga"}),
         }
