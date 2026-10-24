@@ -42,7 +42,7 @@
     {% include "katalog/_field.html" with field=form.condition %}
   </div>
   <div class="price-field{% if form.price.errors %} has-error{% endif %}">
-    {% include "katalog/_field.html" with field=form.price %}
+    {% include "katalog/_field.html" with field=form.price no_optional_hint=True %}
   </div>
   <div class="grid gap-4 sm:grid-cols-2">
     {% include "katalog/_field.html" with field=form.location_name %}

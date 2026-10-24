@@ -51,6 +51,7 @@ class ItemForm(forms.ModelForm):
             "price": "mis. 50000",
         }
         for name, field in self.fields.items():
+            field.error_messages["required"] = "Wajib diisi."
             if name == "transaction_type":
                 continue
             field.widget.attrs.setdefault("class", INPUT_CLASS)
