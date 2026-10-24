@@ -1,72 +1,61 @@
 {% extends "base.html" %}
 {% load static %}
 {% block meta %}
-  <title>Profil saya — UIKembali</title>
+<title>Profil saya — UIKembali</title>
 {% endblock meta %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock extra_css %}
 
 {% block content %}
-  <!-- ===== HEADER / NAVBAR ===== -->
+<!-- ===== HEADER / NAVBAR ===== -->
 
-  <!-- ===== PAGE HEADER ===== -->
-  <div class="container page-header">
-    <div class="page-header-inner">
-      <div>
-        <div class="label-verif">Akun terverifikasi</div>
-        <h1>Lengkapi profilmu</h1>
-        <p class="page-desc">Isi identitas komunitas, preferensi titik temu, dan rekam jejak transaksimu.</p>
-      </div>
+<!-- ===== PAGE HEADER ===== -->
+<div class="container page-header">
+  <div class="page-header-inner">
+    <div>
+      <div class="label-verif">Akun terverifikasi</div>
+      <h1>Lengkapi profilmu</h1>
+      <p class="page-desc">Isi identitas komunitas, preferensi titik temu, dan rekam jejak transaksimu.</p>
     </div>
   </div>
+</div>
 
-  <!-- ===== MAIN CONTENT ===== -->
-  <div class="container">
-    <div class="profile-layout">
+<!-- ===== MAIN CONTENT ===== -->
+<div class="container">
+  <div class="profile-layout">
 
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <!-- Profile Card -->
-        <div class="profile-card">
-          <div class="profile-avatar">{{ profile.inisial }}</div>
-          <h3>{{ profile.nama }}</h3>
-          <p class="profile-detail">{{ profile.faculty }} {{ profile.angkatan }}</p>
-        </div>
-      </aside>
-
-      <!-- Main Content Area -->
-      <div class="main-content">
-
-        <!-- Informasi Profil -->
-        <section class="info-section" id="informasi-profil">
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="info-header">
-              <div>
-                <h2>Informasi profil</h2>
-                <p class="info-sub">Nama dan fakultas disinkronkan dari UI SSO.</p>
-              </div>
-              <button type submit class="btn-simpan" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Simpan perubahan
-              </button>
-            </div>
-            <section class="form-grid">
-              {% for field in form %}
-                <div class="form-group">
-                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                  {{ field }}
-                </div>
-              {% endfor %}
-            </section>
-          </form>
-        </section>
-
-        <!-- Riwayat Terbaru -->
-
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-avatar">{{ profile.inisial }}</div>
+        <h3>{{ profile.nama }}</h3>
+        <p class="profile-detail">{{ profile.faculty }} {{ profile.angkatan }}</p>
       </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+      <!-- Informasi Profil -->
+      <section class="info-section" id="informasi-profil">
+        {% include "components/profile_form_modal.html" %}
+      </section>
+
+      <!-- Riwayat Terbaru -->
+
     </div>
   </div>
+</div>
 {% endblock content %}
+{% block extra_js %}
+<script>
+  document.body.addEventListener("redirectLater", function (e) {
+    setTimeout(function () {
+      window.location.href = e.detail.url;
+    }, e.detail.delay || 1000);
+  });
+</script>
+{% endblock extra_js %}

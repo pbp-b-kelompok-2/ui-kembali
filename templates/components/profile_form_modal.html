@@ -1,0 +1,25 @@
+<form method="post"
+      enctype="multipart/form-data"
+      hx-post="{% url 'auth_ssoui:lengkapi_profil' %}"
+      hx-target="this"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+  <div class="info-header">
+    <div>
+      <h2>Informasi profil</h2>
+      <p class="info-sub">Nama dan fakultas disinkronkan dari UI SSO.</p>
+    </div>
+    <button type="submit" class="btn-simpan">Simpan perubahan</button>
+  </div>
+  <section class="form-grid">
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}
+          <small class="field-error">{{ error }}</small>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </section>
+</form>

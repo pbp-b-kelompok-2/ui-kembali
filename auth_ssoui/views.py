@@ -10,6 +10,10 @@ from .decorators import *
 import json
 
 # Create your views here.
+def with_toast(response, msg, level="success"):
+    response["HX-Trigger"] = json.dumps({"toast": {"msg": msg, "level": level}})
+    return response
+
 @with_sso_ui()
 def login_sso(request, sso_profile):
     username = sso_profile["username"]
@@ -46,6 +50,13 @@ def logout_sso(request):
 def lengkapi_profil(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
 
+    if request.user.profile.is_complete:
+        if request.headers.get("HX-Request"):
+            response = HttpResponse(status=204)
+            response["HX-Redirect"] = reverse("auth_ssoui:profile")
+            return response
+        return redirect("auth_ssoui:profile")
+
     if request.method == "POST":
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
@@ -53,7 +64,17 @@ def lengkapi_profil(request):
             profile.peran = "Mahasiswa"
             profile.is_complete = True
             profile.save()
+            if request.headers.get("HX-Request"):
+                response = HttpResponse(status=204)
+                response["HX-Trigger"] = json.dumps({
+                    "toast": {"msg": "Profil berhasil dilengkapi", "level": "success"},
+                    "redirectLater": {"url": reverse("main:lobby"), "delay": 1200},
+                })
+                return response
             return redirect("main:lobby")
+        response = render(request, "components/profile_form_modal.html",
+                          {"form": form, "profile": profile})
+        return with_toast(response, "Ada isian yang belum benar, cek lagi ya", "error")
     else:
         form = ProfileForm(instance=profile)
     context = {
