@@ -71,7 +71,11 @@
       <aside class="sidebar">
         <!-- Profile Card -->
         <div class="profile-card">
-          <div class="profile-avatar">{{ profile.inisial }}</div>
+          {% if profile.pfp %}
+            <div class="profile-avatar"><img src="{{ profile.pfp.url }}" width="40" height="40" loading="lazy" decoding="async" alt=""></div>
+          {% else %}
+            <div class="profile-avatar">{{ profile.inisial }}</div>
+          {% endif %}
           <h3>{{ profile.nama }}</h3>
           <p class="profile-detail">{{ profile.faculty }} {{ profile.angkatan }}</p>
           <!-- <div class="profile-stats">
@@ -120,44 +124,7 @@
 
         <!-- Informasi Profil -->
         <section class="info-section" id="informasi-profil">
-          <div class="info-header">
-            <div>
-              <h2>Informasi profil</h2>
-              <p class="info-sub">Nama dan fakultas disinkronkan dari UI SSO.</p>
-            </div>
-            <button class="btn-simpan" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Simpan perubahan
-            </button>
-          </div>
-
-          <form class="form-grid" onsubmit="return false;">
-            <div class="form-group">
-              <label for="nama-lengkap">Nama lengkap</label>
-              <input type="text" id="nama-lengkap" value="{{ profile.nama }}" readonly>
-            </div>
-            <div class="form-group">
-              <label for="nama-panggilan">Nama panggilan</label>
-              <input type="text" id="nama-panggilan" value="{{ profile.nama_panggilan }}">
-            </div>
-            <!-- <div class="form-group">
-              <label for="program-studi">Program studi</label>
-              <input type="text" id="program-studi" value="Biologi, FMIPA" readonly>
-            </div> -->
-            <div class="form-group">
-              <label for="titik-favorit">Titik temu favorit</label>
-              <input type="text" id="titik-temu" value="{{ profile.titik_favorit }}">
-            </div>
-            <div class="form-group">
-              <label for="nomor-wa">Nomor WhatsApp</label>
-              <input type="tel" id="nomor-wa" value="{{ profile.no_hp }}">
-              <span class="form-hint">Hanya terlihat setelah transaksi disetujui.</span>
-            </div>
-            <div class="form-group full-width">
-              <label for="bio">Bio singkat</label>
-              <textarea id="bio" rows="2">{{ profile.bio }}</textarea>
-            </div>
-          </form>
+          {% include "components/profile_form_modal.html" %}
         </section>
 
         <!-- Riwayat Terbaru -->
