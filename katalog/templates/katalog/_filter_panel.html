@@ -1,5 +1,9 @@
-<aside class="h-fit rounded-xl border border-line bg-surface p-5" aria-label="Filter">
-  <h2 class="text-lg font-semibold">Filter</h2>
+{# Collapsible on phones (catalog.js closes it below lg); always open on desktop. #}
+<details id="filter-panel" open class="group h-fit rounded-xl border border-line bg-surface p-5">
+  <summary class="flex cursor-pointer list-none items-center justify-between text-lg font-semibold [&::-webkit-details-marker]:hidden">
+    Filter
+    <svg class="h-5 w-5 text-ink-2 transition group-open:rotate-180 lg:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </summary>
 
   <fieldset class="mt-4 border-b border-line pb-4">
     <legend class="mb-2 text-sm font-semibold">Jenis penawaran</legend>
@@ -41,4 +45,4 @@
   <button type="submit" class="mt-5 w-full cursor-pointer rounded-lg border-0 bg-ink px-4 py-3 font-semibold text-white hover:bg-brand">
     Terapkan filter
   </button>
-</aside>
+</details>

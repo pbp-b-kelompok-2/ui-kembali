@@ -1,4 +1,5 @@
 {% extends "katalog/base_katalog.html" %}
+{% load static %}
 
 {% block meta %}<title>Jelajahi barang · UIKembali</title>{% endblock meta %}
 
@@ -20,7 +21,7 @@
     </label>
     <label class="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-2">
       Urutkan:
-      <select name="sort" class="bg-transparent font-semibold text-ink outline-none">
+      <select name="sort" class="border-0 bg-transparent font-semibold text-ink outline-none">
         {% for value, label in form.sort.field.choices %}
           <option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
@@ -34,3 +35,7 @@
   </div>
 </form>
 {% endblock katalog_content %}
+
+{% block extra_js %}
+<script src="{% static 'katalog/js/catalog.js' %}" defer></script>
+{% endblock extra_js %}
