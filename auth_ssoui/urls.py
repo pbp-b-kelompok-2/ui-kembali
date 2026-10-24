@@ -8,7 +8,8 @@ urlpatterns = [
     path("login/", login_sso, name="login"),
     path("logout/", logout_sso, name="logout"),
 
-    path("profile-fill/", lengkapi_profil, name="lengkapi_profil"),
-
-    path("profile/", profile_page, name="profile"),
+    path("profile/", profile_page, name="profile"), 
+    path("profile/fill/", lengkapi_profil, name="lengkapi_profil"),
+    path("profile/edit/", edit_profil, name="edit_profil"),
+    
 ]
