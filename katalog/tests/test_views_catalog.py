@@ -39,6 +39,15 @@ class CatalogPageTests(TestCase):
         self.assertTemplateNotUsed(response, "katalog/catalog.html")
         self.assertTemplateUsed(response, "katalog/_item_grid.html")
 
+    def test_htmx_history_restore_gets_the_full_page(self):
+        # On a history cache miss HTMX re-fetches the URL and needs the whole page.
+        response = self.client.get(
+            reverse("katalog:catalog"),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_HISTORY_RESTORE_REQUEST="true",
+        )
+        self.assertTemplateUsed(response, "katalog/catalog.html")
+
     def test_empty_catalog_shows_empty_state(self):
         response = self.client.get(reverse("katalog:item_list"))
         self.assertContains(response, "Belum ada barang")
