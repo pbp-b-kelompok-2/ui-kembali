@@ -51,6 +51,11 @@ class ItemFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("price", form.errors)
 
+    def test_required_message_is_indonesian(self):
+        form = ItemForm(data=form_data(name="", contact=""))
+        self.assertEqual(form.errors["name"], ["Wajib diisi."])
+        self.assertEqual(form.errors["contact"], ["Wajib diisi."])
+
     def test_bad_photo_url_is_invalid(self):
         form = ItemForm(data=form_data(photo_url="bukan url"))
         self.assertFalse(form.is_valid())
