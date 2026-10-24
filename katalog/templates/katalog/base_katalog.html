@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% comment %}
+  Katalog pages use Tailwind v4 (Play CDN) with theme + utilities only. Preflight
+  is left out on purpose: it would reset lobby.css (header, footer, buttons).
+{% endcomment %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.13"></script>
+<style type="text/tailwindcss">
+  @layer theme, base, components, utilities;
+  @import "tailwindcss/theme.css" layer(theme);
+  @import "tailwindcss/utilities.css" layer(utilities);
+
+  /* Tokens from the "Design System — Color" frame (see the designs zip). */
+  @theme {
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --color-canvas: #f7f6f1;
+    --color-surface: #ffffff;
+    --color-subtle: #edf6ef;
+    --color-ink: #17231b;
+    --color-ink-2: #667168;
+    --color-muted: #909990;
+    --color-line: #dde3dd;
+    --color-line-strong: #c6d0c7;
+    --color-action: #ffcb05;
+    --color-green: #257a47;
+    --color-brand: #155e35;
+    --color-success-bg: #dff1e5;
+    --color-warning-bg: #fff9e8;
+    --color-danger-bg: #fbeaea;
+    --color-danger: #b53d3d;
+    --color-info-bg: #e7f1fa;
+    --color-info: #2769a8;
+  }
+
+  @layer base {
+    .katalog input[type="checkbox"] { accent-color: var(--color-green); width: 1rem; height: 1rem; }
+    .katalog button, .katalog select, .katalog input { font: inherit; }
+    .katalog img { display: block; max-width: 100%; }
+  }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<main class="katalog font-sans bg-canvas text-ink min-h-screen">
+  {% block katalog_content %}{% endblock %}
+</main>
+{% endblock content %}

@@ -33,8 +33,8 @@ class CatalogPageTests(TestCase):
         self.assertContains(response, "Kipas angin")
 
     def test_htmx_request_to_catalog_page_gets_the_partial(self):
-        # hx-push-url puts ?q=… in the address bar; an HTMX history restore
-        # then hits the page URL, which must answer with the grid only.
+        # The filter form hx-gets the page URL itself (so hx-push-url leaves a
+        # real, reloadable URL in the address bar); HTMX only wants the grid.
         response = self.client.get(reverse("katalog:catalog"), HTTP_HX_REQUEST="true")
         self.assertTemplateNotUsed(response, "katalog/catalog.html")
         self.assertTemplateUsed(response, "katalog/_item_grid.html")
@@ -140,7 +140,7 @@ class CatalogFilterTests(TestCase):
         response = self.client.get(
             reverse("katalog:item_list"), {"q": "buku", "category": "BUKU"}
         )
-        self.assertContains(response, "1 barang ditemukan")
+        self.assertContains(response, "2 barang ditemukan")  # name + description match
         self.assertContains(response, "Buku")  # category chip label
         self.assertContains(response, "Hapus semua")
 
