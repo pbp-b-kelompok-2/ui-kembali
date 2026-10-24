@@ -19,14 +19,14 @@
     </div>
   {% endif %}
 
-  {% if page_obj.object_list %}
-    <ul class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      {% for item in page_obj %}
-        <li>{% include "katalog/_item_card.html" %}</li>
-      {% endfor %}
-    </ul>
+  {# #item-list always exists so a newly created card has somewhere to go. #}
+  <ul id="item-list" class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    {% for item in page_obj %}
+      {% include "katalog/_item_card.html" %}
+    {% endfor %}
+  </ul>
 
-    {% if page_obj.has_other_pages %}
+  {% if page_obj.has_other_pages %}
       <nav class="mt-8 flex items-center justify-center gap-3 text-sm" aria-label="Halaman">
         {% if page_obj.has_previous %}
           {% url 'katalog:catalog' as catalog_url %}
@@ -44,9 +44,10 @@
              class="rounded-lg border border-line bg-surface px-4 py-2 font-medium no-underline">Berikutnya →</a>
         {% endif %}
       </nav>
-    {% endif %}
-  {% else %}
-    <div class="mt-5 rounded-xl border border-dashed border-line-strong bg-surface p-10 text-center">
+  {% endif %}
+
+  {% if not page_obj.object_list %}
+    <div class="empty-state mt-5 rounded-xl border border-dashed border-line-strong bg-surface p-10 text-center">
       <p class="font-semibold">Belum ada barang yang cocok.</p>
       <p class="mt-1 text-sm text-ink-2">Coba kata kunci lain atau hapus beberapa filter.</p>
     </div>

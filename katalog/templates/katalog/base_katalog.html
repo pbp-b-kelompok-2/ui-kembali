@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% comment %}
   Katalog pages use Tailwind v4 (Play CDN) with theme + utilities only. Preflight
   is left out on purpose: it would reset lobby.css (header, footer, buttons).
@@ -39,6 +40,11 @@
     --color-info: #2769a8;
   }
 
+  /* Price only matters for "Jual"; keep it visible if it carries an error. */
+  #item-form:not(:has(input[value="JUAL"]:checked)) .price-field:not(.has-error) { display: none; }
+  #grid:has(#item-list li) .empty-state { display: none; }
+  #item-modal::backdrop { background: rgb(23 35 27 / 0.45); }
+
   @layer base {
     .katalog fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .katalog input[type="checkbox"] { accent-color: var(--color-green); width: 1rem; height: 1rem; }
@@ -51,5 +57,17 @@
 {% block content %}
 <main class="katalog font-sans bg-canvas text-ink min-h-screen">
   {% block katalog_content %}{% endblock %}
+
+  {# One shared modal: modal.js opens it whenever HTMX swaps into #modal-body. #}
+  <dialog id="item-modal" aria-labelledby="modal-title"
+          class="m-auto w-[min(40rem,calc(100%-2rem))] max-h-[90vh] overflow-y-auto rounded-2xl border-0 bg-surface p-6 text-ink shadow-xl">
+    <div id="modal-body"></div>
+  </dialog>
 </main>
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'katalog/js/modal.js' %}" defer></script>
+<script src="{% static 'katalog/js/optimistic.js' %}" defer></script>
+{% block katalog_js %}{% endblock %}
+{% endblock extra_js %}

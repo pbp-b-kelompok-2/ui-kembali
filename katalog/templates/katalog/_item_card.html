@@ -1,5 +1,6 @@
 {% load katalog_extras %}
-<article id="item-{{ item.pk }}" class="group relative h-full overflow-hidden rounded-xl border border-line bg-surface transition hover:-translate-y-0.5 hover:shadow-md">
+<li id="item-{{ item.pk }}">
+<article class="group relative h-full overflow-hidden rounded-xl border border-line bg-surface transition hover:-translate-y-0.5 hover:shadow-md">
   <div class="relative aspect-[4/3] bg-subtle">
     {% if item.photo_url %}
       <img src="{{ item.photo_url }}" alt="" loading="lazy" class="h-full w-full object-cover">
@@ -31,5 +32,16 @@
         <span class="text-xs text-ink-2">{{ item.pending_count }} peminat</span>
       {% endif %}
     </div>
+    {% if user.is_authenticated and item.owner_id == user.id %}
+      {# z-10 lifts the buttons above the card's stretched link. #}
+      <div class="relative z-10 mt-3 flex gap-2 border-0 border-t border-solid border-line pt-3">
+        <button type="button" hx-get="{% url 'katalog:item_update' item.pk %}" hx-target="#modal-body" hx-swap="innerHTML"
+                class="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-3 py-2 text-sm font-semibold text-green">Edit</button>
+        <button type="button" hx-post="{% url 'katalog:item_soft_delete' item.pk %}" hx-swap="none"
+                data-optimistic-hide="#item-{{ item.pk }}"
+                class="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-3 py-2 text-sm font-semibold text-danger">Hapus</button>
+      </div>
+    {% endif %}
   </div>
 </article>
+</li>
