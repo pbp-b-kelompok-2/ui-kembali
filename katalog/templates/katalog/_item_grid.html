@@ -1,0 +1,55 @@
+<section id="grid" aria-live="polite" class="min-w-0">
+  {% with q=form.cleaned_data.q %}
+    {% if q %}
+      <p class="text-sm font-medium uppercase tracking-wide text-green">Hasil pencarian</p>
+      <h1 class="mt-1 text-3xl font-bold">“{{ q }}”</h1>
+    {% else %}
+      <h1 class="text-3xl font-bold">Jelajahi barang</h1>
+    {% endif %}
+  {% endwith %}
+  <p class="mt-1 text-sm text-ink-2">{{ page_obj.paginator.count }} barang ditemukan</p>
+
+  {% if chips %}
+    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+      <span class="text-ink-2">Filter aktif:</span>
+      {% for chip in chips %}
+        <span class="rounded-full bg-success-bg px-3 py-1 font-medium text-brand">{{ chip }}</span>
+      {% endfor %}
+      <a href="{% url 'katalog:catalog' %}" class="font-semibold text-green no-underline hover:underline">Hapus semua</a>
+    </div>
+  {% endif %}
+
+  {# #item-list always exists so a newly created card has somewhere to go. #}
+  <ul id="item-list" class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    {% for item in page_obj %}
+      {% include "katalog/_item_card.html" %}
+    {% endfor %}
+  </ul>
+
+  {% if page_obj.has_other_pages %}
+      <nav class="mt-8 flex items-center justify-center gap-3 text-sm" aria-label="Halaman">
+        {% if page_obj.has_previous %}
+          {% url 'katalog:catalog' as catalog_url %}
+          <a href="{{ catalog_url }}?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+             hx-get="{{ catalog_url }}?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+             hx-target="#grid" hx-swap="outerHTML show:top" hx-push-url="true"
+             class="rounded-lg border border-line bg-surface px-4 py-2 font-medium no-underline">← Sebelumnya</a>
+        {% endif %}
+        <span class="text-ink-2">Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          {% url 'katalog:catalog' as catalog_url %}
+          <a href="{{ catalog_url }}?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+             hx-get="{{ catalog_url }}?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+             hx-target="#grid" hx-swap="outerHTML show:top" hx-push-url="true"
+             class="rounded-lg border border-line bg-surface px-4 py-2 font-medium no-underline">Berikutnya →</a>
+        {% endif %}
+      </nav>
+  {% endif %}
+
+  {% if not page_obj.object_list %}
+    <div class="empty-state mt-5 rounded-xl border border-dashed border-line-strong bg-surface p-10 text-center">
+      <p class="font-semibold">Belum ada barang yang cocok.</p>
+      <p class="mt-1 text-sm text-ink-2">Coba kata kunci lain atau hapus beberapa filter.</p>
+    </div>
+  {% endif %}
+</section>
