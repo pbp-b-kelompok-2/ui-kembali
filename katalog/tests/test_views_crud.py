@@ -152,6 +152,13 @@ class ItemUpdateTests(CrudTestCase):
             response["HX-Redirect"], reverse("katalog:item_detail", args=[self.item.pk])
         )
 
+    def test_form_opened_on_detail_page_does_not_target_the_grid(self):
+        # The detail page has no #item-list; HTMX would cancel the request.
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url, {"from_detail": "1"}, **HX)
+        self.assertContains(response, 'name="from_detail"')
+        self.assertNotContains(response, 'hx-target="#item-list"')
+
     def test_invalid_post_is_422(self):
         self.client.force_login(self.owner)
         response = self.client.post(self.url, {**VALID_POST, "description": "pendek"}, **HX)

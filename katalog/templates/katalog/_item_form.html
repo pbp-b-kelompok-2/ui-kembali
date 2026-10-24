@@ -5,7 +5,9 @@
 {% endcomment %}
 {% if item %}{% url 'katalog:item_update' item.pk as action %}{% else %}{% url 'katalog:item_create' as action %}{% endif %}
 <form id="item-form" method="post" action="{{ action }}" novalidate
-      hx-post="{{ action }}" hx-target="#item-list" hx-swap="afterbegin"
+      hx-post="{{ action }}"
+      {# On the detail page there is no #item-list; the view answers with HX-Redirect there. #}
+      {% if from_detail %}hx-target="#modal-body" hx-swap="innerHTML"{% else %}hx-target="#item-list" hx-swap="afterbegin"{% endif %}
       class="flex flex-col gap-4">
   {% csrf_token %}
   {% if from_detail %}<input type="hidden" name="from_detail" value="1">{% endif %}
