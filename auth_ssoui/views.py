@@ -1,16 +1,18 @@
+import json
+
 from django.db.models.fields import related_descriptors
 from asyncio import proactor_events
 from django.core.files import uploadedfile
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .sso_compat import with_sso_ui, get_service_url, get_cas_client
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
+
+from .sso_compat import with_sso_ui, get_service_url, get_cas_client
 from .models import *
 from .forms import *
 from .decorators import *
-import json
 
 # Create your views here.
 def with_toast(response, msg, level="success"):
