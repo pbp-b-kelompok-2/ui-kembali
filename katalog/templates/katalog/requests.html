@@ -1,0 +1,42 @@
+{% extends "katalog/base_katalog.html" %}
+
+{% block meta %}<title>Pusat permintaan · UIKembali</title>{% endblock meta %}
+
+{% block katalog_content %}
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-green">{% if tab == "masuk" %}Untuk barangmu{% else %}Pengajuanmu{% endif %}</p>
+      <h1 class="mt-1 text-4xl font-bold">{% if tab == "masuk" %}Permintaan masuk{% else %}Permintaan keluar{% endif %}</h1>
+      <p class="mt-2 text-ink-2">
+        {% if tab == "masuk" %}Bandingkan kebutuhan calon penerima sebelum menerima satu permintaan.{% else %}Pantau barang yang kamu ajukan dan batalkan kalau sudah tidak perlu.{% endif %}
+      </p>
+    </div>
+    <nav class="flex rounded-lg border border-line bg-surface p-1 text-sm font-semibold" aria-label="Arah permintaan">
+      <a href="?tab=masuk" class="rounded-md px-4 py-2 no-underline {% if tab == 'masuk' %}bg-ink text-white{% else %}text-ink-2{% endif %}" {% if tab == "masuk" %}aria-current="page"{% endif %}>Masuk</a>
+      <a href="?tab=keluar" class="rounded-md px-4 py-2 no-underline {% if tab == 'keluar' %}bg-ink text-white{% else %}text-ink-2{% endif %}" {% if tab == "keluar" %}aria-current="page"{% endif %}>Keluar</a>
+    </nav>
+  </div>
+
+  {% if tab == "masuk" %}
+    <nav class="mt-6 flex flex-wrap gap-2 text-sm" aria-label="Status permintaan">
+      <a href="?status=ditinjau" class="rounded-full px-4 py-2 no-underline {% if status_key == 'ditinjau' %}bg-ink font-semibold text-white{% else %}text-ink-2{% endif %}">Perlu ditinjau · {{ counts.ditinjau }}</a>
+      <a href="?status=disetujui" class="rounded-full px-4 py-2 no-underline {% if status_key == 'disetujui' %}bg-ink font-semibold text-white{% else %}text-ink-2{% endif %}">Disetujui · {{ counts.disetujui }}</a>
+      <a href="?status=selesai" class="rounded-full px-4 py-2 no-underline {% if status_key == 'selesai' %}bg-ink font-semibold text-white{% else %}text-ink-2{% endif %}">Selesai · {{ counts.selesai }}</a>
+    </nav>
+    <p class="mt-4 flex gap-2 rounded-xl bg-warning-bg p-3 text-sm">
+      <span aria-hidden="true">ⓘ</span> Setelah satu permintaan diterima, permintaan lain untuk barang yang sama otomatis ditolak.
+    </p>
+  {% endif %}
+
+  <ul id="request-list" class="mt-5 flex list-none flex-col gap-3 p-0">
+    {% for req in rows %}
+      {% include "katalog/_request_row.html" %}
+    {% empty %}
+      <li class="rounded-xl border border-dashed border-line-strong bg-surface p-10 text-center text-ink-2">
+        {% if tab == "masuk" %}Belum ada permintaan di sini.{% else %}Kamu belum mengajukan barang apa pun. <a href="{% url 'katalog:catalog' %}" class="font-semibold text-green">Jelajahi katalog</a>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock katalog_content %}
