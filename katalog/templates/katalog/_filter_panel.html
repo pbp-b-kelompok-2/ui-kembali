@@ -1,0 +1,48 @@
+{# Collapsible on phones (catalog.js closes it below lg); always open on desktop. #}
+<details id="filter-panel" open class="group h-fit rounded-xl border border-line bg-surface p-5">
+  <summary class="flex cursor-pointer list-none items-center justify-between text-lg font-semibold [&::-webkit-details-marker]:hidden">
+    Filter
+    <svg class="h-5 w-5 text-ink-2 transition group-open:rotate-180 lg:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </summary>
+
+  <fieldset class="mt-4 border-b border-line pb-4">
+    <legend class="mb-2 text-sm font-semibold">Jenis penawaran</legend>
+    {% for cb in form.type %}
+      <label class="flex items-center gap-2 py-1 text-sm text-ink-2">{{ cb.tag }} {{ cb.choice_label }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset class="mt-4 border-b border-line pb-4">
+    <legend class="mb-2 text-sm font-semibold">Kondisi</legend>
+    {% for cb in form.condition %}
+      <label class="flex items-center gap-2 py-1 text-sm text-ink-2">{{ cb.tag }} {{ cb.choice_label }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <label class="mt-4 block text-sm font-semibold" for="f-category">Kategori</label>
+  <select id="f-category" name="category" class="mt-2 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm">
+    {% for value, label in form.category.field.choices %}
+      <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <label class="mt-4 block text-sm font-semibold" for="f-location">Lokasi temu</label>
+  <input id="f-location" type="text" name="location" value="{{ form.location.value|default_if_none:'' }}"
+         placeholder="mis. Kukusan" class="mt-2 w-full rounded-lg border border-line px-3 py-2 text-sm">
+
+  <fieldset class="mt-4">
+    <legend class="text-sm font-semibold">Harga (Rp)</legend>
+    <div class="mt-2 flex gap-2">
+      <input type="number" name="min_price" min="0" step="1000" inputmode="numeric" placeholder="Min"
+             value="{{ form.min_price.value|default_if_none:'' }}" aria-label="Harga minimum"
+             class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+      <input type="number" name="max_price" min="0" step="1000" inputmode="numeric" placeholder="Maks"
+             value="{{ form.max_price.value|default_if_none:'' }}" aria-label="Harga maksimum"
+             class="w-full rounded-lg border border-line px-3 py-2 text-sm">
+    </div>
+  </fieldset>
+
+  <button type="submit" class="mt-5 w-full cursor-pointer rounded-lg border-0 bg-ink px-4 py-3 font-semibold text-white hover:bg-brand">
+    Terapkan filter
+  </button>
+</details>

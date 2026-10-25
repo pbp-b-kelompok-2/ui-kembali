@@ -7,6 +7,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("main.urls")),
     path("auth/", include("auth_ssoui.urls")),
+    path("katalog/", include("katalog.urls")),
 ]
 
 if settings.DEBUG:
