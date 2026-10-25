@@ -5,7 +5,7 @@
 {% endblock meta %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile/profile.css' %}">
 {% endblock extra_css %}
 
 {% block content %}
@@ -40,7 +40,7 @@
 
       <!-- Informasi Profil -->
       <section class="info-section" id="informasi-profil">
-        {% include "components/profile_form_modal.html" %}
+        {% include "profile/components/profile_form_modal.html" %}
       </section>
 
       <!-- Riwayat Terbaru -->

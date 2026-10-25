@@ -78,7 +78,7 @@ def lengkapi_profil(request):
                 })
                 return response
             return redirect("main:lobby")
-        response = render(request, "components/profile_form_modal.html",
+        response = render(request, "profile/components/profile_form_modal.html",
                           {"form": form, "profile": profile})
         return with_toast(response, "Ada isian yang belum benar, cek lagi ya", "error")
     else:
@@ -88,7 +88,7 @@ def lengkapi_profil(request):
         "profile" : profile,
         "form_action" : reverse("auth_ssoui:lengkapi_profil"),
     }
-    return render(request, "first_user.html", context)
+    return render(request, "profile/first_user.html", context)
 
 @with_sso_ui()
 def get_login_cred(request, sso_profile):
@@ -106,19 +106,19 @@ def edit_profil(request):
         if form.is_valid():
             form.save()
             if request.headers.get("HX-Request"):
-                response = render(request, "components/profile_form_modal.html",
+                response = render(request, "profile/components/profile_form_modal.html",
                                   {"form": ProfileForm(fields=EDIT_FIELDS, instance=profile),
                                    "profile": profile,
                                    "form_action": reverse("auth_ssoui:edit_profil")})
                 return with_toast(response, "Perubahan profil berhasil disimpan", "success")
             return redirect("auth_ssoui:profile")
-        response = render(request, "components/profile_form_modal.html",
+        response = render(request, "profile/components/profile_form_modal.html",
                           {"form": form, "profile": profile,
                            "form_action": reverse("auth_ssoui:edit_profil")})
         return with_toast(response, "Ada isian yang belum benar, cek lagi ya", "error")
 
     form = ProfileForm(fields=EDIT_FIELDS, instance=profile)
-    return render(request, "components/profile_form_modal.html",
+    return render(request, "profile/components/profile_form_modal.html",
                   {"form": form, "profile": profile,
                    "form_action": reverse("auth_ssoui:edit_profil")})
 
@@ -132,4 +132,4 @@ def profile_page(request):
         "profile" : profile,
         "form_action" : reverse("auth_ssoui:edit_profil"),
     }
-    return render(request, "profile.html", context)
+    return render(request, "profile/profile.html", context)
