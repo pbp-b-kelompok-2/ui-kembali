@@ -1,0 +1,9 @@
+{% comment %}
+  One labelled form field with its errors. Used by _item_form.html.
+  no_optional_hint: hide "(opsional)" for fields that are conditionally required.
+{% endcomment %}
+<div>
+  <label for="{{ field.id_for_label }}" class="mb-1.5 block text-sm font-semibold">{{ field.label }}{% if not field.field.required and not no_optional_hint %} <span class="font-normal text-muted">(opsional)</span>{% endif %}</label>
+  {{ field }}
+  {% for e in field.errors %}<p class="mt-1 text-sm text-danger">{{ e }}</p>{% endfor %}
+</div>

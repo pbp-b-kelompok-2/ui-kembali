@@ -1,0 +1,47 @@
+{% extends "katalog/base_katalog.html" %}
+{% load static %}
+
+{% block meta %}<title>Jelajahi barang · UIKembali</title>{% endblock meta %}
+
+{% block katalog_content %}
+<form id="filter-form" method="get" action="{% url 'katalog:catalog' %}"
+      hx-get="{% url 'katalog:catalog' %}"
+      hx-trigger="input delay:400ms, submit"
+      hx-target="#grid" hx-swap="outerHTML"
+      hx-push-url="true" hx-sync="this:replace"
+      class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <label class="relative flex-1">
+      <span class="sr-only">Cari barang</span>
+      <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" value="{{ form.q.value|default_if_none:'' }}"
+             placeholder="Cari buku, elektronik, furnitur kos…" autocomplete="off"
+             class="w-full rounded-lg border border-line bg-surface py-3 pl-10 pr-4 text-base outline-none focus:border-green focus:ring-2 focus:ring-green/20">
+    </label>
+    <label class="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-2">
+      Urutkan:
+      <select name="sort" class="border-0 bg-transparent font-semibold text-ink outline-none">
+        {% for value, label in form.sort.field.choices %}
+          <option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% if user.is_authenticated %}
+      <button type="button" hx-get="{% url 'katalog:item_create' %}" hx-target="#modal-body" hx-swap="innerHTML"
+              class="cursor-pointer rounded-lg border-0 bg-action px-5 py-3 font-semibold text-ink">+ Pasang barang</button>
+    {% else %}
+      <a href="{% url 'auth_ssoui:login' %}" class="rounded-lg bg-action px-5 py-3 text-center font-semibold text-ink no-underline">+ Pasang barang</a>
+    {% endif %}
+  </div>
+
+  <div class="mt-6 grid gap-6 lg:grid-cols-[16rem_1fr]">
+    {% include "katalog/_filter_panel.html" %}
+    {% include "katalog/_item_grid.html" %}
+  </div>
+</form>
+{% endblock katalog_content %}
+
+{% block katalog_js %}
+<script src="{% static 'katalog/js/catalog.js' %}" defer></script>
+{% endblock katalog_js %}
