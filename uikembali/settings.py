@@ -176,3 +176,6 @@ MAILERS = {
 }
 
 SSO_UI_URL="https://sso.ui.ac.id/cas2/"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

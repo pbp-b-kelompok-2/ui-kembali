@@ -5,10 +5,10 @@ from .models import Profile
 
 def profile_required(view):
     @wraps(view)
-    @login_required
+    @login_required(login_url="/auth/login/")
     def wrapper(request, *args, **kwargs):
         profile, _ = Profile.objects.get_or_create(user=request.user)
         if not profile.is_complete:
-            return redirect("main:lengkapi_profil")
+            return redirect("auth_ssoui:lengkapi_profil")
         return view(request, *args, **kwargs)
     return wrapper
