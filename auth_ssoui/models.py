@@ -43,6 +43,8 @@ class Profile(models.Model):
         return f"{self.nama} ({self.user.username})"
 
     def inisial(self):
+        if (len(self.nama.split()) == 1):
+            return self.nama.split()[0][0]
         return f"{self.nama.split()[0][0]}{self.nama.split()[-1][0]}"
 
     def save(self, *args, **kwargs):
