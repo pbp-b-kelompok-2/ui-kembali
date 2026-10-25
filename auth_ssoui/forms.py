@@ -84,7 +84,9 @@ class ProfileForm(forms.ModelForm):
     
             # yang wajib diisi
             for name in ["nama_panggilan", "no_hp", "angkatan"]:
-                self.fields[name].required = Tru    def clean_pfp(self):
+                self.fields[name].required = True
+
+    def clean_pfp(self):
         pfp = self.cleaned_data.get("pfp")
         # Hanya validasi jika ada file BARU yang diupload (bukan file lama yang tidak diubah)
         if isinstance(pfp, UploadedFile):
