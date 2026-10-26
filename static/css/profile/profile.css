@@ -13,6 +13,8 @@
   --line-light: #e8ebf0;
   --orange: #e67e22;
   --orange-tint: #fef3e2;
+  --red: #b71111;
+  --red-dark: #860e0e;
 
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
@@ -64,12 +66,12 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.15rem;
-  background: var(--white);
+  background: var(--red);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   font-weight: 600;
   font-size: 0.875rem;
-  color: var(--ink);
+  color: var(--white);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
@@ -77,9 +79,9 @@
 }
 
 .btn-lihat-publik:hover {
-  background: var(--paper);
+  background: var(--red-dark);
   border-color: var(--ink-soft);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 /* ===== Main Layout ===== */
