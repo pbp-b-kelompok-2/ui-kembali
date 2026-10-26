@@ -1,0 +1,28 @@
+{% load static %}
+{# ============================================================
+   _riwayat_row.html — baris tunggal riwayat transaksi
+   Variabel: req, aksi, pihak
+   ============================================================ #}
+
+{# --- Tentukan warna badge berdasarkan status --- #}
+{% if req.status == "SELESAI" %}
+  {% with badge_bg="bg-green-tint" badge_text="text-green" %}
+  {% include "profile/components/_riwayat_badge.html" with req=req aksi=aksi pihak=pihak badge_bg=badge_bg badge_text=badge_text %}
+  {% endwith %}
+{% elif req.status == "PENDING" %}
+  {% with badge_bg="bg-orange-tint" badge_text="text-orange" %}
+  {% include "profile/components/_riwayat_badge.html" with req=req aksi=aksi pihak=pihak badge_bg=badge_bg badge_text=badge_text %}
+  {% endwith %}
+{% elif req.status == "DITERIMA" %}
+  {% with badge_bg="bg-[#e0f0ff]" badge_text="text-[#1565c0]" %}
+  {% include "profile/components/_riwayat_badge.html" with req=req aksi=aksi pihak=pihak badge_bg=badge_bg badge_text=badge_text %}
+  {% endwith %}
+{% elif req.status == "DITOLAK" or req.status == "DIBATALKAN" %}
+  {% with badge_bg="bg-[#fdecea]" badge_text="text-red" %}
+  {% include "profile/components/_riwayat_badge.html" with req=req aksi=aksi pihak=pihak badge_bg=badge_bg badge_text=badge_text %}
+  {% endwith %}
+{% else %}
+  {% with badge_bg="bg-line-light" badge_text="text-ink-muted" %}
+  {% include "profile/components/_riwayat_badge.html" with req=req aksi=aksi pihak=pihak badge_bg=badge_bg badge_text=badge_text %}
+  {% endwith %}
+{% endif %}

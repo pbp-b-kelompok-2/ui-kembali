@@ -1,5 +1,6 @@
 import json
 
+from django.db.models import Q
 from django.db.models.fields import related_descriptors
 from asyncio import proactor_events
 from django.core.files import uploadedfile
@@ -126,12 +127,28 @@ def edit_profil(request):
 
 @profile_required
 def profile_page(request):
+    from katalog.models import ItemRequest
+
     field = EDIT_FIELDS
     profile = get_object_or_404(Profile, user=request.user)
     form = ProfileForm(fields=field, instance=profile)
+
+    # Ambil riwayat transaksi dari dua sisi:
+    # 1) Sebagai requester (barang yang dia minta/beli/adopsi)
+    # 2) Sebagai owner item (barang yang dia jual/berikan ke orang lain)
+    # Ambil 5 terbaru (FIFO: antrian diproses dari yang paling lama)
+    riwayat_terbaru = (
+        ItemRequest.objects.filter(
+            Q(requester=request.user) | Q(item__owner=request.user)
+        )
+        .select_related("item", "item__owner", "requester")
+        .order_by("-created_at")[:3]
+    )
+
     context = {
-        "form" : form,
-        "profile" : profile,
-        "form_action" : reverse("auth_ssoui:edit_profil"),
+        "form": form,
+        "profile": profile,
+        "form_action": reverse("auth_ssoui:edit_profil"),
+        "riwayat_terbaru": riwayat_terbaru,
     }
     return render(request, "profile/profile.html", context)
