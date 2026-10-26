@@ -2,7 +2,7 @@ import json
 import uuid
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -11,13 +11,14 @@ from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
 from .decorators import is_htmx, login_required_htmx, owner_required, toast_response
-from . import services
-from .filters import filter_items
+from . import geocoding, services
+from .filters import RADIUS_CHOICES, filter_items
 from .forms import ItemForm
 from .models import Item, ItemRequest
 from .services import RequestError
 
 PAGE_SIZE = 12
+NOT_ON_MAP = "Tersimpan, tapi lokasinya belum ketemu di peta. Coba nama tempat yang lebih umum."
 
 
 def _list_context(request):
@@ -32,6 +33,7 @@ def _list_context(request):
         "page_obj": page_obj,
         "chips": form.active_chips(),
         "querystring": params.urlencode(),
+        "radius_choices": RADIUS_CHOICES,
     }
 
 
@@ -47,6 +49,16 @@ def catalog_page(request):
 
 def item_list_partial(request):
     return render(request, "katalog/_item_grid.html", _list_context(request))
+
+
+def _public_coords(item, exact):
+    """Exact point for logged-in users; anonymous users only get it rounded
+    to 3 decimals (~100 m), enough to see the area but not the doorstep."""
+    if item.latitude is None or item.longitude is None:
+        return None
+    if exact:
+        return (item.latitude, item.longitude)
+    return (round(item.latitude, 3), round(item.longitude, 3))
 
 
 def _item_to_dict(item, show_contact):
@@ -65,6 +77,9 @@ def _item_to_dict(item, show_contact):
         "owner": item.owner.username,
         "created_at": item.created_at.isoformat(),
     }
+    data["latitude"], data["longitude"] = _public_coords(item, show_contact) or (None, None)
+    if hasattr(item, "distance_km"):
+        data["distance_km"] = round(item.distance_km, 2)
     if show_contact:
         data["contact"] = item.contact
     return data
@@ -72,7 +87,9 @@ def _item_to_dict(item, show_contact):
 
 def items_json(request):
     _, qs = filter_items(request.GET)
-    page_obj = Paginator(qs.defer(None), PAGE_SIZE).get_page(request.GET.get("page"))
+    if isinstance(qs, QuerySet):
+        qs = qs.defer(None)
+    page_obj = Paginator(qs, PAGE_SIZE).get_page(request.GET.get("page"))
     show_contact = request.user.is_authenticated
     return JsonResponse(
         {
@@ -86,7 +103,12 @@ def items_json(request):
 
 def item_detail(request, pk):
     item = get_object_or_404(Item.objects.select_related("owner"), pk=pk)
-    context = {"item": item, "show_contact": request.user.is_authenticated}
+    exact = request.user.is_authenticated
+    context = {"item": item, "show_contact": exact, "map_exact": exact}
+    if coords := _public_coords(item, exact):
+        # Pre-formatted strings: the template must not localise the decimals.
+        digits = 6 if exact else 3
+        context["map_lat"], context["map_lng"] = (f"{c:.{digits}f}" for c in coords)
     context.update(_panel_context(request, item))
     return render(request, "katalog/detail.html", context)
 
@@ -139,10 +161,13 @@ def item_create(request):
         return _form_response(request, form, status=422)
     item = form.save(commit=False)
     item.owner = request.user
+    on_map = geocoding.geocode_item(item)
     item.save()
     if not is_htmx(request):
         return redirect("katalog:item_detail", pk=item.pk)
-    return _with_toast(_card_response(request, item), "Barang berhasil dipasang.")
+    if on_map:
+        return _with_toast(_card_response(request, item), "Barang berhasil dipasang.")
+    return _with_toast(_card_response(request, item), NOT_ON_MAP, "info")
 
 
 @owner_required()
@@ -152,7 +177,12 @@ def item_update(request, item):
     form = ItemForm(request.POST, instance=item)
     if not form.is_valid():
         return _form_response(request, form, item, status=422)
-    item = form.save()
+    item = form.save(commit=False)
+    on_map = True
+    # Only call the API when the place changed (or never resolved before).
+    if "location_name" in form.changed_data or item.latitude is None:
+        on_map = geocoding.geocode_item(item)
+    item.save()
     if request.POST.get("from_detail"):
         response = HttpResponse(status=204)
         response["HX-Redirect"] = reverse("katalog:item_detail", args=[item.pk])
@@ -160,6 +190,8 @@ def item_update(request, item):
     response = _card_response(request, item)
     response["HX-Retarget"] = f"#item-{item.pk}"
     response["HX-Reswap"] = "outerHTML"
+    if not on_map:
+        return _with_toast(response, NOT_ON_MAP, "info")
     return _with_toast(response, "Perubahan disimpan.")
 
 
