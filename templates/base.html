@@ -14,9 +14,48 @@
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/root.css' %}">
-  <!-- <link rel="stylesheet" href="{% static 'css/lobby.css' %}"> -->
   <link rel="stylesheet" href="{% static 'css/toast.css' %}">
-  <!-- <link rel="stylesheet" href="{% static 'css/profile/profile.css' %}"> -->
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#14213d',
+            'ink-soft': '#4a5468',
+            'ink-muted': '#7a8194',
+            paper: '#f6f7f9',
+            yellow: '#ffc800',
+            'yellow-light': '#fff3cc',
+            green: '#1f7a4d',
+            'green-tint': '#dff1e6',
+            'green-dark': '#186038',
+            line: '#d8dce4',
+            'line-light': '#e8ebf0',
+            orange: '#e67e22',
+            'orange-tint': '#fef3e2',
+            red: '#b71111',
+            'red-dark': '#860e0e',
+          },
+          fontFamily: {
+            display: ['Bricolage Grotesque', 'Segoe UI', 'system-ui', 'sans-serif'],
+            body: ['Figtree', 'Segoe UI', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            DEFAULT: '10px',
+            lg: '16px',
+            xl: '20px',
+          },
+          boxShadow: {
+            sm: '0 1px 3px rgba(20,33,61,0.06)',
+            md: '0 4px 12px rgba(20,33,61,0.08)',
+            lg: '0 8px 24px rgba(20,33,61,0.1)',
+          },
+        },
+      },
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
   {% block meta %}
   {% endblock meta %}
