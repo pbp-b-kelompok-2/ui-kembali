@@ -1,8 +1,5 @@
-<form method="post"
-      enctype="multipart/form-data"
-      hx-post="{{ form_action|default:'' }}"
-      hx-target="this"
-      hx-swap="outerHTML">
+<form method="post" enctype="multipart/form-data" hx-post="{{ form_action|default:'' }}" hx-target="this"
+  hx-swap="outerHTML">
   {% csrf_token %}
 
   <!-- Header -->
@@ -11,10 +8,8 @@
       <h2 class="text-[1.2rem] font-extrabold font-display text-ink tracking-tight">Informasi profil</h2>
       <p class="mt-0.5 text-[0.8125rem] text-ink-muted">Nama dan fakultas disinkronkan dari UI SSO.</p>
     </div>
-    <button
-      type="submit"
-      class="inline-flex items-center gap-[0.45rem] px-5 py-[0.6rem] bg-green text-white border-0 rounded-[10px] font-semibold text-sm whitespace-nowrap flex-shrink-0 cursor-pointer transition-all duration-150 hover:bg-green-dark hover:-translate-y-px hover:shadow-md active:translate-y-0"
-    >
+    <button type="submit"
+      class="inline-flex items-center gap-[0.45rem] px-5 py-[0.6rem] bg-green text-white border-0 rounded-[10px] font-semibold text-sm whitespace-nowrap flex-shrink-0 cursor-pointer transition-all duration-150 hover:bg-green-dark hover:-translate-y-px hover:shadow-md active:translate-y-0">
       Simpan perubahan
     </button>
   </div>
@@ -22,22 +17,26 @@
   <!-- Form Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 form-grid">
     {% for field in form %}
-      {% if field.name == "bio" %}
-      <div class="form-group flex flex-col gap-1.5 sm:col-span-2">
+    {% if field.name == "bio" %}
+    <div class="form-group flex flex-col gap-1.5 sm:col-span-2">
       {% else %}
       <div class="form-group flex flex-col gap-1.5">
-      {% endif %}
+        {% endif %}
         <label for="{{ field.id_for_label }}" class="text-[0.8125rem] font-semibold text-ink">
           {{ field.label }}
         </label>
         {{ field }}
         {% for error in field.errors %}
-          <small class="text-red text-xs mt-0.5">{{ error }}</small>
+        <small class="text-red text-xs mt-0.5">{{ error }}</small>
         {% endfor %}
       </div>
-    {% endfor %}
-  </div>
+      {% endfor %}
+    </div>
 </form>
+{% if oob_pfp %}
+  {% include "profile/components/_pfp.html" with oob=True pfp_id="profile-pfp" size=80 img_class="w-full h-full object-cover block" %}
+  {% include "profile/components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
+{% endif %}
 
 <style>
   /* Styling untuk field Django form yang di-render oleh {{ field }} */
@@ -55,6 +54,7 @@
     width: 100%;
     font-family: inherit;
   }
+
   .form-group input:focus,
   .form-group textarea:focus,
   .form-group select:focus {
@@ -62,10 +62,12 @@
     border-color: #1f7a4d;
     box-shadow: 0 0 0 3px #dff1e6;
   }
+
   .form-group input::placeholder,
   .form-group textarea::placeholder {
     color: #7a8194;
   }
+
   /* pfp file upload custom */
   .pfp-file-label {
     display: flex;
@@ -75,6 +77,7 @@
     max-width: 100%;
     min-width: 0;
   }
+
   .pfp-file-btn {
     flex-shrink: 0;
     padding: 6px 12px;
@@ -85,6 +88,7 @@
     background: #f6f7f9;
     cursor: pointer;
   }
+
   .pfp-file-name {
     flex: 1 1 auto;
     min-width: 0;

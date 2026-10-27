@@ -297,6 +297,13 @@ textarea {
   flex-shrink: 0;
 }
 
+.header-actions .nav-image {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:50%;
+}
+
 .btn-pasang {
   display: inline-flex;
   align-items: center;

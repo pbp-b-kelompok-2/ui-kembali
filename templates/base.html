@@ -66,10 +66,10 @@
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <header class="site-header">
     <div class="container header-inner" style="max-width: 100vw;">
-  {% if request.user.is_authenticated %}
-    {% if request.user.profile.is_complete %}
-  <!-- Navbar untuk user yang sudah login & profil lengkap -->
-  
+      {% if request.user.is_authenticated %}
+      {% if request.user.profile.is_complete %}
+      <!-- Navbar untuk user yang sudah login & profil lengkap -->
+
       <a class="brand" href="{% url 'main:lobby' %}" aria-label="UIKembali, beranda">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="16" fill="#ffc800" />
@@ -117,14 +117,13 @@
         </button>
         <a href="{% url 'auth_ssoui:profile' %}" class="avatar-header" aria-label="Menu akun">
           {% if request.user.profile.pfp %}
-          <img src="{{ request.user.profile.pfp.url }}" alt="Foto profil"
-            style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          {% include "profile/components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
           {% else %}
           {{ request.user.profile.inisial }}
           {% endif %}
         </a>
       </div>
-    {% else %}
+      {% else %}
       <a class="brand" href="" aria-label="UIKembali, beranda">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="16" fill="#ffc800" />
@@ -138,10 +137,10 @@
         </span>
       </a>
 
-    {% endif %}
+      {% endif %}
 
-  {% else %}
-  <!-- Navbar untuk tamu / user yang belum lengkapi profil -->
+      {% else %}
+      <!-- Navbar untuk tamu / user yang belum lengkapi profil -->
       <a class="brand" href="" aria-label="UIKembali, beranda">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="16" fill="#ffc800" />
@@ -160,8 +159,8 @@
         <a href="#fitur">Fitur</a>
         <a href="{% url 'auth_ssoui:login' %}" class="btn btn-small">Masuk dengan SSO UI</a>
       </nav>
-    
-  {% endif %}
+
+      {% endif %}
     </div>
   </header>
   {% block content %}

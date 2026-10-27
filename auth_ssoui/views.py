@@ -106,15 +106,21 @@ def edit_profil(request):
 
     if request.method == "POST":
         form = ProfileForm(request.POST, request.FILES, fields=EDIT_FIELDS, instance=profile)
+        
         if form.is_valid():
             form.save()
+            context = {
+                "form": ProfileForm(fields=EDIT_FIELDS, instance=profile),
+                "profile": profile,
+                "form_action": reverse("auth_ssoui:edit_profil"),
+                "oob_pfp": True
+            }
+            
             if request.headers.get("HX-Request"):
-                response = render(request, "profile/components/profile_form_modal.html",
-                                  {"form": ProfileForm(fields=EDIT_FIELDS, instance=profile),
-                                   "profile": profile,
-                                   "form_action": reverse("auth_ssoui:edit_profil")})
+                response = render(request, "profile/components/profile_form_modal.html", context)
                 return with_toast(response, "Perubahan profil berhasil disimpan", "success")
             return redirect("auth_ssoui:profile")
+        
         response = render(request, "profile/components/profile_form_modal.html",
                           {"form": form, "profile": profile,
                            "form_action": reverse("auth_ssoui:edit_profil")})
