@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "profile/base_profile.html" %}
 {% load static %}
-{% block meta %}
+{% block meta_auth %}
 <title>Profil saya — UIKembali</title>
-{% endblock meta %}
+{% endblock meta_auth %}
 
-{% block extra_css %}
+{% block extra_css_auth %}
 <style>
   /* Style tambahan untuk form focus yang tidak bisa dicapai dengan utility classes */
   .form-group input:focus,
@@ -23,9 +23,9 @@
     overflow: hidden;
   }
 </style>
-{% endblock extra_css %}
+{% endblock extra_css_auth %}
 
-{% block content %}
+{% block content_auth %}
 <!-- ===== PAGE HEADER ===== -->
 <div class="w-full max-w-[1120px] mx-auto px-5">
   <div class="pt-8 pb-7">
@@ -75,9 +75,9 @@
     </div>
   </div>
 </div>
-{% endblock content %}
+{% endblock content_auth %}
 
-{% block extra_js %}
+{% block extra_js_auth %}
 <script>
   document.body.addEventListener("redirectLater", function (e) {
     setTimeout(function () {
@@ -85,4 +85,4 @@
     }, e.detail.delay || 1000);
   });
 </script>
-{% endblock extra_js %}
+{% endblock extra_js_auth %}
