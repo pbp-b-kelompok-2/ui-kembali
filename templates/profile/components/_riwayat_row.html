@@ -1,10 +1,12 @@
 {% load static %}
-{# ============================================================
+<!-- 
+   ============================================================
    _riwayat_row.html — baris tunggal riwayat transaksi
    Variabel: req, aksi, pihak
-   ============================================================ #}
+   ============================================================
+-->
 
-{# --- Tentukan warna badge berdasarkan status --- #}
+<!-- --- Tentukan warna badge berdasarkan status --- -->
 {% if req.status == "SELESAI" %}
   {% with badge_bg="bg-green-tint" badge_text="text-green" %}
   {% include "profile/components/_riwayat_badge.html" with req=req aksi=aksi pihak=pihak badge_bg=badge_bg badge_text=badge_text %}

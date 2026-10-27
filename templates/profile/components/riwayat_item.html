@@ -1,12 +1,13 @@
 {% load tz %}
-{# ============================================================
+<!-- 
+   ============================================================
    riwayat_item.html
    Variabel yang dibutuhkan:
      req   — instance ItemRequest
      peran — "requester" | "owner"
-   ============================================================ #}
+   ============================================================ -->
 
-{# --- Tentukan label aksi berdasarkan peran & tipe transaksi --- #}
+<!-- --- Tentukan label aksi berdasarkan peran & tipe transaksi --- -->
 {% if peran == "requester" %}
   {% if req.item.transaction_type == "ADOPSI" %}
     {% with aksi="Mengadopsi dari" pihak=req.item.owner.profile.nama %}
