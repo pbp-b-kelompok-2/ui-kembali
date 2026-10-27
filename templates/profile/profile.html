@@ -12,18 +12,22 @@
     color: #186038;
     font-weight: 600;
   }
+
   .sidebar-nav a.active svg {
     opacity: 1;
   }
+
   .form-group input:focus,
   .form-group textarea:focus {
     outline: none;
     border-color: #1f7a4d;
     box-shadow: 0 0 0 3px #dff1e6;
   }
+
   .riwayat-item:first-child {
     border-top: none !important;
   }
+
   /* file input custom */
   .pfp-file-hidden {
     position: absolute;
@@ -51,10 +55,8 @@
           Kelola identitas komunitas, preferensi titik temu, dan rekam jejak transaksimu.
         </p>
       </div>
-      <a
-        href="{% url 'auth_ssoui:logout' %}"
-        class="inline-flex items-center gap-2 px-[1.15rem] py-[0.6rem] bg-red text-white border border-line rounded-[10px] font-semibold text-sm whitespace-nowrap flex-shrink-0 cursor-pointer transition-all duration-150 hover:bg-red-dark hover:border-ink-soft hover:shadow-md"
-      >
+      <a href="{% url 'auth_ssoui:logout' %}"
+        class="inline-flex items-center gap-2 px-[1.15rem] py-[0.6rem] bg-red text-white border border-line rounded-[10px] font-semibold text-sm whitespace-nowrap flex-shrink-0 cursor-pointer transition-all duration-150 hover:bg-red-dark hover:border-ink-soft hover:shadow-md">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -78,11 +80,13 @@
       <!-- Profile Card -->
       <div class="bg-white border border-line rounded-xl p-7 text-center">
         {% if profile.pfp %}
-        <div class="w-20 h-20 rounded-full bg-green text-white flex items-center justify-center font-display font-extrabold text-[1.6rem] mx-auto mb-4 overflow-hidden tracking-tight">
+        <div
+          class="w-20 h-20 rounded-full bg-green text-white flex items-center justify-center font-display font-extrabold text-[1.6rem] mx-auto mb-4 overflow-hidden tracking-tight">
           {% include "components/_pfp.html" with pfp_id="profile-pfp" size=80 img_class="w-full h-full object-cover block" %}
         </div>
         {% else %}
-        <div class="w-20 h-20 rounded-full bg-green text-white flex items-center justify-center font-display font-extrabold text-[1.6rem] mx-auto mb-4 overflow-hidden tracking-tight">
+        <div
+          class="w-20 h-20 rounded-full bg-green text-white flex items-center justify-center font-display font-extrabold text-[1.6rem] mx-auto mb-4 overflow-hidden tracking-tight">
           {{ profile.inisial }}
         </div>
         {% endif %}
@@ -92,38 +96,41 @@
 
       <!-- Sidebar Navigation -->
       <nav class="sidebar-nav bg-white border border-line rounded-xl p-2" aria-label="Menu profil">
-        <a href="#" class="active flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="#"
+          class="active flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
           Profil &amp; kontak
         </a>
-        <a href="#" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="#"
+          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
           Riwayat transaksi
         </a>
-        <a href="#" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+        <a href="#"
+          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
           </svg>
           Barang saya
         </a>
-        <a href="#" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        <a href="#"
+          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
           Tersimpan
-        </a>
-        <a href="#" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-          Pengaturan akun
         </a>
       </nav>
     </aside>
@@ -138,34 +145,11 @@
 
       <!-- Riwayat Terbaru -->
       <section class="bg-white border border-line rounded-xl p-7" id="riwayat-terbaru">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-[1.2rem] font-extrabold font-display text-ink tracking-tight">Riwayat terbaru</h2>
-          <a href="#" class="text-[0.8125rem] font-semibold text-green transition-colors duration-150 hover:text-green-dark hover:underline underline-offset-[3px]">
-            Lihat semua
-          </a>
-        </div>
-        <div class="flex flex-col">
-          {% for req in riwayat_terbaru %}
-          {% if req.requester == request.user %}
-            {% with peran="requester" %}
-            {% include "profile/components/riwayat_item.html" with req=req peran=peran %}
-            {% endwith %}
-          {% else %}
-            {% with peran="owner" %}
-            {% include "profile/components/riwayat_item.html" with req=req peran=peran %}
-            {% endwith %}
-          {% endif %}
-          {% empty %}
-          <div class="py-10 text-center text-ink-muted text-sm">
-            <svg class="mx-auto mb-3 opacity-40" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            Belum ada riwayat transaksi.
-          </div>
-          {% endfor %}
-        </div>
+        {% include "profile/components/_riwayat_slice_modal.html" with riwayat_terbaru=riwayat_terbaru %}
       </section>
 
+      <!-- Full Riwayat -->
+      <!-- Barang User -->
     </div>
   </div>
 </div>
