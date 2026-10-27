@@ -34,8 +34,8 @@
     </div>
 </form>
 {% if oob_pfp %}
-  {% include "profile/components/_pfp.html" with oob=True pfp_id="profile-pfp" size=80 img_class="w-full h-full object-cover block" %}
-  {% include "profile/components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
+  {% include "components/_pfp.html" with oob=True pfp_id="profile-pfp" size=80 img_class="w-full h-full object-cover block" %}
+  {% include "components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
 {% endif %}
 
 <style>

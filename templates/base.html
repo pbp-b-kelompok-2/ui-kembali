@@ -117,7 +117,7 @@
         </button>
         <a href="{% url 'auth_ssoui:profile' %}" class="avatar-header" aria-label="Menu akun">
           {% if request.user.profile.pfp %}
-          {% include "profile/components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
+          {% include "components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
           {% else %}
           {{ request.user.profile.inisial }}
           {% endif %}
