@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .sso_compat import with_sso_ui, get_service_url, get_cas_client
 from .models import *
@@ -158,3 +159,24 @@ def profile_page(request):
         "riwayat_terbaru": riwayat_terbaru,
     }
     return render(request, "profile/profile.html", context)
+
+
+@profile_required
+def profile_history(request):
+    """Return the paginated history partial requested by the profile page."""
+    from katalog.models import ItemRequest
+
+    riwayat = (
+        ItemRequest.objects.filter(
+            Q(requester=request.user) | Q(item__owner=request.user)
+        )
+        .select_related("item", "item__owner", "requester")
+        .order_by("-created_at")
+    )
+    page_obj = Paginator(riwayat, 5).get_page(request.GET.get("page"))
+
+    return render(
+        request,
+        "profile/components/full_riwayat.html",
+        {"page_obj": page_obj},
+    )
