@@ -11,6 +11,9 @@
   const map = L.map(el, { scrollWheelZoom: false }).setView(point, exact ? 17 : 16);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
+    // OSM's tile servers block requests without a Referer, and Django's
+    // default Referrer-Policy (same-origin) sends none to other sites.
+    referrerPolicy: "strict-origin-when-cross-origin",
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
 
