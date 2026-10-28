@@ -84,16 +84,17 @@ def filter_items(params) -> tuple[CatalogFilterForm, QuerySet]:
         )
     )
 
-    if q := values.get("q"):
+    if "q" in values:
+        q = values["q"]
         qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
-    if category := values.get("category"):
-        qs = qs.filter(category=category)
-    if conditions := values.get("condition"):
-        qs = qs.filter(condition__in=conditions)
-    if types := values.get("type"):
-        qs = qs.filter(transaction_type__in=types)
-    if location := values.get("location"):
-        qs = qs.filter(location_name__icontains=location)
+    if "category" in values:
+        qs = qs.filter(category=values["category"])
+    if "condition" in values:
+        qs = qs.filter(condition__in=values["condition"])
+    if "type" in values:
+        qs = qs.filter(transaction_type__in=values["type"])
+    if "location" in values:
+        qs = qs.filter(location_name__icontains=values["location"])
     if "min_price" in values:
         # A free item counts as Rp0, so any min price above 0 excludes it.
         qs = qs.filter(price__gte=values["min_price"])
