@@ -19,20 +19,6 @@ SORT_CHOICES = [
     ("price_desc", "Harga tertinggi"),
     ("name", "Nama A–Z"),
 ]
-LIST_FIELDS = (
-    "id",
-    "name",
-    "category",
-    "condition",
-    "photo_url",
-    "location_name",
-    "transaction_type",
-    "price",
-    "status",
-    "created_at",
-    "owner",
-    "owner__username",
-)
 
 
 class CatalogFilterForm(forms.Form):
@@ -85,24 +71,18 @@ class CatalogFilterForm(forms.Form):
         return chips
 
 
-def catalog_queryset():
-    """Base list query: one row per item, owner joined, pending requests counted."""
-    return (
-        Item.objects.exclude(status=Item.Status.SELESAI)
-        .select_related("owner")
-        .only(*LIST_FIELDS)
-        .annotate(
-            pending_count=Count(
-                "requests", filter=Q(requests__status="PENDING"), distinct=True
-            )
-        )
-    )
-
-
 def filter_items(params) -> tuple[CatalogFilterForm, QuerySet]:
     form = CatalogFilterForm(params)
     values = form.values()
-    qs = catalog_queryset()
+    # Finished items leave the catalog. select_related joins the owner in the
+    # same query; pending_count is shown on every card.
+    qs = (
+        Item.objects.exclude(status=Item.Status.SELESAI)
+        .select_related("owner")
+        .annotate(
+            pending_count=Count("requests", filter=Q(requests__status="PENDING"))
+        )
+    )
 
     if q := values.get("q"):
         qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))

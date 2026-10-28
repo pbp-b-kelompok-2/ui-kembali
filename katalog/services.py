@@ -1,12 +1,10 @@
 """Request lifecycle rules, kept out of the views so every entry point
 (request page, detail panel, bulk actions) follows the same rules.
 
-Every transition locks the item row first (select_for_update), then re-reads
-the request. All transitions of one item therefore run one after another, so
-two owners' tabs can't both accept a request for the same item.
+Every transition runs in a transaction and starts with _lock(): it locks the
+item row (select_for_update) and re-reads the request. So two owners' tabs
+can't both accept a request for the same item.
 """
-
-from contextlib import contextmanager
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -16,6 +14,7 @@ from .models import Item, ItemRequest
 
 PENDING = ItemRequest.Status.PENDING
 DITERIMA = ItemRequest.Status.DITERIMA
+DITOLAK = ItemRequest.Status.DITOLAK
 
 
 class RequestError(Exception):
@@ -44,13 +43,11 @@ def create_request(item, user, message=""):
         raise RequestError("Kamu sudah mengajukan barang ini. Tunggu balasan pemilik ya.")
 
 
-@contextmanager
-def _transition(req):
-    with transaction.atomic():
-        item = Item.all_objects.select_for_update().get(pk=req.item_id)
-        req.refresh_from_db(fields=["status"])
-        req.item = item
-        yield item
+def _lock(req):
+    """Lock the request's item and re-read the request's latest status."""
+    req.item = Item.all_objects.select_for_update().get(pk=req.item_id)
+    req.refresh_from_db(fields=["status"])
+    return req.item
 
 
 def _check_owner(req, user):
@@ -70,56 +67,58 @@ def _set_status(obj, status):
     obj.save(update_fields=["status", "updated_at"])
 
 
+@transaction.atomic
 def accept_request(req, user):
     """Accept `req`, book the item and reject the other pending requests.
 
     Returns the rejected requests so the view can update their rows too.
     """
-    with _transition(req) as item:
-        _check_owner(req, user)
-        _check_status(req, PENDING)
-        _set_status(req, DITERIMA)
-        others = list(
-            item.requests.filter(status=PENDING)
-            .exclude(pk=req.pk)
-            .select_related("item", "requester")
-        )
-        ItemRequest.objects.filter(pk__in=[o.pk for o in others]).update(
-            status=ItemRequest.Status.DITOLAK, updated_at=timezone.now()
-        )
-        for other in others:
-            other.status = ItemRequest.Status.DITOLAK
-        _set_status(item, Item.Status.DIPESAN)
+    item = _lock(req)
+    _check_owner(req, user)
+    _check_status(req, PENDING)
+    _set_status(req, DITERIMA)
+    others = list(
+        item.requests.filter(status=PENDING)
+        .exclude(pk=req.pk)
+        .select_related("item", "requester")
+    )
+    for other in others:
+        _set_status(other, DITOLAK)
+    _set_status(item, Item.Status.DIPESAN)
     return others
 
 
+@transaction.atomic
 def reject_request(req, user):
-    with _transition(req):
-        _check_owner(req, user)
-        _check_status(req, PENDING)
-        _set_status(req, ItemRequest.Status.DITOLAK)
+    _lock(req)
+    _check_owner(req, user)
+    _check_status(req, PENDING)
+    _set_status(req, DITOLAK)
 
 
+@transaction.atomic
 def cancel_request(req, user):
-    with _transition(req) as item:
-        if req.requester_id != user.id:
-            raise RequestError("Hanya pengaju yang bisa membatalkan permintaan.", 403)
-        _check_status(req, PENDING, DITERIMA)
-        was_accepted = req.status == DITERIMA
-        _set_status(req, ItemRequest.Status.DIBATALKAN)
-        if was_accepted:
-            _set_status(item, Item.Status.TERSEDIA)
+    item = _lock(req)
+    if req.requester_id != user.id:
+        raise RequestError("Hanya pengaju yang bisa membatalkan permintaan.", 403)
+    _check_status(req, PENDING, DITERIMA)
+    if req.status == DITERIMA:
+        # The item was booked for this requester; free it again.
+        _set_status(item, Item.Status.TERSEDIA)
+    _set_status(req, ItemRequest.Status.DIBATALKAN)
 
 
+@transaction.atomic
 def complete_request(req, user):
     """The handover happened. Padjri's review module keys off SELESAI."""
-    with _transition(req) as item:
-        _check_owner(req, user)
-        _check_status(req, DITERIMA)
-        _set_status(req, ItemRequest.Status.SELESAI)
-        _set_status(item, Item.Status.SELESAI)
+    item = _lock(req)
+    _check_owner(req, user)
+    _check_status(req, DITERIMA)
+    _set_status(req, ItemRequest.Status.SELESAI)
+    _set_status(item, Item.Status.SELESAI)
 
 
+@transaction.atomic
 def mark_items_done(items):
     """Bulk "Tandai selesai": finish the items and close their open requests.
 
@@ -128,19 +127,16 @@ def mark_items_done(items):
     Returns the number of items changed.
     """
     now = timezone.now()
-    with transaction.atomic():
-        ids = list(
-            items.select_for_update()
-            .exclude(status=Item.Status.SELESAI)
-            .values_list("pk", flat=True)
-        )
-        open_requests = ItemRequest.objects.filter(item_id__in=ids)
-        open_requests.filter(status=DITERIMA).update(
-            status=ItemRequest.Status.SELESAI, updated_at=now
-        )
-        open_requests.filter(status=PENDING).update(
-            status=ItemRequest.Status.DITOLAK, updated_at=now
-        )
-        return Item.all_objects.filter(pk__in=ids).update(
-            status=Item.Status.SELESAI, updated_at=now
-        )
+    ids = list(
+        items.select_for_update()
+        .exclude(status=Item.Status.SELESAI)
+        .values_list("pk", flat=True)
+    )
+    open_requests = ItemRequest.objects.filter(item_id__in=ids)
+    open_requests.filter(status=DITERIMA).update(
+        status=ItemRequest.Status.SELESAI, updated_at=now
+    )
+    open_requests.filter(status=PENDING).update(status=DITOLAK, updated_at=now)
+    return Item.all_objects.filter(pk__in=ids).update(
+        status=Item.Status.SELESAI, updated_at=now
+    )
