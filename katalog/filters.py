@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
 
 from .models import Item
@@ -19,20 +19,6 @@ SORT_CHOICES = [
     ("price_desc", "Harga tertinggi"),
     ("name", "Nama A–Z"),
 ]
-LIST_FIELDS = (
-    "id",
-    "name",
-    "category",
-    "condition",
-    "photo_url",
-    "location_name",
-    "transaction_type",
-    "price",
-    "status",
-    "created_at",
-    "owner",
-    "owner__username",
-)
 
 
 class CatalogFilterForm(forms.Form):
@@ -60,12 +46,12 @@ class CatalogFilterForm(forms.Form):
     max_price = forms.IntegerField(required=False, min_value=0)
     sort = forms.ChoiceField(required=False, choices=SORT_CHOICES)
 
-    def values(self) -> dict:
+    def values(self):
         """Cleaned values, skipping any field that failed validation."""
         self.is_valid()
         return {k: v for k, v in self.cleaned_data.items() if v not in (None, "", [])}
 
-    def active_chips(self) -> list[str]:
+    def active_chips(self):
         """Labels for the "Filter aktif" row."""
         values = self.values()
         chips = []
@@ -85,35 +71,30 @@ class CatalogFilterForm(forms.Form):
         return chips
 
 
-def catalog_queryset():
-    """Base list query: one row per item, owner joined, pending requests counted."""
-    return (
+def filter_items(params):
+    form = CatalogFilterForm(params)
+    values = form.values()
+    # Finished items leave the catalog. select_related joins the owner in the
+    # same query; pending_count is shown on every card.
+    qs = (
         Item.objects.exclude(status=Item.Status.SELESAI)
         .select_related("owner")
-        .only(*LIST_FIELDS)
         .annotate(
-            pending_count=Count(
-                "requests", filter=Q(requests__status="PENDING"), distinct=True
-            )
+            pending_count=Count("requests", filter=Q(requests__status="PENDING"))
         )
     )
 
-
-def filter_items(params) -> tuple[CatalogFilterForm, QuerySet]:
-    form = CatalogFilterForm(params)
-    values = form.values()
-    qs = catalog_queryset()
-
-    if q := values.get("q"):
+    if "q" in values:
+        q = values["q"]
         qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
-    if category := values.get("category"):
-        qs = qs.filter(category=category)
-    if conditions := values.get("condition"):
-        qs = qs.filter(condition__in=conditions)
-    if types := values.get("type"):
-        qs = qs.filter(transaction_type__in=types)
-    if location := values.get("location"):
-        qs = qs.filter(location_name__icontains=location)
+    if "category" in values:
+        qs = qs.filter(category=values["category"])
+    if "condition" in values:
+        qs = qs.filter(condition__in=values["condition"])
+    if "type" in values:
+        qs = qs.filter(transaction_type__in=values["type"])
+    if "location" in values:
+        qs = qs.filter(location_name__icontains=values["location"])
     if "min_price" in values:
         # A free item counts as Rp0, so any min price above 0 excludes it.
         qs = qs.filter(price__gte=values["min_price"])

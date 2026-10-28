@@ -25,11 +25,10 @@
   });
 
   // Network or server failure: put the (still filled-in) form back on screen.
-  document.body.addEventListener("htmx:responseError", function (event) {
-    if (event.detail.elt.id === "item-form") modal.showModal();
-  });
-  document.body.addEventListener("htmx:sendError", function (event) {
-    if (event.detail.elt.id === "item-form") modal.showModal();
+  ["htmx:responseError", "htmx:sendError"].forEach(function (name) {
+    document.body.addEventListener(name, function (event) {
+      if (event.detail.elt.id === "item-form") modal.showModal();
+    });
   });
 
   modal.addEventListener("click", function (event) {

@@ -5,7 +5,6 @@ from . import views
 app_name = "katalog"
 urlpatterns = [
     path("", views.catalog_page, name="catalog"),
-    path("list/", views.item_list_partial, name="item_list"),
     path("json/", views.items_json, name="items_json"),
     path("<uuid:pk>/", views.item_detail, name="item_detail"),
     path("<uuid:pk>/json/", views.item_detail_json, name="item_detail_json"),
@@ -15,11 +14,10 @@ urlpatterns = [
     path("<uuid:pk>/restore/", views.item_restore, name="item_restore"),
     path("<uuid:pk>/ajukan/", views.request_create, name="request_create"),
     path("permintaan/", views.requests_page, name="requests_page"),
-    path(
-        "permintaan/<uuid:pk>/<slug:action>/",
-        views.request_action,
-        name="request_action",
-    ),
+    path("permintaan/<uuid:pk>/terima/", views.request_accept, name="request_accept"),
+    path("permintaan/<uuid:pk>/tolak/", views.request_reject, name="request_reject"),
+    path("permintaan/<uuid:pk>/batal/", views.request_cancel, name="request_cancel"),
+    path("permintaan/<uuid:pk>/selesai/", views.request_complete, name="request_complete"),
     path("saya/", views.my_items, name="my_items"),
     path("saya/bulk/", views.bulk_action, name="bulk_action"),
 ]
