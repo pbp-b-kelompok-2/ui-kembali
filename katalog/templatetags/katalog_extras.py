@@ -30,3 +30,11 @@ def waktu_lalu(value):
     if days < 365:
         return f"{days // 30:.0f} bulan lalu"
     return f"{days // 365:.0f} tahun lalu"
+
+
+@register.filter
+def jarak(km):
+    """Distance on a card: "330 m" under 1 km, else "1,2 km"."""
+    if km < 1:
+        return f"{round(km * 100) * 10} m"
+    return f"{km:.1f} km".replace(".", ",")

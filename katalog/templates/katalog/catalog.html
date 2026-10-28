@@ -23,7 +23,7 @@
       Urutkan:
       <select name="sort" class="border-0 bg-transparent font-semibold text-ink outline-none">
         {% for value, label in form.sort.field.choices %}
-          <option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ value }}" {% if form.effective_sort == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
     </label>

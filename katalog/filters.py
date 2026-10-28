@@ -2,7 +2,11 @@ from django import forms
 from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
 
+from . import geocoding
 from .models import Item
+
+DEFAULT_RADIUS_KM = 2
+RADIUS_CHOICES = [(1, "1 km"), (2, "2 km"), (5, "5 km"), (10, "10 km")]
 
 SORT_ORDERS = {
     "newest": ("-created_at",),
@@ -11,6 +15,9 @@ SORT_ORDERS = {
     "price_asc": ("price_or_zero", "-created_at"),
     "price_desc": ("-price_or_zero", "-created_at"),
     "name": ("name",),
+    # The real distance sort happens in Python (within_radius); newest first
+    # breaks ties and is the fallback when there's no centre point.
+    "distance": ("-created_at",),
 }
 SORT_CHOICES = [
     ("newest", "Terbaru"),
@@ -18,6 +25,7 @@ SORT_CHOICES = [
     ("price_asc", "Harga terendah"),
     ("price_desc", "Harga tertinggi"),
     ("name", "Nama A–Z"),
+    ("distance", "Terdekat"),
 ]
 
 
@@ -45,6 +53,33 @@ class CatalogFilterForm(forms.Form):
     min_price = forms.IntegerField(required=False, min_value=0)
     max_price = forms.IntegerField(required=False, min_value=0)
     sort = forms.ChoiceField(required=False, choices=SORT_CHOICES)
+    # Radius filter: the centre is a known place, or the browser's location.
+    near = forms.ChoiceField(
+        required=False,
+        choices=[("", "Di mana saja"), *((k, p.label) for k, p in geocoding.PLACES.items())],
+    )
+    lat = forms.FloatField(required=False, min_value=-90, max_value=90)
+    lng = forms.FloatField(required=False, min_value=-180, max_value=180)
+    radius = forms.FloatField(required=False, min_value=0.1, max_value=50)
+
+    def center(self):
+        """(lat, lng, label) of the radius filter's centre, if there is one."""
+        values = self.values()
+        if "near" in values:
+            place = geocoding.PLACES[values["near"]]
+            return (place.lat, place.lng, place.label)
+        if "lat" in values and "lng" in values:
+            return (values["lat"], values["lng"], "lokasimu")
+        return None
+
+    def radius_km(self):
+        return self.values().get("radius", DEFAULT_RADIUS_KM)
+
+    def effective_sort(self):
+        """Explicit ?sort= wins; otherwise nearest first when filtering by radius."""
+        center = self.center()
+        sort = self.values().get("sort") or ("distance" if center else "newest")
+        return "newest" if sort == "distance" and not center else sort
 
     def values(self):
         """Cleaned values, skipping any field that failed validation."""
@@ -68,7 +103,32 @@ class CatalogFilterForm(forms.Form):
             chips.append(f"≥ Rp{values['min_price']:,}".replace(",", "."))
         if "max_price" in values:
             chips.append(f"≤ Rp{values['max_price']:,}".replace(",", "."))
+        center = self.center()
+        if center is not None:
+            chips.append(f"≤ {self.radius_km():g} km dari {center[2]}")
         return chips
+
+
+def within_radius(qs, lat, lng, km, by_distance):
+    """Items within `km` of (lat, lng), each with a .distance_km attribute.
+
+    Two steps: a bounding box in SQL throws away almost everything cheaply,
+    then haversine in Python keeps only the true circle (the box's corners
+    are ~1.4x further than its edges). Items without coordinates drop out.
+    """
+    min_lat, max_lat, min_lng, max_lng = geocoding.bounding_box(lat, lng, km)
+    candidates = qs.filter(
+        latitude__range=(min_lat, max_lat), longitude__range=(min_lng, max_lng)
+    )
+    items = []
+    for item in candidates:
+        item.distance_km = geocoding.haversine_km(lat, lng, item.latitude, item.longitude)
+        if item.distance_km <= km:
+            items.append(item)
+    if by_distance:
+        # sorted() is stable, so equal distances keep the SQL order (newest first).
+        items.sort(key=lambda i: i.distance_km)
+    return items
 
 
 def filter_items(params):
@@ -101,7 +161,12 @@ def filter_items(params):
     if "max_price" in values:
         qs = qs.filter(Q(price__lte=values["max_price"]) | Q(price__isnull=True))
 
-    sort = values.get("sort", "newest")
+    sort = form.effective_sort()
     if sort.startswith("price"):
         qs = qs.annotate(price_or_zero=Coalesce("price", 0))
-    return form, qs.order_by(*SORT_ORDERS[sort])
+    qs = qs.order_by(*SORT_ORDERS[sort])
+    center = form.center()
+    if center is not None:
+        lat, lng, _ = center
+        return form, within_radius(qs, lat, lng, form.radius_km(), sort == "distance")
+    return form, qs

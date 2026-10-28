@@ -10,7 +10,8 @@ from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
-from .filters import filter_items
+from . import geocoding
+from .filters import RADIUS_CHOICES, filter_items
 from .forms import ItemForm
 from .htmx_utils import add_toast, hx_redirect, is_htmx, toast_only
 from .models import Item, ItemRequest
@@ -18,6 +19,7 @@ from .models import Item, ItemRequest
 PAGE_SIZE = 12
 LOGIN_URL = "/auth/login/"
 TOO_FAST = "Terlalu banyak aksi dalam semenit. Coba lagi sebentar."
+NOT_ON_MAP = "Tersimpan, tapi lokasinya belum ketemu di peta. Coba nama tempat yang lebih umum."
 
 PENDING = ItemRequest.Status.PENDING
 DITERIMA = ItemRequest.Status.DITERIMA
@@ -39,12 +41,23 @@ def catalog_page(request):
         "page_obj": page_obj,
         "chips": form.active_chips(),
         "querystring": params.urlencode(),
+        "radius_choices": RADIUS_CHOICES,
     }
     # The filter form hx-gets this same URL and only wants the grid back.
     # HTMX history restore (after hx-push-url) needs the whole page though.
     if is_htmx(request) and not request.headers.get("HX-History-Restore-Request"):
         return render(request, "katalog/_item_grid.html", context)
     return render(request, "katalog/catalog.html", context)
+
+
+def _public_coords(item, exact):
+    """Exact point for logged-in users; anonymous users only get it rounded
+    to 3 decimals (~100 m), enough to see the area but not the doorstep."""
+    if item.latitude is None or item.longitude is None:
+        return None
+    if exact:
+        return (item.latitude, item.longitude)
+    return (round(item.latitude, 3), round(item.longitude, 3))
 
 
 def _item_to_dict(item, show_contact):
@@ -63,6 +76,14 @@ def _item_to_dict(item, show_contact):
         "owner": item.owner.username,
         "created_at": item.created_at.isoformat(),
     }
+    coords = _public_coords(item, show_contact)
+    if coords is None:
+        data["latitude"], data["longitude"] = None, None
+    else:
+        data["latitude"], data["longitude"] = coords
+    # Only set when the radius filter is on.
+    if hasattr(item, "distance_km"):
+        data["distance_km"] = round(item.distance_km, 2)
     # Contact info is only for logged-in users.
     if show_contact:
         data["contact"] = item.contact
@@ -85,8 +106,16 @@ def items_json(request):
 
 def item_detail(request, pk):
     item = get_object_or_404(Item.objects.select_related("owner"), pk=pk)
+    exact = request.user.is_authenticated
     context = _panel_context(request, item)
-    context["show_contact"] = request.user.is_authenticated
+    context["show_contact"] = exact
+    context["map_exact"] = exact
+    coords = _public_coords(item, exact)
+    if coords is not None:
+        # Pre-formatted strings: the template must not localise the decimals.
+        digits = 6 if exact else 3
+        context["map_lat"] = f"{coords[0]:.{digits}f}"
+        context["map_lng"] = f"{coords[1]:.{digits}f}"
     return render(request, "katalog/detail.html", context)
 
 
@@ -131,9 +160,13 @@ def item_create(request):
     if request.method == "POST" and form.is_valid():
         item = form.save(commit=False)
         item.owner = request.user
+        # OpenStreetMap: turn the place name into coordinates for the map.
+        on_map = geocoding.geocode_item(item)
         item.save()
         if not is_htmx(request):
             return redirect("katalog:item_detail", pk=item.pk)
+        if not on_map:
+            return add_toast(_card_response(request, item), NOT_ON_MAP, "info")
         return add_toast(_card_response(request, item), "Barang berhasil dipasang.")
 
     return _form_response(request, form)
@@ -148,13 +181,20 @@ def item_update(request, pk):
     form = ItemForm(request.POST or None, instance=item)
 
     if request.method == "POST" and form.is_valid():
-        item = form.save()
+        item = form.save(commit=False)
+        on_map = True
+        # Only call the API when the place changed (or never resolved before).
+        if "location_name" in form.changed_data or item.latitude is None:
+            on_map = geocoding.geocode_item(item)
+        item.save()
         if request.POST.get("from_detail"):
             return hx_redirect(reverse("katalog:item_detail", args=[item.pk]))
         # Swap the edited card in place instead of the form's default target.
         response = _card_response(request, item)
         response["HX-Retarget"] = f"#item-{item.pk}"
         response["HX-Reswap"] = "outerHTML"
+        if not on_map:
+            return add_toast(response, NOT_ON_MAP, "info")
         return add_toast(response, "Perubahan disimpan.")
 
     return _form_response(request, form, item)
