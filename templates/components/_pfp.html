@@ -1,2 +1,8 @@
-<img id="{{ pfp_id }}" {% if oob %}hx-swap-oob="true" {% endif %} src="{{ request.user.profile.pfp.url }}"
-    width="{{ size }}" height="{{ size }}" loading="lazy" decoding="async" alt="" class="{{ img_class }}">
+{% if request.user.profile.pfp %}
+    <img id="{{ pfp_id }}"
+        {% if oob %}hx-swap-oob="true" {% endif %} 
+        src="{{ request.user.profile.pfp.url }}"
+        width="{{ size }}" height="{{ size }}" 
+        loading="lazy" decoding="async" 
+        alt="" class="{{ img_class }}">
+{% endif %}

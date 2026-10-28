@@ -29,7 +29,7 @@ class ProfileHistoryViewTests(TestCase):
             is_complete=True,
         )
 
-        for index in range(4):
+        for index in range(6):
             item = Item.objects.create(
                 owner=self.owner,
                 name=f"Barang {index}",
@@ -56,7 +56,7 @@ class ProfileHistoryViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "profile/components/full_riwayat.html")
-        self.assertContains(response, "4 transaksi")
+        self.assertContains(response, "6 transaksi")
         self.assertContains(response, "Barang 3")
         self.assertContains(response, "Barang 2")
         self.assertContains(response, "Barang 1")
@@ -67,4 +67,4 @@ class ProfileHistoryViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Barang 0")
-        self.assertNotContains(response, "Barang 3")
+        self.assertNotContains(response, "Barang 5")
