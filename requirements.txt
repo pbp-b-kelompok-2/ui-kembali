@@ -7,6 +7,7 @@ psycopg2-binary
 python-dotenv
 whitenoise
 django-sso-ui
+python-cas
 six
 pillow
 django-ratelimit

@@ -1,0 +1,1 @@
+<div class="mb-6 rounded-2xl border border-line bg-subtle p-5 text-brand">{% if summary.count %}<p class="text-3xl font-bold">★ {{ summary.average|floatformat:1 }} <span class="text-base font-normal">/ 5</span></p><p class="mt-1">{{ summary.count }} ulasan dari transaksi selesai</p>{% else %}<p class="font-semibold">Belum ada ulasan</p>{% endif %}</div>

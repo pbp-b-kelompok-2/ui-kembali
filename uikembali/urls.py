@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("main.urls")),
     path("auth/", include("auth_ssoui.urls")),
     path("katalog/", include("katalog.urls")),
+    path("review-report/", include("review_report.urls")),
 ]
 
 if settings.DEBUG:

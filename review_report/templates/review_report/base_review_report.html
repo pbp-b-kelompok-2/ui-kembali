@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% block meta %}<title>{% block review_title %}Ulasan & Laporan{% endblock %} · UIKembali</title>{% endblock %}
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.13"></script>
+<style type="text/tailwindcss">
+  @import "tailwindcss/theme.css" layer(theme);
+  @tailwind utilities;
+  @source not inline("container");
+  @theme {
+    --font-sans: "Figtree", "Segoe UI", system-ui, sans-serif;
+    --color-canvas: #f7f6f1;
+    --color-surface: #ffffff;
+    --color-subtle: #edf6ef;
+    --color-ink: #17231b;
+    --color-ink-2: #536357;
+    --color-line: #dde3dd;
+    --color-action: #ffcb05;
+    --color-green: #257a47;
+    --color-brand: #155e35;
+    --color-danger: #a12e2e;
+    --color-danger-bg: #fbeaea;
+  }
+</style>
+<link rel="stylesheet" href="{% static 'review_report/module.css' %}">
+{% endblock %}
+{% block content %}
+<main class="rr-module min-h-screen bg-canvas font-sans text-ink">
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <nav class="mb-7 flex flex-wrap gap-3 text-sm font-semibold" aria-label="Ulasan dan laporan">
+      <a href="{% url 'katalog:catalog' %}" class="rounded-lg px-3 py-2 hover:bg-subtle focus-visible:outline-2">Jelajahi</a>
+      <a href="{% url 'review_report:transactions' %}" class="rounded-lg px-3 py-2 hover:bg-subtle focus-visible:outline-2">Riwayat Transaksi</a>
+      <a href="{% url 'review_report:my_reviews' %}" class="rounded-lg px-3 py-2 hover:bg-subtle focus-visible:outline-2">Ulasan Saya</a>
+      <a href="{% url 'review_report:my_reports' %}" class="rounded-lg px-3 py-2 hover:bg-subtle focus-visible:outline-2">Laporan Saya</a>
+    </nav>
+    {% for message in messages %}<p class="mb-4 rounded-xl bg-subtle p-4" role="status">{{ message }}</p>{% endfor %}
+    {% block review_content %}{% endblock %}
+  </div>
+</main>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'review_report/module.js' %}" defer></script>{% endblock %}

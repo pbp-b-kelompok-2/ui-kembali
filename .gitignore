@@ -29,3 +29,5 @@ Thumbs.db
 # coverage
 .coverage
 htmlcov/
+.browser-cache/
+.artifacts/
