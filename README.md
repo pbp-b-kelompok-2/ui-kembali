@@ -81,8 +81,8 @@ https://wiki.openstreetmap.org/wiki/API
 UIKembali menggunakan **UI SSO** sebagai mekanisme autentikasi pengguna. Dengan autentikasi ini, pengguna dapat masuk ke dalam aplikasi menggunakan akun Universitas Indonesia.
 
 **Dokumentasi:**  
-[Masukkan tautan dokumentasi UI SSO]
-
+as reference : https://github.com/RistekCSUI/django-sso-ui
+rebuild in file : ./auth_ssoui/sso_compat.py
 ---
 
 ## 🎨 Desain Figma
