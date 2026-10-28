@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'main',
     'auth_ssoui',
     'katalog',
+    'review_report',
 ]
 
 MIDDLEWARE = [
