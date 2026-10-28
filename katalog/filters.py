@@ -65,8 +65,8 @@ class CatalogFilterForm(forms.Form):
     def center(self) -> tuple[float, float, str] | None:
         """(lat, lng, label) of the radius filter's centre, if there is one."""
         values = self.values()
-        if near := values.get("near"):
-            place = geocoding.PLACES[near]
+        if "near" in values:
+            place = geocoding.PLACES[values["near"]]
             return (place.lat, place.lng, place.label)
         if "lat" in values and "lng" in values:
             return (values["lat"], values["lng"], "lokasimu")
@@ -103,7 +103,8 @@ class CatalogFilterForm(forms.Form):
             chips.append(f"≥ Rp{values['min_price']:,}".replace(",", "."))
         if "max_price" in values:
             chips.append(f"≤ Rp{values['max_price']:,}".replace(",", "."))
-        if center := self.center():
+        center = self.center()
+        if center is not None:
             chips.append(f"≤ {self.radius_km():g} km dari {center[2]}")
         return chips
 
@@ -164,7 +165,8 @@ def filter_items(params) -> tuple[CatalogFilterForm, QuerySet | list[Item]]:
     if sort.startswith("price"):
         qs = qs.annotate(price_or_zero=Coalesce("price", 0))
     qs = qs.order_by(*SORT_ORDERS[sort])
-    if center := form.center():
+    center = form.center()
+    if center is not None:
         lat, lng, _ = center
         return form, within_radius(qs, lat, lng, form.radius_km(), sort == "distance")
     return form, qs

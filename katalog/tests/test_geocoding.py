@@ -50,15 +50,15 @@ class GeocodeOnlineTests(SimpleTestCase):
 
     def test_timeout_falls_back_to_the_place_table(self, get):
         get.side_effect = requests.Timeout
-        self.assertEqual(geocoding.geocode("Gedung Fasilkom"), FASILKOM.coords)
+        self.assertEqual(geocoding.geocode("Gedung Fasilkom"), (FASILKOM.lat, FASILKOM.lng))
 
     def test_empty_result_falls_back_to_the_place_table(self, get):
         get.return_value = nominatim_reply([])
-        self.assertEqual(geocoding.geocode("Kukusan"), geocoding.PLACES["kukusan"].coords)
+        self.assertEqual(geocoding.geocode("Kukusan"), (geocoding.PLACES["kukusan"].lat, geocoding.PLACES["kukusan"].lng))
 
     def test_malformed_reply_falls_back(self, get):
         get.return_value = nominatim_reply([{"lat": "bukan angka"}])
-        self.assertEqual(geocoding.geocode("Fasilkom"), FASILKOM.coords)
+        self.assertEqual(geocoding.geocode("Fasilkom"), (FASILKOM.lat, FASILKOM.lng))
 
     def test_unknown_place_returns_none_and_is_not_cached(self, get):
         get.return_value = nominatim_reply([])
@@ -79,7 +79,7 @@ class GeocodeOfflineTests(SimpleTestCase):
 
     @mock.patch("katalog.geocoding.requests.get")
     def test_offline_uses_only_the_table(self, get):
-        self.assertEqual(geocoding.geocode("dekat STASIUN UI"), geocoding.PLACES["stasiun_ui"].coords)
+        self.assertEqual(geocoding.geocode("dekat STASIUN UI"), (geocoding.PLACES["stasiun_ui"].lat, geocoding.PLACES["stasiun_ui"].lng))
         get.assert_not_called()
 
     def test_lookup_place_matches_aliases(self):
@@ -93,10 +93,10 @@ class DistanceTests(SimpleTestCase):
         self.assertAlmostEqual(geocoding.haversine_km(0, 0, 0, 1), 111.19, places=1)
 
     def test_haversine_same_point_is_zero(self):
-        self.assertEqual(geocoding.haversine_km(*FASILKOM.coords, *FASILKOM.coords), 0)
+        self.assertEqual(geocoding.haversine_km(*(FASILKOM.lat, FASILKOM.lng), *(FASILKOM.lat, FASILKOM.lng)), 0)
 
     def test_bounding_box_contains_the_circle(self):
-        lat, lng = FASILKOM.coords
+        lat, lng = (FASILKOM.lat, FASILKOM.lng)
         min_lat, max_lat, min_lng, max_lng = geocoding.bounding_box(lat, lng, 2)
         # Points exactly 2 km north and east sit on the box edge, not outside it.
         self.assertAlmostEqual(geocoding.haversine_km(lat, lng, max_lat, lng), 2, places=2)

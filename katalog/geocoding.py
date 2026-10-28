@@ -31,10 +31,6 @@ class Place(NamedTuple):
     lng: float
     aliases: tuple[str, ...]
 
-    @property
-    def coords(self) -> tuple[float, float]:
-        return (self.lat, self.lng)
-
 
 # Approximate centres of common meeting spots around UI Depok. Used when
 # Nominatim is down or doesn't know the name, and for the "Dekat dengan" filter.
@@ -100,12 +96,17 @@ def geocode(query: str) -> tuple[float, float] | None:
     if not query:
         return None
     key = f"geo:{slugify(query)}"
-    if (cached := cache.get(key)) is not None:
+    cached = cache.get(key)
+    if cached is not None:
         return tuple(cached)
 
-    coords = _ask_nominatim(query) if _online() else None
-    if coords is None and (place := lookup_place(query)):
-        coords = place.coords
+    coords = None
+    if _online():
+        coords = _ask_nominatim(query)
+    if coords is None:
+        place = lookup_place(query)
+        if place is not None:
+            coords = (place.lat, place.lng)
     # Misses aren't cached, so `geocode_missing` can retry them later.
     if coords is not None:
         cache.set(key, coords, CACHE_SECONDS)
@@ -115,7 +116,7 @@ def geocode(query: str) -> tuple[float, float] | None:
 def geocode_item(item) -> bool:
     """Set (or clear) item.latitude/longitude from its location name. Doesn't save."""
     coords = geocode(item.location_name)
-    item.latitude, item.longitude = coords if coords else (None, None)
+    item.latitude, item.longitude = coords or (None, None)
     return coords is not None
 
 

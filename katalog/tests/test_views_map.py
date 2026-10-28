@@ -15,7 +15,7 @@ from .test_models import make_item
 from .test_views_crud import HX, VALID_POST, toast
 
 User = get_user_model()
-LAT, LNG = PLACES["fasilkom"].coords
+LAT, LNG = (PLACES["fasilkom"].lat, PLACES["fasilkom"].lng)
 
 
 class GeocodeOnSaveTests(TestCase):
