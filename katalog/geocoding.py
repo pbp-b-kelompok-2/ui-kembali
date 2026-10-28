@@ -52,13 +52,13 @@ PLACES = {
 }
 
 
-def _online() -> bool:
+def _online():
     # Tests must never hit the real API (slow, and against Nominatim's policy),
     # so it's off under `manage.py test` unless a test turns it on explicitly.
     return getattr(settings, "KATALOG_GEOCODE_ONLINE", "test" not in sys.argv)
 
 
-def lookup_place(query: str) -> Place | None:
+def lookup_place(query):
     """Built-in table: whole-word, case-insensitive alias match."""
     text = query.lower()
     for place in PLACES.values():
@@ -67,7 +67,7 @@ def lookup_place(query: str) -> Place | None:
     return None
 
 
-def _ask_nominatim(query: str) -> tuple[float, float] | None:
+def _ask_nominatim(query):
     try:
         response = requests.get(
             NOMINATIM_URL,
@@ -91,7 +91,7 @@ def _ask_nominatim(query: str) -> tuple[float, float] | None:
         return None
 
 
-def geocode(query: str) -> tuple[float, float] | None:
+def geocode(query):
     query = query.strip()
     if not query:
         return None
@@ -113,14 +113,14 @@ def geocode(query: str) -> tuple[float, float] | None:
     return coords
 
 
-def geocode_item(item) -> bool:
+def geocode_item(item):
     """Set (or clear) item.latitude/longitude from its location name. Doesn't save."""
     coords = geocode(item.location_name)
     item.latitude, item.longitude = coords or (None, None)
     return coords is not None
 
 
-def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+def haversine_km(lat1, lng1, lat2, lng2):
     """Great-circle distance: the length of the arc between two points on a sphere."""
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
@@ -129,7 +129,7 @@ def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     return 2 * EARTH_RADIUS_KM * math.asin(math.sqrt(a))
 
 
-def bounding_box(lat: float, lng: float, km: float) -> tuple[float, float, float, float]:
+def bounding_box(lat, lng, km):
     """(min_lat, max_lat, min_lng, max_lng) of a square around the circle.
 
     A degree of latitude is always ~111 km; a degree of longitude shrinks with

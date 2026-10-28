@@ -1,5 +1,6 @@
 import uuid
 
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import Http404, JsonResponse
@@ -11,11 +12,12 @@ from django_ratelimit.decorators import ratelimit
 from . import geocoding, services
 from .filters import RADIUS_CHOICES, filter_items
 from .forms import ItemForm
-from .htmx_utils import add_toast, hx_redirect, is_htmx, login_required_htmx, toast_only
+from .htmx_utils import add_toast, hx_redirect, is_htmx, toast_only
 from .models import Item, ItemRequest
 from .services import RequestError
 
 PAGE_SIZE = 12
+LOGIN_URL = "/auth/login/"
 TOO_FAST = "Terlalu banyak aksi dalam semenit. Coba lagi sebentar."
 NOT_ON_MAP = "Tersimpan, tapi lokasinya belum ketemu di peta. Coba nama tempat yang lebih umum."
 
@@ -126,11 +128,13 @@ def item_detail_json(request, pk):
 # --- Create / update / delete (HTMX modal + partials) -------------------------
 
 
-def _form_response(request, form, item=None, status=200):
+def _form_response(request, form, item=None):
     # from_detail: the form was opened on the detail page, so after saving we
     # reload that page instead of swapping a catalog card.
     from_detail = request.POST.get("from_detail") or request.GET.get("from_detail")
     context = {"form": form, "item": item, "from_detail": from_detail}
+    # A form that comes back with errors answers 422 (Unprocessable Entity).
+    status = 422 if form.errors else 200
     response = render(request, "katalog/_item_form.html", context, status=status)
     if status == 422:
         # The form's hx-target is the grid (where a saved card goes); errors
@@ -145,56 +149,56 @@ def _card_response(request, item):
     return render(request, "katalog/_item_card.html", {"item": item})
 
 
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 @ratelimit(key="user", rate="10/m", method="POST", block=False)
 def item_create(request):
-    if request.method != "POST":
-        return _form_response(request, ItemForm())
     if request.limited:
         return toast_only(TOO_FAST, status=429)
-    form = ItemForm(request.POST)
-    if not form.is_valid():
-        return _form_response(request, form, status=422)
-    item = form.save(commit=False)
-    item.owner = request.user
-    on_map = geocoding.geocode_item(item)
-    item.save()
-    if not is_htmx(request):
-        return redirect("katalog:item_detail", pk=item.pk)
-    if not on_map:
-        return add_toast(_card_response(request, item), NOT_ON_MAP, "info")
-    return add_toast(_card_response(request, item), "Barang berhasil dipasang.")
+    form = ItemForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        item = form.save(commit=False)
+        item.owner = request.user
+        on_map = geocoding.geocode_item(item)
+        item.save()
+        if not is_htmx(request):
+            return redirect("katalog:item_detail", pk=item.pk)
+        if not on_map:
+            return add_toast(_card_response(request, item), NOT_ON_MAP, "info")
+        return add_toast(_card_response(request, item), "Barang berhasil dipasang.")
+
+    return _form_response(request, form)
 
 
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 def item_update(request, pk):
     item = get_object_or_404(Item, pk=pk)
     if item.owner != request.user:
         return _forbidden(request)
-    if request.method != "POST":
-        return _form_response(request, ItemForm(instance=item), item)
-    form = ItemForm(request.POST, instance=item)
-    if not form.is_valid():
-        return _form_response(request, form, item, status=422)
-    item = form.save(commit=False)
-    on_map = True
-    # Only call the API when the place changed (or never resolved before).
-    if "location_name" in form.changed_data or item.latitude is None:
-        on_map = geocoding.geocode_item(item)
-    item.save()
-    if request.POST.get("from_detail"):
-        return hx_redirect(reverse("katalog:item_detail", args=[item.pk]))
-    # Swap the edited card in place instead of the form's default target.
-    response = _card_response(request, item)
-    response["HX-Retarget"] = f"#item-{item.pk}"
-    response["HX-Reswap"] = "outerHTML"
-    if not on_map:
-        return add_toast(response, NOT_ON_MAP, "info")
-    return add_toast(response, "Perubahan disimpan.")
+    form = ItemForm(request.POST or None, instance=item)
+
+    if request.method == "POST" and form.is_valid():
+        item = form.save(commit=False)
+        on_map = True
+        # Only call the API when the place changed (or never resolved before).
+        if "location_name" in form.changed_data or item.latitude is None:
+            on_map = geocoding.geocode_item(item)
+        item.save()
+        if request.POST.get("from_detail"):
+            return hx_redirect(reverse("katalog:item_detail", args=[item.pk]))
+        # Swap the edited card in place instead of the form's default target.
+        response = _card_response(request, item)
+        response["HX-Retarget"] = f"#item-{item.pk}"
+        response["HX-Reswap"] = "outerHTML"
+        if not on_map:
+            return add_toast(response, NOT_ON_MAP, "info")
+        return add_toast(response, "Perubahan disimpan.")
+
+    return _form_response(request, form, item)
 
 
 @require_POST
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 def item_soft_delete(request, pk):
     item = get_object_or_404(Item, pk=pk)
     if item.owner != request.user:
@@ -214,7 +218,7 @@ def item_soft_delete(request, pk):
 
 
 @require_POST
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 def item_restore(request, pk):
     # all_objects: the item is soft-deleted, so the default manager hides it.
     item = get_object_or_404(Item.all_objects, pk=pk)
@@ -250,7 +254,7 @@ def _panel_response(request, item):
 
 
 @require_POST
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 @ratelimit(key="user", rate="10/m", method="POST", block=False)
 def request_create(request, pk):
     item = get_object_or_404(Item.objects.select_related("owner"), pk=pk)
@@ -275,7 +279,7 @@ INCOMING_TABS = {
 }
 
 
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 def requests_page(request):
     # The template reads the item, its owner and the requester of every row,
     # so join them all up front (one query instead of one per row).
@@ -312,7 +316,7 @@ REQUEST_ACTIONS = {
 
 
 @require_POST
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 def request_action(request, pk, action):
     if action not in REQUEST_ACTIONS:
         raise Http404
@@ -356,7 +360,7 @@ def _my_items_context(request, tab):
     return {"tab": tab, "items": items}
 
 
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 def my_items(request):
     context = _my_items_context(request, request.GET.get("tab"))
     return render(request, "katalog/my_items.html", context)
@@ -374,7 +378,7 @@ def _valid_uuids(values):
 
 
 @require_POST
-@login_required_htmx
+@login_required(login_url=LOGIN_URL)
 @ratelimit(key="user", rate="10/m", method="POST", block=False)
 def bulk_action(request):
     if request.limited:

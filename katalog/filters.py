@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
 
 from . import geocoding
@@ -62,7 +62,7 @@ class CatalogFilterForm(forms.Form):
     lng = forms.FloatField(required=False, min_value=-180, max_value=180)
     radius = forms.FloatField(required=False, min_value=0.1, max_value=50)
 
-    def center(self) -> tuple[float, float, str] | None:
+    def center(self):
         """(lat, lng, label) of the radius filter's centre, if there is one."""
         values = self.values()
         if "near" in values:
@@ -72,21 +72,21 @@ class CatalogFilterForm(forms.Form):
             return (values["lat"], values["lng"], "lokasimu")
         return None
 
-    def radius_km(self) -> float:
+    def radius_km(self):
         return self.values().get("radius", DEFAULT_RADIUS_KM)
 
-    def effective_sort(self) -> str:
+    def effective_sort(self):
         """Explicit ?sort= wins; otherwise nearest first when filtering by radius."""
         center = self.center()
         sort = self.values().get("sort") or ("distance" if center else "newest")
         return "newest" if sort == "distance" and not center else sort
 
-    def values(self) -> dict:
+    def values(self):
         """Cleaned values, skipping any field that failed validation."""
         self.is_valid()
         return {k: v for k, v in self.cleaned_data.items() if v not in (None, "", [])}
 
-    def active_chips(self) -> list[str]:
+    def active_chips(self):
         """Labels for the "Filter aktif" row."""
         values = self.values()
         chips = []
@@ -109,7 +109,7 @@ class CatalogFilterForm(forms.Form):
         return chips
 
 
-def within_radius(qs, lat, lng, km, by_distance) -> list[Item]:
+def within_radius(qs, lat, lng, km, by_distance):
     """Items within `km` of (lat, lng), each with a .distance_km attribute.
 
     Two steps: a bounding box in SQL throws away almost everything cheaply,
@@ -131,7 +131,7 @@ def within_radius(qs, lat, lng, km, by_distance) -> list[Item]:
     return items
 
 
-def filter_items(params) -> tuple[CatalogFilterForm, QuerySet | list[Item]]:
+def filter_items(params):
     form = CatalogFilterForm(params)
     values = form.values()
     # Finished items leave the catalog. select_related joins the owner in the
