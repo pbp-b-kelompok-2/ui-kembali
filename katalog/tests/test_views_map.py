@@ -159,7 +159,9 @@ class RadiusFilterTests(TestCase):
 
     def test_query_count_stays_small(self):
         with CaptureQueriesContext(connection) as ctx:
-            self.client.get(reverse("katalog:item_list"), {"near": "fasilkom", "radius": "50"})
+            self.client.get(
+                reverse("katalog:catalog"), {"near": "fasilkom", "radius": "50"}, HTTP_HX_REQUEST="true"
+            )
         # count + page rows; the haversine step runs in Python, not per row.
         self.assertLessEqual(len(ctx.captured_queries), 3)
 

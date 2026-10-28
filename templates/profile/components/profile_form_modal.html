@@ -1,0 +1,29 @@
+<form method="post"
+      enctype="multipart/form-data"
+      hx-post="{{ form_action|default:'' }}"
+      hx-target="this"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+  <div class="info-header">
+    <div>
+      <h2>Informasi profil</h2>
+      <p class="info-sub">Nama dan fakultas disinkronkan dari UI SSO.</p>
+    </div>
+    <button type="submit" class="btn-simpan">Simpan perubahan</button>
+  </div>
+  <section class="form-grid">
+    {% for field in form %}
+      {% if field.name == "bio" %}
+      <div class="form-group full-width">
+      {% else %}
+      <div class="form-group">
+      {% endif %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}
+          <small class="field-error">{{ error }}</small>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </section>
+</form>

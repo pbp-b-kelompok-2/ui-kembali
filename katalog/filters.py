@@ -27,22 +27,6 @@ SORT_CHOICES = [
     ("name", "Nama A–Z"),
     ("distance", "Terdekat"),
 ]
-LIST_FIELDS = (
-    "id",
-    "name",
-    "category",
-    "condition",
-    "photo_url",
-    "location_name",
-    "transaction_type",
-    "price",
-    "status",
-    "created_at",
-    "latitude",
-    "longitude",
-    "owner",
-    "owner__username",
-)
 
 
 class CatalogFilterForm(forms.Form):
@@ -124,20 +108,6 @@ class CatalogFilterForm(forms.Form):
         return chips
 
 
-def catalog_queryset():
-    """Base list query: one row per item, owner joined, pending requests counted."""
-    return (
-        Item.objects.exclude(status=Item.Status.SELESAI)
-        .select_related("owner")
-        .only(*LIST_FIELDS)
-        .annotate(
-            pending_count=Count(
-                "requests", filter=Q(requests__status="PENDING"), distinct=True
-            )
-        )
-    )
-
-
 def within_radius(qs, lat, lng, km, by_distance) -> list[Item]:
     """Items within `km` of (lat, lng), each with a .distance_km attribute.
 
@@ -163,18 +133,27 @@ def within_radius(qs, lat, lng, km, by_distance) -> list[Item]:
 def filter_items(params) -> tuple[CatalogFilterForm, QuerySet | list[Item]]:
     form = CatalogFilterForm(params)
     values = form.values()
-    qs = catalog_queryset()
+    # Finished items leave the catalog. select_related joins the owner in the
+    # same query; pending_count is shown on every card.
+    qs = (
+        Item.objects.exclude(status=Item.Status.SELESAI)
+        .select_related("owner")
+        .annotate(
+            pending_count=Count("requests", filter=Q(requests__status="PENDING"))
+        )
+    )
 
-    if q := values.get("q"):
+    if "q" in values:
+        q = values["q"]
         qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
-    if category := values.get("category"):
-        qs = qs.filter(category=category)
-    if conditions := values.get("condition"):
-        qs = qs.filter(condition__in=conditions)
-    if types := values.get("type"):
-        qs = qs.filter(transaction_type__in=types)
-    if location := values.get("location"):
-        qs = qs.filter(location_name__icontains=location)
+    if "category" in values:
+        qs = qs.filter(category=values["category"])
+    if "condition" in values:
+        qs = qs.filter(condition__in=values["condition"])
+    if "type" in values:
+        qs = qs.filter(transaction_type__in=values["type"])
+    if "location" in values:
+        qs = qs.filter(location_name__icontains=values["location"])
     if "min_price" in values:
         # A free item counts as Rp0, so any min price above 0 excludes it.
         qs = qs.filter(price__gte=values["min_price"])
