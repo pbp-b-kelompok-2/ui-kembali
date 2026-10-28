@@ -1,0 +1,20 @@
+{% extends "katalog/base_katalog.html" %}
+
+{% block meta %}<title>Barang saya · UIKembali</title>{% endblock meta %}
+
+{% block katalog_content %}
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-green">Kelola</p>
+      <h1 class="mt-1 text-4xl font-bold">Barang saya</h1>
+      <p class="mt-2 text-ink-2">Centang beberapa barang lalu hapus, tandai selesai, atau kembalikan sekaligus.</p>
+    </div>
+    <nav class="flex rounded-lg border border-line bg-surface p-1 text-sm font-semibold" aria-label="Daftar barang">
+      <a href="?tab=aktif" class="rounded-md px-4 py-2 no-underline {% if tab == 'aktif' %}bg-ink text-white{% else %}text-ink-2{% endif %}" {% if tab == "aktif" %}aria-current="page"{% endif %}>Aktif</a>
+      <a href="?tab=terhapus" class="rounded-md px-4 py-2 no-underline {% if tab == 'terhapus' %}bg-ink text-white{% else %}text-ink-2{% endif %}" {% if tab == "terhapus" %}aria-current="page"{% endif %}>Terhapus</a>
+    </nav>
+  </div>
+  {% include "katalog/_my_items_table.html" %}
+</div>
+{% endblock katalog_content %}

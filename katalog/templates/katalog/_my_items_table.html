@@ -1,0 +1,53 @@
+{% load katalog_extras %}
+{# Swapped as a whole after every bulk action. Deleting is soft, so there's #}
+{# no confirm dialog: anything deleted comes back from the Terhapus tab. #}
+<form id="my-items" class="mt-6" hx-post="{% url 'katalog:bulk_action' %}" hx-target="this" hx-swap="outerHTML"
+      hx-disabled-elt="find button">
+  <input type="hidden" name="tab" value="{{ tab }}">
+  <div class="flex flex-wrap items-center gap-2">
+    {% if tab == "aktif" %}
+      <button type="submit" name="action" value="done" class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold text-green">Tandai selesai</button>
+      <button type="submit" name="action" value="delete" class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold text-danger">Hapus</button>
+    {% else %}
+      <button type="submit" name="action" value="restore" class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold text-green">Kembalikan</button>
+    {% endif %}
+    <span class="text-sm text-muted">{{ items|length }} barang</span>
+  </div>
+
+  {% if items %}
+  <div class="mt-4 overflow-x-auto rounded-xl border border-line bg-surface">
+    <table class="w-full border-collapse text-left text-sm">
+      <thead class="bg-subtle text-xs uppercase tracking-wide text-ink-2">
+        <tr>
+          <th class="w-10 p-3"><span class="sr-only">Pilih</span></th>
+          <th class="p-3">Barang</th>
+          <th class="p-3">Status</th>
+          <th class="p-3">Peminat</th>
+          <th class="p-3">Harga</th>
+          <th class="p-3">Dipasang</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr class="border-0 border-t border-solid border-line">
+          <td class="p-3"><input type="checkbox" name="ids" value="{{ item.pk }}" aria-label="Pilih {{ item.name }}"></td>
+          <td class="p-3 font-semibold">
+            {% if tab == "aktif" %}<a href="{% url 'katalog:item_detail' item.pk %}" class="text-ink no-underline hover:underline">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}
+          </td>
+          <td class="p-3">
+            <span class="rounded-full px-2.5 py-1 text-xs font-semibold {% if item.status == 'TERSEDIA' %}bg-success-bg text-brand{% elif item.status == 'DIPESAN' %}bg-warning-bg text-ink{% else %}bg-subtle text-ink-2{% endif %}">{{ item.get_status_display }}</span>
+          </td>
+          <td class="p-3">{% if item.pending_count %}<a href="{% url 'katalog:requests_page' %}" class="font-semibold text-green">{{ item.pending_count }} menunggu</a>{% else %}<span class="text-muted">–</span>{% endif %}</td>
+          <td class="p-3">{{ item.price|rupiah }}</td>
+          <td class="p-3 text-ink-2">{{ item.created_at|waktu_lalu }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="mt-4 rounded-xl border border-dashed border-line-strong bg-surface p-10 text-center text-ink-2">
+      {% if tab == "aktif" %}Belum ada barang. <a href="{% url 'katalog:catalog' %}" class="font-semibold text-green">Pasang barang pertamamu</a>{% else %}Tidak ada barang terhapus.{% endif %}
+    </p>
+  {% endif %}
+</form>
