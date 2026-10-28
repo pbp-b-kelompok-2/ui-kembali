@@ -17,6 +17,7 @@
     const target = targetOf(event.detail.elt);
     if (target) target.hidden = false;
   }
-  document.body.addEventListener("htmx:responseError", rollback);
-  document.body.addEventListener("htmx:sendError", rollback);
+  ["htmx:responseError", "htmx:sendError"].forEach(function (name) {
+    document.body.addEventListener(name, rollback);
+  });
 })();
