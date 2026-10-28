@@ -1,7 +1,7 @@
 {% load katalog_extras %}
 {# One row of the request center. The owner sees who asked; the requester #}
-{# sees which item. `oob` marks rows that ride along on an accept response. #}
-<li id="request-{{ req.pk }}"{% if oob %} hx-swap-oob="outerHTML"{% endif %}
+{# sees which item. Reject/cancel/complete swap this row; accept reloads the page. #}
+<li id="request-{{ req.pk }}"
     class="grid gap-4 rounded-xl border {% if req.status == 'DITERIMA' %}border-green{% else %}border-line{% endif %} bg-surface p-5 sm:grid-cols-[13rem_1fr_11rem] sm:items-center">
   {% if req.item.owner_id == user.id %}
     <div class="flex items-center gap-3">
@@ -26,14 +26,14 @@
 
   <div class="flex flex-col gap-2">
     {% if req.item.owner_id == user.id and req.status == "PENDING" %}
-      <button type="button" hx-post="{% url 'katalog:request_action' req.pk 'accept' %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+      <button type="button" hx-post="{% url 'katalog:request_accept' req.pk %}" hx-swap="none"
               hx-confirm="Terima {{ req.requester.username }}? Permintaan lain untuk barang ini akan ditolak otomatis."
               class="cursor-pointer rounded-lg border-0 bg-ink px-4 py-2.5 font-semibold text-white">✓ Terima</button>
-      <button type="button" hx-post="{% url 'katalog:request_action' req.pk 'reject' %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+      <button type="button" hx-post="{% url 'katalog:request_reject' req.pk %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
               class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-ink">✕ Tolak</button>
     {% elif req.item.owner_id == user.id and req.status == "DITERIMA" %}
       <span class="rounded-full bg-success-bg px-3 py-1 text-center text-sm font-semibold text-brand">Disetujui · menunggu temu</span>
-      <button type="button" hx-post="{% url 'katalog:request_action' req.pk 'complete' %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+      <button type="button" hx-post="{% url 'katalog:request_complete' req.pk %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
               hx-confirm="Barang sudah diserahkan ke {{ req.requester.username }}?"
               class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-green">Tandai selesai</button>
     {% else %}
@@ -42,11 +42,10 @@
         {% if req.status == "DITERIMA" %}Disetujui · hubungi pemilik{% else %}{{ req.get_status_display }}{% endif %}
       </span>
       {% if req.requester_id == user.id and req.status == "PENDING" or req.requester_id == user.id and req.status == "DITERIMA" %}
-        <button type="button" hx-post="{% url 'katalog:request_action' req.pk 'cancel' %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+        <button type="button" hx-post="{% url 'katalog:request_cancel' req.pk %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
                 hx-confirm="Batalkan pengajuanmu untuk {{ req.item.name }}?"
                 class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-danger">Batalkan</button>
       {% endif %}
     {% endif %}
   </div>
 </li>
-{% for other in oob_rows %}{% include "katalog/_request_row.html" with req=other oob=True oob_rows=None %}{% endfor %}

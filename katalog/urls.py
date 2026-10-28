@@ -14,11 +14,10 @@ urlpatterns = [
     path("<uuid:pk>/restore/", views.item_restore, name="item_restore"),
     path("<uuid:pk>/ajukan/", views.request_create, name="request_create"),
     path("permintaan/", views.requests_page, name="requests_page"),
-    path(
-        "permintaan/<uuid:pk>/<slug:action>/",
-        views.request_action,
-        name="request_action",
-    ),
+    path("permintaan/<uuid:pk>/terima/", views.request_accept, name="request_accept"),
+    path("permintaan/<uuid:pk>/tolak/", views.request_reject, name="request_reject"),
+    path("permintaan/<uuid:pk>/batal/", views.request_cancel, name="request_cancel"),
+    path("permintaan/<uuid:pk>/selesai/", views.request_complete, name="request_complete"),
     path("saya/", views.my_items, name="my_items"),
     path("saya/bulk/", views.bulk_action, name="bulk_action"),
 ]

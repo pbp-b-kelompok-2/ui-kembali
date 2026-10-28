@@ -1,32 +1,29 @@
-import uuid
-
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import Http404, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import strip_tags
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
-from . import geocoding, services
+from . import geocoding
 from .filters import RADIUS_CHOICES, filter_items
 from .forms import ItemForm
 from .htmx_utils import add_toast, hx_redirect, is_htmx, toast_only
 from .models import Item, ItemRequest
-from .services import RequestError
 
 PAGE_SIZE = 12
 LOGIN_URL = "/auth/login/"
 TOO_FAST = "Terlalu banyak aksi dalam semenit. Coba lagi sebentar."
 NOT_ON_MAP = "Tersimpan, tapi lokasinya belum ketemu di peta. Coba nama tempat yang lebih umum."
 
-
-def _forbidden(request):
-    """Someone else's item: an error toast for HTMX, the 403 page otherwise."""
-    if is_htmx(request):
-        return toast_only("Bukan barangmu, aksi ditolak.", status=403)
-    return render(request, "katalog/403.html", status=403)
+PENDING = ItemRequest.Status.PENDING
+DITERIMA = ItemRequest.Status.DITERIMA
+DITOLAK = ItemRequest.Status.DITOLAK
 
 
 # --- Catalog (read) -----------------------------------------------------------
@@ -79,7 +76,11 @@ def _item_to_dict(item, show_contact):
         "owner": item.owner.username,
         "created_at": item.created_at.isoformat(),
     }
-    data["latitude"], data["longitude"] = _public_coords(item, show_contact) or (None, None)
+    coords = _public_coords(item, show_contact)
+    if coords is None:
+        data["latitude"], data["longitude"] = None, None
+    else:
+        data["latitude"], data["longitude"] = coords
     # Only set when the radius filter is on.
     if hasattr(item, "distance_km"):
         data["distance_km"] = round(item.distance_km, 2)
@@ -145,7 +146,7 @@ def _form_response(request, form, item=None):
 
 
 def _card_response(request, item):
-    item.pending_count = item.requests.filter(status=ItemRequest.Status.PENDING).count()
+    item.pending_count = item.requests.filter(status=PENDING).count()
     return render(request, "katalog/_item_card.html", {"item": item})
 
 
@@ -159,6 +160,7 @@ def item_create(request):
     if request.method == "POST" and form.is_valid():
         item = form.save(commit=False)
         item.owner = request.user
+        # OpenStreetMap: turn the place name into coordinates for the map.
         on_map = geocoding.geocode_item(item)
         item.save()
         if not is_htmx(request):
@@ -173,8 +175,9 @@ def item_create(request):
 @login_required(login_url=LOGIN_URL)
 def item_update(request, pk):
     item = get_object_or_404(Item, pk=pk)
+    # Only the owner may edit (same check as Tutorial 04).
     if item.owner != request.user:
-        return _forbidden(request)
+        raise PermissionDenied
     form = ItemForm(request.POST or None, instance=item)
 
     if request.method == "POST" and form.is_valid():
@@ -202,7 +205,7 @@ def item_update(request, pk):
 def item_soft_delete(request, pk):
     item = get_object_or_404(Item, pk=pk)
     if item.owner != request.user:
-        return _forbidden(request)
+        raise PermissionDenied
     item.soft_delete()
     if request.POST.get("from_detail"):
         return hx_redirect(reverse("katalog:catalog"))
@@ -223,7 +226,7 @@ def item_restore(request, pk):
     # all_objects: the item is soft-deleted, so the default manager hides it.
     item = get_object_or_404(Item.all_objects, pk=pk)
     if item.owner != request.user:
-        return _forbidden(request)
+        raise PermissionDenied
     item.restore()
     return add_toast(_card_response(request, item), "Barang dikembalikan.")
 
@@ -237,12 +240,11 @@ def _panel_context(request, item):
     my_request = None
     if request.user.is_authenticated and item.owner != request.user:
         my_request = item.requests.filter(
-            requester=request.user,
-            status__in=[ItemRequest.Status.PENDING, ItemRequest.Status.DITERIMA],
+            requester=request.user, status__in=[PENDING, DITERIMA]
         ).first()
     if item.status == Item.Status.SELESAI:
         step = 3
-    elif my_request and my_request.status == ItemRequest.Status.DITERIMA:
+    elif my_request and my_request.status == DITERIMA:
         step = 2
     else:
         step = 1
@@ -257,13 +259,21 @@ def _panel_response(request, item):
 @login_required(login_url=LOGIN_URL)
 @ratelimit(key="user", rate="10/m", method="POST", block=False)
 def request_create(request, pk):
-    item = get_object_or_404(Item.objects.select_related("owner"), pk=pk)
     if request.limited:
         return toast_only(TOO_FAST, status=429)
-    try:
-        services.create_request(item, request.user, request.POST.get("message", ""))
-    except RequestError as error:
-        return toast_only(error.message, status=error.status)
+    item = get_object_or_404(Item.objects.select_related("owner"), pk=pk)
+    if item.owner == request.user:
+        raise PermissionDenied
+    if item.status != Item.Status.TERSEDIA:
+        return toast_only("Barang ini sudah tidak tersedia.", status=409)
+    if item.requests.filter(requester=request.user, status=PENDING).exists():
+        return toast_only("Kamu sudah mengajukan barang ini. Tunggu balasan pemilik ya.", status=409)
+
+    ItemRequest.objects.create(
+        item=item,
+        requester=request.user,
+        message=strip_tags(request.POST.get("message", "")).strip(),
+    )
     return add_toast(
         _panel_response(request, item), "Pengajuan terkirim. Tunggu balasan pemilik ya."
     )
@@ -273,8 +283,8 @@ def request_create(request, pk):
 
 # ?status= tabs of the incoming list, as in design 07.
 INCOMING_TABS = {
-    "ditinjau": ItemRequest.Status.PENDING,
-    "disetujui": ItemRequest.Status.DITERIMA,
+    "ditinjau": PENDING,
+    "disetujui": DITERIMA,
     "selesai": ItemRequest.Status.SELESAI,
 }
 
@@ -286,8 +296,7 @@ def requests_page(request):
     requests = ItemRequest.objects.select_related("item", "item__owner", "requester")
 
     if request.GET.get("tab") == "keluar":
-        rows = requests.filter(requester=request.user)
-        context = {"tab": "keluar", "rows": rows}
+        context = {"tab": "keluar", "rows": requests.filter(requester=request.user)}
         return render(request, "katalog/requests.html", context)
 
     incoming = requests.filter(item__owner=request.user)
@@ -298,49 +307,82 @@ def requests_page(request):
         "tab": "masuk",
         "status_key": status_key,
         "rows": incoming.filter(status=INCOMING_TABS[status_key]),
-        # One badge count per status tab.
         "counts": {
-            key: incoming.filter(status=status).count()
-            for key, status in INCOMING_TABS.items()
+            "ditinjau": incoming.filter(status=PENDING).count(),
+            "disetujui": incoming.filter(status=DITERIMA).count(),
+            "selesai": incoming.filter(status=ItemRequest.Status.SELESAI).count(),
         },
     }
     return render(request, "katalog/requests.html", context)
 
 
-REQUEST_ACTIONS = {
-    "accept": (services.accept_request, "Permintaan diterima. Peminat lain otomatis ditolak."),
-    "reject": (services.reject_request, "Permintaan ditolak."),
-    "cancel": (services.cancel_request, "Pengajuan dibatalkan."),
-    "complete": (services.complete_request, "Serah terima selesai. Terima kasih sudah berbagi!"),
-}
+def _row_response(request, req, message):
+    """The updated row of the request center, plus a toast."""
+    response = render(request, "katalog/_request_row.html", {"req": req})
+    return add_toast(response, message)
+
+
+# Each action below finds the request with get_object_or_404 *and* the rule of
+# who may do it (owner or requester) and in which status. Anything else -
+# someone else's request, or a request that already moved on - is a 404.
 
 
 @require_POST
 @login_required(login_url=LOGIN_URL)
-def request_action(request, pk, action):
-    if action not in REQUEST_ACTIONS:
-        raise Http404
-    handler, message = REQUEST_ACTIONS[action]
-    # Only the item's owner and the requester may even see the request;
-    # anyone else gets the same 404 as for a request that doesn't exist.
+def request_accept(request, pk):
+    req = get_object_or_404(ItemRequest, pk=pk, item__owner=request.user, status=PENDING)
+    req.status = DITERIMA
+    req.save()
+    # One item goes to one person: the other waiting requests are rejected.
+    req.item.requests.filter(status=PENDING).update(status=DITOLAK)
+    req.item.status = Item.Status.DIPESAN
+    req.item.save()
+
+    # Several rows changed at once, so HTMX reloads the whole page; the toast
+    # comes from Django messages after the reload.
+    messages.success(request, "Permintaan diterima. Peminat lain otomatis ditolak.")
+    response = HttpResponse()
+    response["HX-Refresh"] = "true"
+    return response
+
+
+@require_POST
+@login_required(login_url=LOGIN_URL)
+def request_reject(request, pk):
+    req = get_object_or_404(ItemRequest, pk=pk, item__owner=request.user, status=PENDING)
+    req.status = DITOLAK
+    req.save()
+    return _row_response(request, req, "Permintaan ditolak.")
+
+
+@require_POST
+@login_required(login_url=LOGIN_URL)
+def request_cancel(request, pk):
     req = get_object_or_404(
-        ItemRequest.objects.select_related("item", "item__owner", "requester").filter(
-            Q(item__owner=request.user) | Q(requester=request.user)
-        ),
-        pk=pk,
+        ItemRequest, pk=pk, requester=request.user, status__in=[PENDING, DITERIMA]
     )
-    try:
-        rejected = handler(req, request.user)
-    except RequestError as error:
-        return toast_only(error.message, status=error.status)
+    if req.status == DITERIMA:
+        # The item was booked for this requester; make it available again.
+        req.item.status = Item.Status.TERSEDIA
+        req.item.save()
+    req.status = ItemRequest.Status.DIBATALKAN
+    req.save()
+
     if request.POST.get("from_detail"):
-        return add_toast(_panel_response(request, req.item), message)
-    # Accepting rejects the item's other requests; their rows ride along as
-    # out-of-band swaps so the whole list is right without a reload.
-    response = render(
-        request, "katalog/_request_row.html", {"req": req, "oob_rows": rejected or []}
-    )
-    return add_toast(response, message)
+        return add_toast(_panel_response(request, req.item), "Pengajuan dibatalkan.")
+    return _row_response(request, req, "Pengajuan dibatalkan.")
+
+
+@require_POST
+@login_required(login_url=LOGIN_URL)
+def request_complete(request, pk):
+    """The handover happened. Padjri's review module keys off SELESAI."""
+    req = get_object_or_404(ItemRequest, pk=pk, item__owner=request.user, status=DITERIMA)
+    req.status = ItemRequest.Status.SELESAI
+    req.save()
+    req.item.status = Item.Status.SELESAI
+    req.item.save()
+    return _row_response(request, req, "Serah terima selesai. Terima kasih sudah berbagi!")
 
 
 # --- "Barang saya" + bulk actions ---------------------------------------------
@@ -350,11 +392,7 @@ def _my_items_context(request, tab):
     tab = "terhapus" if tab == "terhapus" else "aktif"
     items = (
         Item.all_objects.filter(owner=request.user, is_deleted=tab == "terhapus")
-        .annotate(
-            pending_count=Count(
-                "requests", filter=Q(requests__status=ItemRequest.Status.PENDING)
-            )
-        )
+        .annotate(pending_count=Count("requests", filter=Q(requests__status=PENDING)))
         .order_by("-created_at")
     )
     return {"tab": tab, "items": items}
@@ -366,15 +404,12 @@ def my_items(request):
     return render(request, "katalog/my_items.html", context)
 
 
-def _valid_uuids(values):
-    """Checkbox values that are real UUIDs; tampered values are skipped."""
-    ids = []
-    for value in values:
-        try:
-            ids.append(uuid.UUID(value))
-        except ValueError:
-            pass
-    return ids
+def _mark_done(item):
+    """Bulk "Tandai selesai": finish the item and close its open requests."""
+    item.status = Item.Status.SELESAI
+    item.save()
+    item.requests.filter(status=DITERIMA).update(status=ItemRequest.Status.SELESAI)
+    item.requests.filter(status=PENDING).update(status=DITOLAK)
 
 
 @require_POST
@@ -384,28 +419,34 @@ def bulk_action(request):
     if request.limited:
         return toast_only(TOO_FAST, status=429)
     action = request.POST.get("action")
-    if action not in ("delete", "done", "restore"):
-        return toast_only("Aksi tidak dikenal.", status=400)
-    ids = _valid_uuids(request.POST.getlist("ids"))
+    ids = request.POST.getlist("ids")
     if not ids:
         return toast_only("Pilih minimal satu barang dulu.", status=400)
 
     # owner=request.user is the security check: ids of other people's items
-    # simply match nothing.
-    mine = Item.all_objects.filter(owner=request.user, pk__in=ids)
+    # simply match nothing. A tampered id that isn't a UUID raises ValidationError.
+    try:
+        mine = list(Item.all_objects.filter(owner=request.user, pk__in=ids))
+    except ValidationError:
+        return toast_only("Pilihan barang tidak valid.", status=400)
+
     if action == "delete":
-        items = list(mine.filter(is_deleted=False))
-        for item in items:
+        chosen = [item for item in mine if not item.is_deleted]
+        for item in chosen:
             item.soft_delete()
-        message = f"{len(items)} barang dihapus. Kembalikan lewat tab Terhapus."
+        message = f"{len(chosen)} barang dihapus. Kembalikan lewat tab Terhapus."
     elif action == "done":
-        count = services.mark_items_done(mine.filter(is_deleted=False))
-        message = f"{count} barang ditandai selesai."
-    else:
-        items = list(mine.filter(is_deleted=True))
-        for item in items:
+        chosen = [item for item in mine if not item.is_deleted and item.status != Item.Status.SELESAI]
+        for item in chosen:
+            _mark_done(item)
+        message = f"{len(chosen)} barang ditandai selesai."
+    elif action == "restore":
+        chosen = [item for item in mine if item.is_deleted]
+        for item in chosen:
             item.restore()
-        message = f"{len(items)} barang dikembalikan."
+        message = f"{len(chosen)} barang dikembalikan."
+    else:
+        return toast_only("Aksi tidak dikenal.", status=400)
 
     context = _my_items_context(request, request.POST.get("tab"))
     response = render(request, "katalog/_my_items_table.html", context)
