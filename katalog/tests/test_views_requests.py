@@ -5,7 +5,6 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from katalog import services
 from katalog.models import Item, ItemRequest
 
 from .test_models import make_item
@@ -47,12 +46,25 @@ class RequestCreateViewTests(RequestViewTestCase):
         self.assertEqual((req.requester, req.message), (self.alice, "Untuk kos."))
         # The panel now shows the pending state with a cancel button.
         self.assertContains(response, "Menunggu")
-        self.assertContains(response, reverse("katalog:request_action", args=[req.pk, "cancel"]))
+        self.assertContains(response, reverse("katalog:request_cancel", args=[req.pk]))
 
-    def test_owner_gets_403_toast(self):
+    def test_message_is_stripped_of_html(self):
+        self.client.force_login(self.alice)
+        self.client.post(self.url(), {"message": "<b>Butuh</b> untuk kos"}, **HX)
+        self.assertEqual(ItemRequest.objects.get().message, "Butuh untuk kos")
+
+    def test_owner_cannot_request_own_item(self):
         self.client.force_login(self.owner)
         response = self.client.post(self.url(), {}, **HX)
         self.assertEqual(response.status_code, 403)
+        self.assertFalse(ItemRequest.objects.exists())
+
+    def test_booked_item_gets_409_toast(self):
+        self.item.status = Item.Status.DIPESAN
+        self.item.save()
+        self.client.force_login(self.alice)
+        response = self.client.post(self.url(), {}, **HX)
+        self.assertEqual(response.status_code, 409)
         self.assertEqual(toast(response)["level"], "error")
 
     def test_duplicate_gets_409_toast(self):
@@ -87,15 +99,18 @@ class DetailRequestPanelTests(RequestViewTestCase):
         self.assertContains(response, "Kirim pengajuan adopsi")
 
     def test_requester_sees_their_pending_request(self):
-        services.create_request(self.item, self.alice, "Halo")
+        ItemRequest.objects.create(item=self.item, requester=self.alice, message="Halo")
         self.client.force_login(self.alice)
         response = self.detail()
         self.assertContains(response, "Menunggu")
         self.assertNotContains(response, "Kirim pengajuan")
 
     def test_booked_item_shows_no_form(self):
-        req = services.create_request(self.item, self.bob)
-        services.accept_request(req, self.owner)
+        req = ItemRequest.objects.create(item=self.item, requester=self.bob)
+        req.status = ItemRequest.Status.DITERIMA
+        req.save()
+        self.item.status = Item.Status.DIPESAN
+        self.item.save()
         self.client.force_login(self.alice)
         response = self.detail()
         self.assertNotContains(response, "Kirim pengajuan")
@@ -107,9 +122,9 @@ class RequestsPageTests(RequestViewTestCase):
 
     def setUp(self):
         super().setUp()
-        self.incoming = services.create_request(self.item, self.alice, "Butuh meja")
+        self.incoming = ItemRequest.objects.create(item=self.item, requester=self.alice, message="Butuh meja")
         alice_item = make_item(self.alice, name="Rak buku Alice")
-        self.outgoing = services.create_request(alice_item, self.owner, "Mau raknya")
+        self.outgoing = ItemRequest.objects.create(item=alice_item, requester=self.owner, message="Mau raknya")
 
     def test_login_required(self):
         response = self.client.get(self.url)
@@ -121,17 +136,18 @@ class RequestsPageTests(RequestViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Butuh meja")
         self.assertNotContains(response, "Mau raknya")
-        self.assertContains(response, reverse("katalog:request_action", args=[self.incoming.pk, "accept"]))
+        self.assertContains(response, reverse("katalog:request_accept", args=[self.incoming.pk]))
 
     def test_outgoing_tab_lists_my_requests(self):
         self.client.force_login(self.owner)
         response = self.client.get(self.url, {"tab": "keluar"})
         self.assertContains(response, "Mau raknya")
         self.assertNotContains(response, "Butuh meja")
-        self.assertContains(response, reverse("katalog:request_action", args=[self.outgoing.pk, "cancel"]))
+        self.assertContains(response, reverse("katalog:request_cancel", args=[self.outgoing.pk]))
 
     def test_status_filter_on_incoming(self):
-        services.accept_request(self.incoming, self.owner)
+        self.incoming.status = ItemRequest.Status.DITERIMA
+        self.incoming.save()
         self.client.force_login(self.owner)
         pending = self.client.get(self.url, {"status": "ditinjau"})
         accepted = self.client.get(self.url, {"status": "disetujui"})
@@ -144,7 +160,7 @@ class RequestsPageTests(RequestViewTestCase):
             self.client.get(self.url)
         for i in range(5):
             user = User.objects.create_user(f"peminat{i}", password="pw")
-            services.create_request(self.item, user, f"Pesan {i}")
+            ItemRequest.objects.create(item=self.item, requester=user, message=f"Pesan {i}")
         with CaptureQueriesContext(connection) as six_rows:
             self.client.get(self.url)
         self.assertEqual(len(one_row), len(six_rows))
@@ -153,31 +169,51 @@ class RequestsPageTests(RequestViewTestCase):
 class RequestActionTests(RequestViewTestCase):
     def setUp(self):
         super().setUp()
-        self.req_a = services.create_request(self.item, self.alice)
-        self.req_b = services.create_request(self.item, self.bob)
+        self.req_a = ItemRequest.objects.create(item=self.item, requester=self.alice)
+        self.req_b = ItemRequest.objects.create(item=self.item, requester=self.bob)
 
-    def act(self, req, action):
-        return self.client.post(
-            reverse("katalog:request_action", args=[req.pk, action]), **HX
-        )
+    def act(self, req, action, **data):
+        url = reverse(f"katalog:request_{action}", args=[req.pk])
+        return self.client.post(url, data, **HX)
 
-    def test_owner_accepts_and_sibling_rows_update_out_of_band(self):
+    def refresh(self, *objs):
+        for obj in objs:
+            obj.refresh_from_db()
+
+    def test_owner_accepts_books_item_and_rejects_the_others(self):
         self.client.force_login(self.owner)
         response = self.act(self.req_a, "accept")
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "katalog/_request_row.html")
-        self.assertContains(response, f'id="request-{self.req_a.pk}"')
-        self.assertContains(response, "Disetujui")
-        # Bob's row is rejected in the same transaction and swapped too.
-        self.assertContains(response, f'id="request-{self.req_b.pk}" hx-swap-oob="outerHTML"')
-        self.assertEqual(toast(response)["level"], "success")
+        self.assertEqual(response["HX-Refresh"], "true")
+        self.refresh(self.req_a, self.req_b, self.item)
+        self.assertEqual(self.req_a.status, ItemRequest.Status.DITERIMA)
+        self.assertEqual(self.req_b.status, ItemRequest.Status.DITOLAK)
+        self.assertEqual(self.item.status, Item.Status.DIPESAN)
+
+    def test_accept_toast_shows_after_the_reload(self):
+        self.client.force_login(self.owner)
+        self.act(self.req_a, "accept")
+        page = self.client.get(reverse("katalog:requests_page"))
+        self.assertContains(page, "Permintaan diterima.")
 
     def test_requester_cannot_accept(self):
         self.client.force_login(self.alice)
-        response = self.act(self.req_a, "accept")
-        self.assertEqual(response.status_code, 403)
-        self.req_a.refresh_from_db()
+        self.assertEqual(self.act(self.req_a, "accept").status_code, 404)
+        self.refresh(self.req_a)
         self.assertEqual(self.req_a.status, ItemRequest.Status.PENDING)
+
+    def test_cannot_accept_a_rejected_request(self):
+        self.client.force_login(self.owner)
+        self.act(self.req_a, "reject")
+        self.assertEqual(self.act(self.req_a, "accept").status_code, 404)
+
+    def test_owner_rejects_and_gets_the_row(self):
+        self.client.force_login(self.owner)
+        response = self.act(self.req_a, "reject")
+        self.assertTemplateUsed(response, "katalog/_request_row.html")
+        self.assertEqual(toast(response)["level"], "success")
+        self.refresh(self.req_a)
+        self.assertEqual(self.req_a.status, ItemRequest.Status.DITOLAK)
 
     def test_stranger_gets_404(self):
         stranger = User.objects.create_user("asing", password="pw")
@@ -188,31 +224,43 @@ class RequestActionTests(RequestViewTestCase):
         self.client.force_login(self.alice)
         response = self.act(self.req_a, "cancel")
         self.assertEqual(response.status_code, 200)
-        self.req_a.refresh_from_db()
+        self.refresh(self.req_a)
         self.assertEqual(self.req_a.status, ItemRequest.Status.DIBATALKAN)
+
+    def test_cancelling_the_accepted_request_frees_the_item(self):
+        self.client.force_login(self.owner)
+        self.act(self.req_a, "accept")
+        self.client.force_login(self.alice)
+        self.act(self.req_a, "cancel")
+        self.refresh(self.item)
+        self.assertEqual(self.item.status, Item.Status.TERSEDIA)
+
+    def test_owner_cannot_cancel_someone_elses_request(self):
+        self.client.force_login(self.owner)
+        self.assertEqual(self.act(self.req_a, "cancel").status_code, 404)
 
     def test_cancel_from_detail_returns_the_panel(self):
         self.client.force_login(self.alice)
-        response = self.client.post(
-            reverse("katalog:request_action", args=[self.req_a.pk, "cancel"]),
-            {"from_detail": "1"},
-            **HX,
-        )
+        response = self.act(self.req_a, "cancel", from_detail="1")
         self.assertTemplateUsed(response, "katalog/_request_panel.html")
         self.assertContains(response, "Kirim pengajuan")
 
-    def test_invalid_transition_is_409(self):
+    def test_complete_finishes_request_and_item(self):
         self.client.force_login(self.owner)
+        self.act(self.req_a, "accept")
         response = self.act(self.req_a, "complete")
-        self.assertEqual(response.status_code, 409)
+        self.assertTemplateUsed(response, "katalog/_request_row.html")
+        self.refresh(self.req_a, self.item)
+        self.assertEqual(self.req_a.status, ItemRequest.Status.SELESAI)
+        self.assertEqual(self.item.status, Item.Status.SELESAI)
 
-    def test_unknown_action_is_404(self):
+    def test_only_an_accepted_request_can_be_completed(self):
         self.client.force_login(self.owner)
-        self.assertEqual(self.act(self.req_a, "hapus").status_code, 404)
+        self.assertEqual(self.act(self.req_a, "complete").status_code, 404)
 
     def test_get_is_not_allowed(self):
         self.client.force_login(self.owner)
-        url = reverse("katalog:request_action", args=[self.req_a.pk, "accept"])
+        url = reverse("katalog:request_accept", args=[self.req_a.pk])
         self.assertEqual(self.client.get(url).status_code, 405)
 
 
@@ -270,6 +318,17 @@ class BulkActionTests(RequestViewTestCase):
         self.assertEqual(self.item.status, Item.Status.SELESAI)
         self.assertEqual(self.second.status, Item.Status.TERSEDIA)
 
+    def test_bulk_done_closes_open_requests(self):
+        accepted = ItemRequest.objects.create(
+            item=self.item, requester=self.alice, status=ItemRequest.Status.DITERIMA
+        )
+        waiting = ItemRequest.objects.create(item=self.item, requester=self.bob)
+        self.bulk("done", [self.item])
+        accepted.refresh_from_db()
+        waiting.refresh_from_db()
+        self.assertEqual(accepted.status, ItemRequest.Status.SELESAI)
+        self.assertEqual(waiting.status, ItemRequest.Status.DITOLAK)
+
     def test_bulk_restore_brings_deleted_items_back(self):
         self.item.soft_delete()
         response = self.bulk("restore", [self.item], tab="terhapus")
@@ -285,12 +344,12 @@ class BulkActionTests(RequestViewTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(toast(response)["level"], "error")
 
-    def test_bad_ids_are_ignored(self):
+    def test_tampered_ids_are_400(self):
         response = self.client.post(
             self.url, {"action": "delete", "ids": ["bukan-uuid", str(self.item.pk)]}, **HX
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(Item.objects.filter(pk=self.item.pk).exists())
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Item.objects.filter(pk=self.item.pk).exists())
 
     def test_get_is_not_allowed(self):
         self.assertEqual(self.client.get(self.url).status_code, 405)

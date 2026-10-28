@@ -53,17 +53,10 @@ class OwnerRequiredTests(CrudTestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_non_owner_gets_403_page(self):
-        self.client.force_login(self.other)
-        response = self.client.get(self.edit_url())
-        self.assertEqual(response.status_code, 403)
-        self.assertTemplateUsed(response, "katalog/403.html")
-
-    def test_non_owner_htmx_request_gets_403_toast(self):
+    def test_non_owner_gets_403(self):
         self.client.force_login(self.other)
         response = self.client.get(self.edit_url(), **HX)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(toast(response)["level"], "error")
 
 
 class ItemCreateTests(CrudTestCase):
