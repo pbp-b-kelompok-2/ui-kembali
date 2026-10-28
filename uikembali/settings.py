@@ -44,6 +44,9 @@ SECRET_KEY = os.getenv(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', str(not PRODUCTION)).lower() == 'true'
+# Local Django servers must still serve uploaded media when DEBUG is disabled
+# by the workstation environment. Keep media serving off in production by default.
+SERVE_MEDIA = os.getenv('SERVE_MEDIA', str(not PRODUCTION)).lower() == 'true'
 
 ALLOWED_HOSTS = env_list(
     'ALLOWED_HOSTS',
@@ -67,6 +70,7 @@ INSTALLED_APPS = [
     'main',
     'auth_ssoui',
     'katalog',
+    'forum',
 ]
 
 MIDDLEWARE = [
