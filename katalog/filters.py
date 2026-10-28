@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
 
 from .models import Item
@@ -46,12 +46,12 @@ class CatalogFilterForm(forms.Form):
     max_price = forms.IntegerField(required=False, min_value=0)
     sort = forms.ChoiceField(required=False, choices=SORT_CHOICES)
 
-    def values(self) -> dict:
+    def values(self):
         """Cleaned values, skipping any field that failed validation."""
         self.is_valid()
         return {k: v for k, v in self.cleaned_data.items() if v not in (None, "", [])}
 
-    def active_chips(self) -> list[str]:
+    def active_chips(self):
         """Labels for the "Filter aktif" row."""
         values = self.values()
         chips = []
@@ -71,7 +71,7 @@ class CatalogFilterForm(forms.Form):
         return chips
 
 
-def filter_items(params) -> tuple[CatalogFilterForm, QuerySet]:
+def filter_items(params):
     form = CatalogFilterForm(params)
     values = form.values()
     # Finished items leave the catalog. select_related joins the owner in the

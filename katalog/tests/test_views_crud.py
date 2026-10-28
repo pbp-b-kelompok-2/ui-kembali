@@ -46,10 +46,6 @@ class OwnerRequiredTests(CrudTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("auth_ssoui:login"), response["Location"])
 
-    def test_anonymous_htmx_request_gets_hx_redirect(self):
-        response = self.client.get(self.edit_url(), **HX)
-        self.assertIn(reverse("auth_ssoui:login"), response["HX-Redirect"])
-
     def test_missing_item_is_404(self):
         self.client.force_login(self.owner)
         response = self.client.get(

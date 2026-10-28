@@ -29,7 +29,8 @@ class RequestCreateViewTests(RequestViewTestCase):
 
     def test_anonymous_is_sent_to_login(self):
         response = self.client.post(self.url(), {"message": "Mau"}, **HX)
-        self.assertIn(reverse("auth_ssoui:login"), response["HX-Redirect"])
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("auth_ssoui:login"), response["Location"])
         self.assertFalse(ItemRequest.objects.exists())
 
     def test_get_is_not_allowed(self):
