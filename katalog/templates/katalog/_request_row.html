@@ -1,0 +1,51 @@
+{% load katalog_extras %}
+{# One row of the request center. The owner sees who asked; the requester #}
+{# sees which item. Reject/cancel/complete swap this row; accept reloads the page. #}
+<li id="request-{{ req.pk }}"
+    class="grid gap-4 rounded-xl border {% if req.status == 'DITERIMA' %}border-green{% else %}border-line{% endif %} bg-surface p-5 sm:grid-cols-[13rem_1fr_11rem] sm:items-center">
+  {% if req.item.owner_id == user.id %}
+    <div class="flex items-center gap-3">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-success-bg font-semibold uppercase text-brand" aria-hidden="true">{{ req.requester.username|slice:":2" }}</span>
+      <div class="min-w-0">
+        <p class="truncate font-semibold">{{ req.requester.username }}</p>
+        <p class="truncate text-sm text-ink-2">untuk <a href="{% url 'katalog:item_detail' req.item.pk %}" class="font-medium text-green">{{ req.item.name }}</a></p>
+      </div>
+    </div>
+  {% else %}
+    <div class="min-w-0">
+      <a href="{% url 'katalog:item_detail' req.item.pk %}" class="block truncate font-semibold text-ink no-underline hover:underline">{{ req.item.name }}</a>
+      <p class="truncate text-sm text-ink-2">milik {{ req.item.owner.username }}</p>
+    </div>
+  {% endif %}
+
+  <div class="min-w-0">
+    <p class="text-xs font-semibold uppercase tracking-wide text-green">Pesan</p>
+    <p class="mt-1 break-words">{{ req.message|default:"(tanpa pesan)" }}</p>
+    <p class="mt-1 text-xs text-muted">Diajukan {{ req.created_at|waktu_lalu }}{% if req.item.is_deleted %} · barang sudah dihapus pemilik{% endif %}</p>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    {% if req.item.owner_id == user.id and req.status == "PENDING" %}
+      <button type="button" hx-post="{% url 'katalog:request_accept' req.pk %}" hx-swap="none"
+              hx-confirm="Terima {{ req.requester.username }}? Permintaan lain untuk barang ini akan ditolak otomatis."
+              class="cursor-pointer rounded-lg border-0 bg-ink px-4 py-2.5 font-semibold text-white">✓ Terima</button>
+      <button type="button" hx-post="{% url 'katalog:request_reject' req.pk %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+              class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-ink">✕ Tolak</button>
+    {% elif req.item.owner_id == user.id and req.status == "DITERIMA" %}
+      <span class="rounded-full bg-success-bg px-3 py-1 text-center text-sm font-semibold text-brand">Disetujui · menunggu temu</span>
+      <button type="button" hx-post="{% url 'katalog:request_complete' req.pk %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+              hx-confirm="Barang sudah diserahkan ke {{ req.requester.username }}?"
+              class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-green">Tandai selesai</button>
+    {% else %}
+      <span class="rounded-full px-3 py-1 text-center text-sm font-semibold
+        {% if req.status == 'DITERIMA' or req.status == 'SELESAI' %}bg-success-bg text-brand{% elif req.status == 'PENDING' %}bg-warning-bg text-ink{% else %}bg-danger-bg text-danger{% endif %}">
+        {% if req.status == "DITERIMA" %}Disetujui · hubungi pemilik{% else %}{{ req.get_status_display }}{% endif %}
+      </span>
+      {% if req.requester_id == user.id and req.status == "PENDING" or req.requester_id == user.id and req.status == "DITERIMA" %}
+        <button type="button" hx-post="{% url 'katalog:request_cancel' req.pk %}" hx-target="#request-{{ req.pk }}" hx-swap="outerHTML"
+                hx-confirm="Batalkan pengajuanmu untuk {{ req.item.name }}?"
+                class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-danger">Batalkan</button>
+      {% endif %}
+    {% endif %}
+  </div>
+</li>

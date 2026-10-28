@@ -46,7 +46,8 @@
         <a href="{% url 'main:lobby' %}">Beranda</a>
         <a href="#">Forum</a>
         <a href="#">Jelajahi</a>
-        <a href="#">Transaksi</a>
+        <a href="{% url 'chat:inbox' %}">Pesan</a>
+        <a href="{% url 'forum:forum_list' %}">Forum</a>
       </nav>
 
       <div class="header-search">
@@ -116,6 +117,7 @@
       <nav class="main-nav" aria-label="Navigasi utama">
         <a href="#cara-kerja">Cara kerja</a>
         <a href="#fitur">Fitur</a>
+        <a href="{% url 'forum:forum_list' %}">Forum</a>
         <a href="{% url 'auth_ssoui:login' %}" class="btn btn-small">Masuk dengan SSO UI</a>
       </nav>
 

@@ -10,6 +10,11 @@ from .test_models import make_item
 User = get_user_model()
 
 
+def get_grid(client, params=None):
+    """What the filter form gets: the catalog URL, asked for by HTMX."""
+    return client.get(reverse("katalog:catalog"), params or {}, HTTP_HX_REQUEST="true")
+
+
 class CatalogPageTests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user("pemilik", password="pw")
@@ -23,21 +28,15 @@ class CatalogPageTests(TestCase):
         self.assertContains(response, 'id="grid"')
         self.assertContains(response, "Kipas angin")
 
-    def test_list_partial_renders_only_the_grid(self):
-        make_item(self.owner, name="Kipas angin")
-        response = self.client.get(reverse("katalog:item_list"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "katalog/_item_grid.html")
-        self.assertTemplateNotUsed(response, "katalog/catalog.html")
-        self.assertNotContains(response, "<html")
-        self.assertContains(response, "Kipas angin")
-
     def test_htmx_request_to_catalog_page_gets_the_partial(self):
         # The filter form hx-gets the page URL itself (so hx-push-url leaves a
         # real, reloadable URL in the address bar); HTMX only wants the grid.
-        response = self.client.get(reverse("katalog:catalog"), HTTP_HX_REQUEST="true")
+        make_item(self.owner, name="Kipas angin")
+        response = get_grid(self.client)
         self.assertTemplateNotUsed(response, "katalog/catalog.html")
         self.assertTemplateUsed(response, "katalog/_item_grid.html")
+        self.assertNotContains(response, "<html")
+        self.assertContains(response, "Kipas angin")
 
     def test_htmx_history_restore_gets_the_full_page(self):
         # On a history cache miss HTMX re-fetches the URL and needs the whole page.
@@ -49,7 +48,7 @@ class CatalogPageTests(TestCase):
         self.assertTemplateUsed(response, "katalog/catalog.html")
 
     def test_empty_catalog_shows_empty_state(self):
-        response = self.client.get(reverse("katalog:item_list"))
+        response = get_grid(self.client)
         self.assertContains(response, "Belum ada barang")
 
 
@@ -84,7 +83,7 @@ class CatalogFilterTests(TestCase):
         )
 
     def names(self, **params):
-        response = self.client.get(reverse("katalog:item_list"), params)
+        response = get_grid(self.client, params)
         self.assertEqual(response.status_code, 200)
         return [item.name for item in response.context["page_obj"]]
 
@@ -99,9 +98,7 @@ class CatalogFilterTests(TestCase):
         )
 
     def test_filter_by_several_conditions(self):
-        response = self.client.get(
-            reverse("katalog:item_list"), {"condition": ["BAIK", "SEPERTI_BARU"]}
-        )
+        response = get_grid(self.client, {"condition": ["BAIK", "SEPERTI_BARU"]})
         self.assertCountEqual(
             [i.name for i in response.context["page_obj"]],
             ["Buku Kalkulus Purcell", "Kipas angin"],
@@ -146,9 +143,7 @@ class CatalogFilterTests(TestCase):
         self.assertEqual(self.names(), ["Buku Kalkulus Purcell"])
 
     def test_result_count_and_active_filter_chips(self):
-        response = self.client.get(
-            reverse("katalog:item_list"), {"q": "buku", "category": "BUKU"}
-        )
+        response = get_grid(self.client, {"q": "buku", "category": "BUKU"})
         self.assertContains(response, "2 barang ditemukan")  # name + description match
         self.assertContains(response, "Buku")  # category chip label
         self.assertContains(response, "Hapus semua")
@@ -161,7 +156,7 @@ class CatalogFilterTests(TestCase):
             requester=User.objects.create_user("lain", password="pw"),
             status=ItemRequest.Status.DITOLAK,
         )
-        response = self.client.get(reverse("katalog:item_list"), {"q": "kipas"})
+        response = get_grid(self.client, {"q": "kipas"})
         self.assertEqual(response.context["page_obj"][0].pending_count, 1)
 
     def test_list_query_count_is_constant(self):
@@ -169,7 +164,7 @@ class CatalogFilterTests(TestCase):
         for i in range(5):
             make_item(self.owner, name=f"Barang {i}")
         with self.assertNumQueries(2):  # count + page
-            self.client.get(reverse("katalog:item_list"))
+            get_grid(self.client)
 
 
 class CatalogPaginationTests(TestCase):
@@ -179,17 +174,17 @@ class CatalogPaginationTests(TestCase):
             make_item(owner, name=f"Barang {i:02d}")
 
     def test_first_page_is_full_and_links_to_next(self):
-        response = self.client.get(reverse("katalog:item_list"))
+        response = get_grid(self.client)
         self.assertEqual(len(response.context["page_obj"]), PAGE_SIZE)
         self.assertContains(response, "page=2")
 
     def test_out_of_range_page_falls_back_to_last(self):
-        response = self.client.get(reverse("katalog:item_list"), {"page": 99})
+        response = get_grid(self.client, {"page": 99})
         self.assertEqual(response.context["page_obj"].number, 2)
         self.assertEqual(len(response.context["page_obj"]), 3)
 
     def test_page_links_keep_the_filters(self):
-        response = self.client.get(reverse("katalog:item_list"), {"q": "barang"})
+        response = get_grid(self.client, {"q": "barang"})
         self.assertContains(response, "q=barang&amp;page=2")
 
 

@@ -14,7 +14,7 @@
   --font-body: "Figtree", "Segoe UI", system-ui, sans-serif;
 
   --radius: 10px;
-  --maxw: 1120px;
+  --maxw: 1200px;
 }
 /* ===== Hero ===== */
 .hero { padding-block: 4rem 5rem; }
