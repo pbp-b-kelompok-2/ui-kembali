@@ -45,28 +45,28 @@
 
       <nav class="main-nav" aria-label="Navigasi utama">
         <a href="{% url 'main:lobby' %}">Beranda</a>
-        <a href="#">Jelajahi</a>
-        <a href="#">Transaksi</a>
+        <a href="{% url 'katalog:catalog' %}">Jelajahi</a>
+        <a href="{% url 'katalog:requests_page' %}">Transaksi</a>
       </nav>
 
-      <div class="header-search">
+      <form class="header-search" method="get" action="{% url 'katalog:catalog' %}" role="search">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <input type="search" placeholder="Cari buku, elektronik, furnitur kos..." aria-label="Pencarian">
-      </div>
+        <input type="search" name="q" placeholder="Cari buku, elektronik, furnitur kos..." aria-label="Pencarian">
+      </form>
 
       <div class="header-actions">
-        <button class="btn-pasang" type="button">
+        <a class="btn-pasang" href="{% url 'katalog:catalog' %}#pasang">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           Pasang barang
-        </button>
+        </a>
         <button class="btn-icon" type="button" aria-label="Notifikasi">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">

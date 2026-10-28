@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+from auth_ssoui.models import Profile
+
 User = get_user_model()
 
 
@@ -11,7 +13,10 @@ class SiteNavigationTests(TestCase):
         self.assertContains(response, f'href="{reverse("katalog:catalog")}" class="btn btn-ghost"')
 
     def test_logged_in_navbar_links_to_katalog_pages(self):
-        self.client.force_login(User.objects.create_user("pemilik", password="pw"))
+        # The full navbar only shows once the SSO profile is complete.
+        user = User.objects.create_user("pemilik", password="pw")
+        Profile.objects.create(user=user, nama="Owen Pemilik", is_complete=True)
+        self.client.force_login(user)
         response = self.client.get(reverse("katalog:catalog"))
         self.assertContains(response, f'<a href="{reverse("katalog:catalog")}">Jelajahi</a>')
         self.assertContains(response, f'<a href="{reverse("katalog:requests_page")}">Transaksi</a>')
