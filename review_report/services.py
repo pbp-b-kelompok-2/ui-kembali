@@ -112,3 +112,33 @@ def delete_report(report, user):
     report = Report.objects.select_for_update().get(pk=report.pk)
     _pending_reporter(report, user)
     report.delete()
+
+
+def can_moderate(user):
+    return user.is_authenticated and user.is_active and user.is_staff and user.has_perm('review_report.moderate_report')
+
+
+def validate_transition(current, target, public_result=''):
+    allowed = {'PENDING': {'IN_REVIEW'}, 'IN_REVIEW': {'RESOLVED', 'REJECTED'}}
+    if target not in allowed.get(current, set()):
+        raise ValidationError('Transisi status tidak diizinkan. Mulai pemeriksaan sebelum menutup laporan.')
+    if target in {'RESOLVED', 'REJECTED'} and not public_result.strip():
+        raise ValidationError('Hasil penanganan untuk pelapor wajib diisi.')
+
+
+@transaction.atomic
+def moderate_report(report, user, status, *, internal_notes='', public_result=''):
+    if not can_moderate(user):
+        raise PermissionDenied('Izin moderasi laporan diperlukan.')
+    report = Report.objects.select_for_update().get(pk=report.pk)
+    validate_transition(report.status, status, public_result)
+    now = timezone.now()
+    if status == Report.Status.IN_REVIEW:
+        report.reviewed_at = now
+    else:
+        report.resolved_at = now
+    report.status, report.reviewed_by = status, user
+    report.internal_notes, report.public_result = internal_notes.strip(), public_result.strip()
+    report.full_clean()
+    report.save()
+    return report
