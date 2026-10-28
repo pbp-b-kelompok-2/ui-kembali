@@ -56,6 +56,17 @@
 
 {% block content %}
 <main class="katalog font-sans bg-canvas text-ink min-h-screen">
+  {% if user.is_authenticated %}
+    {% with current=request.resolver_match.url_name %}
+    <nav class="border-0 border-b border-solid border-line bg-surface" aria-label="Menu katalog">
+      <div class="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 text-sm font-semibold sm:px-6 lg:px-8">
+        <a href="{% url 'katalog:catalog' %}" class="border-0 border-b-2 border-solid py-3 no-underline {% if current == 'catalog' or current == 'item_detail' %}border-green text-green{% else %}border-transparent text-ink-2{% endif %}">Jelajahi</a>
+        <a href="{% url 'katalog:my_items' %}" class="border-0 border-b-2 border-solid py-3 no-underline {% if current == 'my_items' %}border-green text-green{% else %}border-transparent text-ink-2{% endif %}">Barang saya</a>
+        <a href="{% url 'katalog:requests_page' %}" class="border-0 border-b-2 border-solid py-3 no-underline {% if current == 'requests_page' %}border-green text-green{% else %}border-transparent text-ink-2{% endif %}">Pusat permintaan</a>
+      </div>
+    </nav>
+    {% endwith %}
+  {% endif %}
   {% block katalog_content %}{% endblock %}
 
   {# One shared modal: modal.js opens it whenever HTMX swaps into #modal-body. #}
