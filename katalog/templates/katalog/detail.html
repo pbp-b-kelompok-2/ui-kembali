@@ -96,7 +96,9 @@
                     class="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-3 py-2.5 font-semibold text-danger">Hapus</button>
           </div>
         {% else %}
-          <button type="button" disabled class="w-full rounded-lg border-0 bg-action/50 px-4 py-3 font-semibold text-ink">Pengajuan segera dibuka</button>
+          <button type="button" data-chat-start-url="{% url 'chat:start' item.pk %}" data-csrf-token="{{ csrf_token }}"
+                  class="w-full rounded-lg border-0 bg-action px-4 py-3 font-semibold text-ink">Hubungi pemilik lewat chat</button>
+          <p id="chat-start-feedback" class="mt-2 text-sm text-danger" role="status" aria-live="polite"></p>
         {% endif %}
       </div>
     </aside>
