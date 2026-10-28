@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'main',
     'auth_ssoui',
     'katalog',
+    'chat',
 ]
 
 MIDDLEWARE = [
