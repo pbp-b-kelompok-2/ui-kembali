@@ -109,12 +109,13 @@ def edit_profil(request):
         form = ProfileForm(request.POST, request.FILES, fields=EDIT_FIELDS, instance=profile)
         
         if form.is_valid():
+            has_new_pfp = bool(request.FILES.get("pfp"))
             form.save()
             context = {
                 "form": ProfileForm(fields=EDIT_FIELDS, instance=profile),
                 "profile": profile,
                 "form_action": reverse("auth_ssoui:edit_profil"),
-                "oob_pfp": True
+                "oob_pfp": has_new_pfp,
             }
             
             if request.headers.get("HX-Request"):

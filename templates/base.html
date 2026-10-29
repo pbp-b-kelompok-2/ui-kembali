@@ -78,7 +78,9 @@
           {% if request.user.profile.pfp %}
           {% include "components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
           {% else %}
-          {{ request.user.profile.inisial }}
+          <div id="navbar-pfp">
+            {{ request.user.profile.inisial }}
+          </div>
           {% endif %}
         </a>
       </div>
