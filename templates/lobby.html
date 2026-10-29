@@ -22,7 +22,7 @@
           {% else %}
           <a href="{% url 'auth_ssoui:login' %}" class="btn">Masuk dengan SSO UI</a>
           {% endif %}
-          <a href="#" class="btn btn-ghost">Lihat katalog</a>
+          <a href="{% url 'katalog:catalog' %}" class="btn btn-ghost">Lihat katalog</a>
         </div>
         <p class="hero-note">Masuk memakai akun SSO UI-mu. Tidak perlu daftar terpisah.</p>
       </div>

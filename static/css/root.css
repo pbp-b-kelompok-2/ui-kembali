@@ -315,6 +315,7 @@ textarea {
   border-radius: var(--radius);
   font-weight: 600;
   font-size: 0.875rem;
+  text-decoration: none;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
