@@ -1,0 +1,59 @@
+{% load katalog_extras %}
+{# The "Ajukan" panel on the detail page. Swapped as a whole (outerHTML) after #}
+{# sending or cancelling a request, so the steps below stay in sync too. #}
+<div id="request-panel" class="mt-4">
+  {% with on="bg-green font-semibold text-white" off="border border-line-strong" %}
+  <ol class="flex items-center gap-2 text-xs text-ink-2" aria-label="Tahap pengajuan">
+    <li class="flex items-center gap-1.5" {% if step == 1 %}aria-current="step"{% endif %}><span class="flex h-6 w-6 items-center justify-center rounded-full {{ on }}">1</span>Ajukan</li>
+    <li aria-hidden="true" class="h-px flex-1 bg-line"></li>
+    <li class="flex items-center gap-1.5" {% if step == 2 %}aria-current="step"{% endif %}><span class="flex h-6 w-6 items-center justify-center rounded-full {% if step >= 2 %}{{ on }}{% else %}{{ off }}{% endif %}">2</span>Disetujui</li>
+    <li aria-hidden="true" class="h-px flex-1 bg-line"></li>
+    <li class="flex items-center gap-1.5" {% if step == 3 %}aria-current="step"{% endif %}><span class="flex h-6 w-6 items-center justify-center rounded-full {% if step >= 3 %}{{ on }}{% else %}{{ off }}{% endif %}">3</span>Serah terima</li>
+  </ol>
+  {% endwith %}
+
+  <div class="mt-5">
+  {% if not user.is_authenticated %}
+    <a href="{% url 'auth_ssoui:login' %}?next={{ request.path|urlencode }}" class="block rounded-lg bg-action px-4 py-3 text-center font-semibold text-ink no-underline">Masuk untuk mengajukan</a>
+
+  {% elif user.id == item.owner_id %}
+    <p class="rounded-lg bg-subtle p-3 text-sm">Ini barangmu. Permintaan yang masuk ada di <a href="{% url 'katalog:requests_page' %}" class="font-semibold text-green">Pusat permintaan</a>.</p>
+    <div class="mt-3 flex gap-2">
+      <button type="button" hx-get="{% url 'katalog:item_update' item.pk %}?from_detail=1" hx-target="#modal-body" hx-swap="innerHTML"
+              class="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-3 py-2.5 font-semibold text-green">Edit barang</button>
+      <button type="button" hx-post="{% url 'katalog:item_soft_delete' item.pk %}" hx-vals='{"from_detail": "1"}'
+              hx-confirm="Hapus “{{ item.name }}” dari katalog?"
+              class="flex-1 cursor-pointer rounded-lg border border-line bg-surface px-3 py-2.5 font-semibold text-danger">Hapus</button>
+    </div>
+
+  {% elif my_request %}
+    <div class="rounded-lg {% if my_request.status == 'DITERIMA' %}bg-success-bg{% else %}bg-warning-bg{% endif %} p-4 text-sm" role="status">
+      <p class="font-semibold">
+        {% if my_request.status == "DITERIMA" %}Disetujui! Hubungi pemilik untuk atur waktu temu.{% else %}{{ my_request.get_status_display }} persetujuan pemilik{% endif %}
+      </p>
+      {% if my_request.message %}<p class="mt-1 text-ink-2">“{{ my_request.message }}”</p>{% endif %}
+      <p class="mt-1 text-xs text-muted">Diajukan {{ my_request.created_at|waktu_lalu }}</p>
+    </div>
+    <button type="button" hx-post="{% url 'katalog:request_cancel' my_request.pk %}" hx-vals='{"from_detail": "1"}'
+            hx-target="#request-panel" hx-swap="outerHTML" hx-confirm="Batalkan pengajuanmu?"
+            class="mt-3 w-full cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-danger">Batalkan pengajuan</button>
+
+  {% elif item.status != "TERSEDIA" %}
+    <p class="rounded-lg bg-subtle p-4 text-sm" role="status">
+      {% if item.status == "DIPESAN" %}Barang ini sudah dipesan peminat lain.{% else %}Barang ini sudah diserahkan ke pemilik barunya.{% endif %}
+    </p>
+
+  {% else %}
+    <form hx-post="{% url 'katalog:request_create' item.pk %}" hx-target="#request-panel" hx-swap="outerHTML" hx-disabled-elt="find button">
+      <label for="request-message" class="text-sm font-semibold">Alasan membutuhkan</label>
+      <textarea id="request-message" name="message" rows="4" maxlength="500"
+                placeholder="Ceritakan singkat kenapa kamu butuh barang ini dan kapan bisa ambil."
+                class="mt-2 w-full rounded-lg border border-line bg-canvas p-3 outline-none focus:border-green focus:ring-2 focus:ring-green/20"></textarea>
+      <button type="submit" class="mt-4 w-full cursor-pointer rounded-lg border-0 bg-action px-4 py-3 font-semibold text-ink">
+        Kirim pengajuan {% if item.transaction_type == "JUAL" %}pembelian{% else %}adopsi{% endif %}
+      </button>
+      <p class="mt-3 text-center text-xs text-muted">Dengan mengirim, kamu berkomitmen hadir sesuai waktu yang disepakati.</p>
+    </form>
+  {% endif %}
+  </div>
+</div>

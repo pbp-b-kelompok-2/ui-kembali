@@ -18,8 +18,11 @@
           dengan teman yang sedang mencarinya, dari perabot kost sampai buku kuliah.
         </p>
         <div class="hero-actions">
+          {% if request.user.is_authenticated and request.user.profile.is_complete %}
+          {% else %}
           <a href="{% url 'auth_ssoui:login' %}" class="btn">Masuk dengan SSO UI</a>
-          <a href="#" class="btn btn-ghost">Lihat katalog</a>
+          {% endif %}
+          <a href="{% url 'katalog:catalog' %}" class="btn btn-ghost">Lihat katalog</a>
         </div>
         <p class="hero-note">Masuk memakai akun SSO UI-mu. Tidak perlu daftar terpisah.</p>
       </div>
@@ -115,7 +118,10 @@
   <section class="cta">
     <div class="container cta-inner">
       <h2>Mulai dari barang yang ada di kamarmu.</h2>
-      <a href="#" class="btn btn-on-dark">Masuk dengan SSO UI</a>
+      {% if request.user.is_authenticated and request.user.profile.is_complete %}
+      {% else %}
+      <a href="{% url 'auth_ssoui:login' %}" class="btn btn-on-dark">Masuk dengan SSO UI</a>
+      {% endif %}
     </div>
   </section>
 </main>

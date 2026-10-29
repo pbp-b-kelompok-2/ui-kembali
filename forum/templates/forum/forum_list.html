@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261028-4">{% endblock extra_css %}
+
+{% block content %}
+<div class="forum-beranda" data-uikembali-semantic-mode="light">
+  <main class="konten-forum">
+    <div class="area-diskusi">
+      <aside class="navigasi-forum" aria-label="Navigasi forum">
+        <span class="label-bagian">RUANG KOMUNITAS</span>
+        <a class="menu-forum{% if not selected_mine and not selected_saved and not selected_category %} aktif{% endif %}" href="{% url 'forum:forum_list' %}"{% if not selected_mine and not selected_saved and not selected_category %} aria-current="page"{% endif %}><span class="vector-wrapper">▣</span><span class="div">Semua diskusi</span></a>
+        {% if request.user.is_authenticated %}
+        <a class="menu-forum-2{% if selected_mine %} aktif{% endif %}" href="?mine=1&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}"{% if selected_mine %} aria-current="page"{% endif %}><span class="vector-wrapper">▤</span><span class="label-2">Posting Saya</span></a>
+        <a class="menu-forum-2{% if selected_saved %} aktif{% endif %}" href="?saved=1&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}"{% if selected_saved %} aria-current="page"{% endif %}><span class="vector-wrapper">▱</span><span class="label-2">Tersimpan</span></a>
+        {% endif %}
+        <div class="pemisah" aria-hidden="true"></div>
+        <span class="label-kategori">JELAJAHI TOPIK</span>
+        {% for value, label in categories %}
+        <a class="topik" href="?category={{ value|urlencode }}&amp;q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"><span class="nama-topik">{{ label }}</span></a>
+        {% endfor %}
+      </aside>
+
+      <section class="daftar-diskusi" aria-labelledby="forum-title">
+        <div class="div-2">
+          <h1 class="judul" id="forum-title">{% if selected_mine %}Posting Saya{% elif selected_saved %}Tersimpan{% elif selected_category %}{% for value, label in categories %}{% if value == selected_category %}{{ label }}{% endif %}{% endfor %}{% else %}Semua diskusi{% endif %}</h1>
+          <a class="label-wrapper" href="{% url 'forum:post_create' %}"><span class="label-3">＋&nbsp;&nbsp;Buat posting</span></a>
+        </div>
+        <form class="kolom-isian" role="search" action="{% url 'forum:forum_list' %}" method="get">
+          <label class="label-4" for="discussion-search">Cari diskusi</label>
+          <input type="hidden" name="category" value="{{ selected_category }}">
+          <input type="hidden" name="sort" value="{{ selected_sort }}">
+          {% if selected_mine %}<input type="hidden" name="mine" value="1">{% endif %}
+          {% if selected_saved %}<input type="hidden" name="saved" value="1">{% endif %}
+          <div class="field"><input id="discussion-search" name="q" type="search" value="{{ query }}" placeholder="Cari topik, pertanyaan, atau pengalaman..."></div>
+        </form>
+        <nav class="filter-kategori" aria-label="Filter kategori">
+          <a class="filter" href="?q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if not selected_category %} aria-current="true"{% endif %}><span class="label-5">Semua</span></a>
+          {% for value, label in categories %}<a class="div-wrapper" href="?category={{ value|urlencode }}&amp;q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if value == selected_category %} aria-current="true"{% endif %}><span class="label-6">{{ label }}</span></a>{% endfor %}
+        </nav>
+        <div class="div-2">
+          <p class="text-wrapper-3">{{ post_count }} diskusi</p>
+          <form method="get" action="{% url 'forum:forum_list' %}">
+            <input type="hidden" name="q" value="{{ query }}">
+            <input type="hidden" name="category" value="{{ selected_category }}">
+            {% if selected_mine %}<input type="hidden" name="mine" value="1">{% endif %}
+            {% if selected_saved %}<input type="hidden" name="saved" value="1">{% endif %}
+            <label class="urutan" for="discussion-sort">Urutkan</label>
+            <select class="pemilih-urutan" id="discussion-sort" name="sort" onchange="this.form.submit()">
+              <option value="newest"{% if selected_sort == 'newest' %} selected{% endif %}>Terbaru</option>
+              <option value="oldest"{% if selected_sort == 'oldest' %} selected{% endif %}>Terlama</option>
+              <option value="popular"{% if selected_sort == 'popular' %} selected{% endif %}>Terpopuler</option>
+            </select>
+          </form>
+        </div>
+
+        {% for post in posts %}
+        <article class="kartu-diskusi">
+          <div class="div-2">
+            <span class="kategori"><span class="gratis">{{ post.get_category_display }}</span></span>
+            <time class="text-wrapper-3" datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|date:"d M Y, H:i" }}</time>
+          </div>
+          <h2 class="judul-diskusi">
+            <a href="{% url 'forum:post_detail' post.pk %}">{{ post.title }}</a>
+          </h2>
+          <p class="text-wrapper-2">{{ post.content|truncatechars:220 }}</p>
+          <div class="div-2 forum-post-footer">
+            <div class="div-3">
+              <span class="inisial-wrapper">
+                {% if post.author.profile.pfp %}<img src="{{ post.author.profile.pfp.url }}" alt="">
+                {% else %}<span class="inisial">{% if post.author.profile.nama %}{{ post.author.profile.inisial }}{% else %}{{ post.author.username|slice:":2"|upper }}{% endif %}</span>{% endif %}
+              </span>
+              <span class="text-wrapper-3">
+                {% if post.author.profile.nama %}{{ post.author.profile.nama }}{% elif post.author.get_full_name %}{{ post.author.get_full_name }}{% else %}{{ post.author.username }}{% endif %}
+                {% if post.author.profile.faculty %} · {{ post.author.profile.faculty }}{% endif %}
+                {% if request.user == post.author %} · Anda{% endif %}
+              </span>
+            </div>
+            <div class="interaksi" aria-label="{{ post.like_count }} suka dan {{ post.comment_count }} komentar">
+              <span class="img-wrapper" aria-hidden="true">♡</span>
+              <span class="text-wrapper-4">{{ post.like_count }}</span>
+              <span class="img-wrapper" aria-hidden="true">◯</span>
+              <span class="text-wrapper-4">{{ post.comment_count }}</span>
+            </div>
+          </div>
+        </article>
+        {% empty %}
+        <div class="kartu-diskusi">
+          <p class="text-wrapper-2">Belum ada diskusi yang cocok.</p>
+        </div>
+        {% endfor %}
+
+        <nav class="forum-pagination" aria-label="Paginasi diskusi">
+          <p class="text-wrapper-3">Menampilkan {{ page_obj.start_index }}–{{ page_obj.end_index }} dari {{ post_count }} diskusi</p>
+          <div class="forum-pagination-controls">
+            {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}" aria-label="Halaman sebelumnya">←</a>{% endif %}
+            {% for page_number in page_numbers %}
+            <a href="?page={{ page_number }}&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if page_number == page_obj.number %} aria-current="page"{% endif %}>{{ page_number }}</a>
+            {% endfor %}
+            {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}" aria-label="Halaman berikutnya">→</a>{% endif %}
+          </div>
+        </nav>
+      </section>
+
+      <aside class="tentang-komunitas" aria-label="Tentang komunitas">
+        <div class="ajakan-berbagi"><span class="sprout">✦</span><strong class="text-wrapper-5">Punya barang tak terpakai?</strong><p class="deskripsi">Temukan pemilik berikutnya lewat katalog UIKembali.</p><a class="text-wrapper-5" href="{% url 'katalog:item_create' %}">Pasang barang →</a></div>
+      </aside>
+    </div>
+  </main>
+
+</div>
+{% endblock content %}

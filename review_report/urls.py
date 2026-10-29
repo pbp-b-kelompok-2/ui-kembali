@@ -3,6 +3,7 @@ from . import views
 
 app_name = 'review_report'
 urlpatterns = [
+    path('', views.home, name='home'),
     path('transaksi/', views.transactions, name='transactions'),
     path('ulasan/saya/', views.my_reviews, name='my_reviews'),
     path('pengguna/<int:pk>/ulasan/', views.owner_reviews, name='owner_reviews'),

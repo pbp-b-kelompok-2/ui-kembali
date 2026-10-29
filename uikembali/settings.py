@@ -9,11 +9,6 @@ https://docs.djangoproject.com/en/6.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
-import sys
-import six
-
-sys.modules["django.utils.six.moves"] = six.moves
-
 from pathlib import Path
 import os
 
@@ -44,6 +39,9 @@ SECRET_KEY = os.getenv(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', str(not PRODUCTION)).lower() == 'true'
+# Local Django servers must still serve uploaded media when DEBUG is disabled
+# by the workstation environment. Keep media serving off in production by default.
+SERVE_MEDIA = os.getenv('SERVE_MEDIA', str(not PRODUCTION)).lower() == 'true'
 
 ALLOWED_HOSTS = env_list(
     'ALLOWED_HOSTS',
@@ -67,6 +65,8 @@ INSTALLED_APPS = [
     'main',
     'auth_ssoui',
     'katalog',
+    'chat',
+    'forum',
     'review_report',
 ]
 

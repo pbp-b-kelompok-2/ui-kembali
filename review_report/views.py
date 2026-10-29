@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.cache import patch_vary_headers
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
-from katalog.decorators import is_htmx, login_required_htmx
+from katalog.htmx_utils import is_htmx, login_required_htmx
 from katalog.models import Item, ItemRequest
 from .forms import ReviewForm, ReportForm, ReviewFilterForm
 from .models import Review, Report
@@ -37,6 +37,13 @@ def page(request, context, status=200):
     if status >= 400:
         response['HX-Trigger'] = json.dumps({'toast': {'msg': 'Periksa pesan pada halaman.', 'level': 'error'}})
     return response
+
+
+@module_view
+@login_required_htmx
+@require_GET
+def home(request):
+    return page(request, {'kind': 'home', 'title': 'Ulasan & Laporan'})
 
 
 def success(request, url, msg):
