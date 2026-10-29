@@ -5,8 +5,8 @@
   background: #f7f6f1;
 }
 
-.lobby-page ~ .site-footer {
-  display: none;
+.site-footer {
+  border-top: 1px solid #dce3dc;
 }
 
 .lobby-hero {
