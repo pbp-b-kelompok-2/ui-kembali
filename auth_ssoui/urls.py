@@ -9,7 +9,6 @@ urlpatterns = [
     path("logout/", logout_sso, name="logout"),
 
     path("profile/", profile_page, name="profile"), 
-    path("profile/history/", profile_history, name="profile_history"),
     path("profile/fill/", lengkapi_profil, name="lengkapi_profil"),
     path("profile/edit/", edit_profil, name="edit_profil"),
     

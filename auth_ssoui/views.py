@@ -1,6 +1,5 @@
 import json
 
-from django.db.models import Q
 from django.db.models.fields import related_descriptors
 from asyncio import proactor_events
 from django.core.files import uploadedfile
@@ -9,7 +8,6 @@ from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 
 from .sso_compat import with_sso_ui, get_service_url, get_cas_client
 from .models import *
@@ -107,22 +105,15 @@ def edit_profil(request):
 
     if request.method == "POST":
         form = ProfileForm(request.POST, request.FILES, fields=EDIT_FIELDS, instance=profile)
-        
         if form.is_valid():
-            has_new_pfp = bool(request.FILES.get("pfp"))
             form.save()
-            context = {
-                "form": ProfileForm(fields=EDIT_FIELDS, instance=profile),
-                "profile": profile,
-                "form_action": reverse("auth_ssoui:edit_profil"),
-                "oob_pfp": has_new_pfp,
-            }
-            
             if request.headers.get("HX-Request"):
-                response = render(request, "profile/components/profile_form_modal.html", context)
+                response = render(request, "profile/components/profile_form_modal.html",
+                                  {"form": ProfileForm(fields=EDIT_FIELDS, instance=profile),
+                                   "profile": profile,
+                                   "form_action": reverse("auth_ssoui:edit_profil")})
                 return with_toast(response, "Perubahan profil berhasil disimpan", "success")
             return redirect("auth_ssoui:profile")
-        
         response = render(request, "profile/components/profile_form_modal.html",
                           {"form": form, "profile": profile,
                            "form_action": reverse("auth_ssoui:edit_profil")})
@@ -135,49 +126,12 @@ def edit_profil(request):
 
 @profile_required
 def profile_page(request):
-    from katalog.models import ItemRequest
-
     field = EDIT_FIELDS
     profile = get_object_or_404(Profile, user=request.user)
     form = ProfileForm(fields=field, instance=profile)
-
-    # Ambil riwayat transaksi dari dua sisi:
-    # 1) Sebagai requester (barang yang dia minta/beli/adopsi)
-    # 2) Sebagai owner item (barang yang dia jual/berikan ke orang lain)
-    # Ambil 5 terbaru (FIFO: antrian diproses dari yang paling lama)
-    riwayat_terbaru = (
-        ItemRequest.objects.filter(
-            Q(requester=request.user) | Q(item__owner=request.user)
-        )
-        .select_related("item", "item__owner", "requester")
-        .order_by("-created_at")[:3]
-    )
-
     context = {
-        "form": form,
-        "profile": profile,
-        "form_action": reverse("auth_ssoui:edit_profil"),
-        "riwayat_terbaru": riwayat_terbaru,
+        "form" : form,
+        "profile" : profile,
+        "form_action" : reverse("auth_ssoui:edit_profil"),
     }
     return render(request, "profile/profile.html", context)
-
-
-@profile_required
-def profile_history(request):
-    """Return the paginated history partial requested by the profile page."""
-    from katalog.models import ItemRequest
-
-    riwayat = (
-        ItemRequest.objects.filter(
-            Q(requester=request.user) | Q(item__owner=request.user)
-        )
-        .select_related("item", "item__owner", "requester")
-        .order_by("-created_at")
-    )
-    page_obj = Paginator(riwayat, 5).get_page(request.GET.get("page"))
-
-    return render(
-        request,
-        "profile/components/full_riwayat.html",
-        {"page_obj": page_obj},
-    )

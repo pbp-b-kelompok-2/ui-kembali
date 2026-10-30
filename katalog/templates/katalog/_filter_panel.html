@@ -30,28 +30,6 @@
   <input id="f-location" type="text" name="location" value="{{ form.location.value|default_if_none:'' }}"
          placeholder="mis. Kukusan" class="mt-2 w-full rounded-lg border border-line px-3 py-2 text-sm">
 
-  <fieldset class="mt-4 border-b border-line pb-4">
-    <legend class="text-sm font-semibold">Jarak</legend>
-    <div class="mt-2 flex gap-2">
-      <select name="near" aria-label="Dekat dengan" class="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm">
-        {% for value, label in form.near.field.choices %}
-          <option value="{{ value }}" {% if form.near.value == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-      <select name="radius" aria-label="Radius" class="rounded-lg border border-line bg-surface px-3 py-2 text-sm">
-        {% for value, label in radius_choices %}
-          <option value="{{ value }}" {% if form.radius_km == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    {# catalog.js fills lat/lng from the browser; picking a place clears them. #}
-    <input type="hidden" name="lat" value="{{ form.lat.value|default_if_none:'' }}">
-    <input type="hidden" name="lng" value="{{ form.lng.value|default_if_none:'' }}">
-    <button type="button" id="use-my-location" class="mt-2 cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-green">
-      📍 Gunakan lokasiku
-    </button>
-  </fieldset>
-
   <fieldset class="mt-4">
     <legend class="text-sm font-semibold">Harga (Rp)</legend>
     <div class="mt-2 flex gap-2">
