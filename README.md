@@ -71,6 +71,32 @@ python manage.py test katalog --exclude-tag=functional
 python manage.py test katalog.tests.test_functional
 ```
 
+### Modul 4 — Forum
+
+**Penanggung jawab:** Dimas Bayu Nugroho  
+**Model utama:** `ForumPost`, `ForumAttachment`, `Comment`  
+**Public API:** Tidak menggunakan public API eksternal
+
+Modul Forum menyediakan ruang bagi pengguna untuk berbagi diskusi, bertanya, dan bertukar pengalaman seputar barang bekas serta kehidupan kampus.
+
+#### Fitur
+
+- CRUD posting forum dengan judul, isi, dan kategori **Tips**, **Tanya**, **Pengalaman**, atau **Lainnya**.
+- Upload satu atau beberapa lampiran pada posting, melihat lampiran, dan menghapus lampiran dari posting milik sendiri.
+- Daftar posting dengan pencarian berdasarkan judul atau isi, filter kategori, filter posting milik sendiri atau tersimpan, pengurutan terbaru/terlama/populer, dan pagination.
+- Halaman detail posting dengan komentar dan balasan bertingkat, pengurutan komentar, serta daftar posting terkait.
+- Like posting dan komentar, serta simpan atau batal-simpan posting.
+
+#### Keamanan
+
+- Membuat posting, berkomentar, memberi like, dan menyimpan posting memerlukan login.
+- Hanya pemilik posting yang dapat mengubah atau menghapus posting dan lampirannya.
+- Aksi yang mengubah data menggunakan metode POST; redirect setelah aksi like/simpan dibatasi ke host aplikasi.
+
+#### Pengujian
+
+Test mencakup pencarian, filter, pengurutan, pagination, CRUD posting, unggah dan penghapusan lampiran, komentar dan balasan, like, simpan posting, serta pemeriksaan login dan kepemilikan.
+
 ---
 
 ## 👤 Jenis dan Peran Pengguna
