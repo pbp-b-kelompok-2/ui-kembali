@@ -244,6 +244,14 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 
 ### Modul 2 — Posting & Katalog Barang (Owen)
 
+- **Tool:** Codex.
+- **Penggunaan:** perencanaan, pembangunan page html, penulisan kode dan test, refactor, serta debugging error. Preferensi fitur dipilih oleh saya dan beberapa kode awal masih ditulis oleh saya.
+- **Perbaikan:** build tahun angkatan berdasarkan NPM, pengolahan awal response json dari API SSO, routing url dan pembangunan awal view function, dan penyederhanaan kode agar lebih mudah dibaca.
+- **Kekurangan:** belum terdapat response terhadap interaksi user dengan display 3 riwayat terbaru pada tampilan page profile. beberapa view function berujung tidak terpakai dikarenakan terdapat duplikasi pada routing lain aplikasi. beberapa style page masih belum konsisten dengan page lainnya dalam aplikasi.
+
+
+### Modul 2 — Posting & Katalog Barang (Owen)
+
 - **Tool:** Claude Code (Anthropic).
 - **Penggunaan:** perencanaan, penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Keputusan fitur tetap dari saya, dan hasilnya saya periksa lewat diff, test, dan browser.
 - **Perbaikan manual:** test urutan yang tidak stabil karena timestamp sama, pembulatan koordinat untuk tamu, dan penyederhanaan kode agar lebih mudah dibaca.
