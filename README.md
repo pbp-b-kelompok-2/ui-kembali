@@ -97,6 +97,12 @@ Modul Forum menyediakan ruang bagi pengguna untuk berbagi diskusi, bertanya, dan
 
 Test mencakup pencarian, filter, pengurutan, pagination, CRUD posting, unggah dan penghapusan lampiran, komentar dan balasan, like, simpan posting, serta pemeriksaan login dan kepemilikan.
 
+Jalankan seluruh test modul Forum dengan:
+
+```bash
+python manage.py test forum
+```
+
 ---
 
 ## 👤 Jenis dan Peran Pengguna

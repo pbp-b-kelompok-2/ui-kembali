@@ -44,12 +44,12 @@
       </a>
 
       <nav class="main-nav" aria-label="Navigasi utama">
-        <a href="{% url 'main:lobby' %}">Beranda</a>
-        <a href="{% url 'katalog:catalog' %}">Jelajahi</a>
-        <a href="{% url 'katalog:requests_page' %}">Transaksi</a>
-        <a href="{% url 'chat:inbox' %}">Pesan</a>
-        <a href="{% url 'forum:forum_list' %}">Forum</a>
-        <a href="{% url 'review_report:home' %}"{% if request.resolver_match.app_name == 'review_report' %} class="active" aria-current="true"{% endif %}>Ulasan &amp; Laporan</a>
+        <a href="{% url 'main:lobby' %}"{% if request.resolver_match.app_name == 'main' %} class="active" aria-current="page"{% endif %}>Beranda</a>
+        <a href="{% url 'katalog:catalog' %}"{% if request.resolver_match.app_name == 'katalog' and request.resolver_match.url_name != 'requests_page' %} class="active" aria-current="page"{% endif %}>Jelajahi</a>
+        <a href="{% url 'katalog:requests_page' %}"{% if request.resolver_match.url_name == 'requests_page' %} class="active" aria-current="page"{% endif %}>Transaksi</a>
+        <a href="{% url 'chat:inbox' %}"{% if request.resolver_match.app_name == 'chat' %} class="active" aria-current="page"{% endif %}>Pesan</a>
+        <a href="{% url 'forum:forum_list' %}"{% if request.resolver_match.app_name == 'forum' %} class="active" aria-current="page"{% endif %}>Forum</a>
+        <a href="{% url 'review_report:home' %}"{% if request.resolver_match.app_name == 'review_report' %} class="active" aria-current="page"{% endif %}>Ulasan &amp; Laporan</a>
       </nav>
 
       <form class="header-search" method="get" action="{% url 'katalog:catalog' %}" role="search">
