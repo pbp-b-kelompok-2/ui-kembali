@@ -30,6 +30,48 @@ A web platform for UI students to give away or sell reusable second-hand items, 
 
 ## 📝 Detail Modul
 
+### Modul 1 — Profile
+
+**Penanggung jawab:** Elvis Sestomi  
+**Model utama:** `Profile`  
+**Integrasi eksternal:** UI SSO melalui CAS
+
+Modul ini mengelola autentikasi pengguna lewat UI SSO dan data profil yang dibutuhkan untuk memakai UIKembali, mulai dari login pertama sampai pengeditan profil.
+
+#### Fitur
+
+- Login melalui UI SSO. Saat ingin login, aplikasi membatasi pengguna untuk melakukan login hanya melalui SSO UI, dan akan di-redirect ke pengisian profil awal untuk kasus login pertama kali.
+- Pengisian profil awal. Pengguna dengan profil yang belum lengkap otomatis diarahkan ke halaman pengisian profil dan belum dapat mengakses fitur yang memerlukan profil lengkap.
+- Halaman profil memungkinkan pengguna untuk melakukan pengeditan nama panggilan, nomor WhatsApp, foto profil, titik temu favorit, dan bio.
+- Halaman profil menampilkan identitas pengguna, ringkasan ulasan, tautan ke ulasan dan laporan, serta display tiga transaksi terbaru.
+- Pengeditan profil memakai HTMX, sehingga formulir diperbarui tanpa memuat ulang seluruh halaman.
+- Upload foto profil hanya mengizinkan JPG, PNG, atau WEBP (maksimal 2 MB). Gambar kemudian diubah menjadi WEBP.
+
+#### Keamanan
+
+- Field nama, fakultas, dan angkatan yang berasal dari SSO dinonaktifkan pada formulir, sehingga tidak dapat diubah lewat formulir profil.
+- Nomor WhatsApp dan tahun angkatan divalidasi oleh validator pada model.
+- Akun yang dibuat hanya dapat diakses kembali dengan melakukan login melalui SSO UI.
+
+#### Integrasi UI SSO
+
+- UI SSO mengirimkan username dan atribut pengguna ke aplikasi melalui CAS.
+- Aplikasi menyimpan username, lalu menyinkronkan nama, fakultas, dan angkatan dari atribut `npm` yang diterima dari API SSO.
+
+#### Pengujian
+
+Modul yang diuji dengan unit test mencakup:
+
+- model dan formulir,
+- decorator akses,
+- pengisian dan pengeditan profil,
+- halaman profil,
+- URL.
+
+```bash
+python manage.py test auth_ssoui
+```
+
 ### Modul 2 — Posting & Katalog Barang
 
 **Penanggung jawab:** Owen Viriya Chandra  
@@ -233,6 +275,14 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 ---
 
 ## 🤖 AI Disclosure
+
+### Modul 2 — Posting & Katalog Barang (Owen)
+
+- **Tool:** Codex.
+- **Penggunaan:** perencanaan, pembangunan page html, penulisan kode dan test, refactor, serta debugging error. Preferensi fitur dipilih oleh saya dan beberapa kode awal masih ditulis oleh saya.
+- **Perbaikan:** build tahun angkatan berdasarkan NPM, pengolahan awal response json dari API SSO, routing url dan pembangunan awal view function, dan penyederhanaan kode agar lebih mudah dibaca.
+- **Kekurangan:** belum terdapat response terhadap interaksi user dengan display 3 riwayat terbaru pada tampilan page profile. beberapa view function berujung tidak terpakai dikarenakan terdapat duplikasi pada routing lain aplikasi. beberapa style page masih belum konsisten dengan page lainnya dalam aplikasi.
+
 
 ### Modul 2 — Posting & Katalog Barang (Owen)
 
