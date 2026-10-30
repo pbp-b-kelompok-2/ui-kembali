@@ -67,6 +67,16 @@ def forum_list(request):
     selected_mine = request.GET.get("mine") == "1" and request.user.is_authenticated
     selected_saved = request.GET.get("saved") == "1" and request.user.is_authenticated
 
+    category_counts = dict(
+        ForumPost.objects.values("category")
+        .annotate(total=Count("pk"))
+        .values_list("category", "total")
+    )
+    categories = [
+        (value, label, category_counts.get(value, 0))
+        for value, label in ForumPost.Category.choices
+    ]
+
     if query:
         posts = posts.filter(Q(title__icontains=query) | Q(content__icontains=query))
     if category:
@@ -103,7 +113,7 @@ def forum_list(request):
             "selected_mine": selected_mine,
             "selected_saved": selected_saved,
             "post_count": post_count,
-            "categories": ForumPost.Category.choices,
+            "categories": categories,
         },
     )
 

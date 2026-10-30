@@ -27,14 +27,6 @@
         {% endfor %}
       </select>
     </label>
-    {% if user.is_authenticated %}
-      {# The navbar's "Pasang barang" links to /katalog/#pasang: open the form right away. #}
-      <button type="button" hx-get="{% url 'katalog:item_create' %}" hx-target="#modal-body" hx-swap="innerHTML"
-              hx-trigger="click, load[location.hash === '#pasang']"
-              class="cursor-pointer rounded-lg border-0 bg-action px-5 py-3 font-semibold text-ink">+ Pasang barang</button>
-    {% else %}
-      <a href="{% url 'auth_ssoui:login' %}" class="rounded-lg bg-action px-5 py-3 text-center font-semibold text-ink no-underline">+ Pasang barang</a>
-    {% endif %}
   </div>
 
   <div class="mt-6 grid gap-6 lg:grid-cols-[16rem_1fr]">
@@ -42,6 +34,11 @@
     {% include "katalog/_item_grid.html" %}
   </div>
 </form>
+{% if user.is_authenticated %}
+  {# The navbar's "Pasang barang" links to /katalog/#pasang. Coming from another page opens the form on load; already on this page only the click fires. #}
+  <div hidden hx-get="{% url 'katalog:item_create' %}" hx-target="#modal-body" hx-swap="innerHTML"
+       hx-trigger="load[location.hash === '#pasang'], click from:.btn-pasang"></div>
+{% endif %}
 {% endblock katalog_content %}
 
 {% block katalog_js %}

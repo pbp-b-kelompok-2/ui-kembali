@@ -26,3 +26,5 @@ class SiteNavigationTests(TestCase):
         # The header search is a real form that searches the catalog.
         self.assertContains(response, f'action="{reverse("katalog:catalog")}" role="search"')
         self.assertContains(response, "load[location.hash === '#pasang']")
+        # Already on the catalog the link only changes the hash, so listen for the click too.
+        self.assertContains(response, "click from:.btn-pasang")

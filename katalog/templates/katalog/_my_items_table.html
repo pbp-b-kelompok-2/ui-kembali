@@ -47,7 +47,7 @@
   </div>
   {% else %}
     <p class="mt-4 rounded-xl border border-dashed border-line-strong bg-surface p-10 text-center text-ink-2">
-      {% if tab == "aktif" %}Belum ada barang. <a href="{% url 'katalog:catalog' %}" class="font-semibold text-green">Pasang barang pertamamu</a>{% else %}Tidak ada barang terhapus.{% endif %}
+      {% if tab == "aktif" %}Belum ada barang. <a href="{% url 'katalog:catalog' %}#pasang" class="font-semibold text-green">Pasang barang pertamamu</a>{% else %}Tidak ada barang terhapus.{% endif %}
     </p>
   {% endif %}
 </form>

@@ -1,5 +1,6 @@
 {% extends "profile/base_profile.html" %}
 {% load static %}
+{% load review_report_tags %}
 {% block meta_auth %}
 <title>Profil saya — UIKembali</title>
 {% endblock meta_auth %}
@@ -40,6 +41,7 @@
 {% endblock extra_css_auth %}
 
 {% block content_auth %}
+<div class="min-h-screen" style="background-color: #f7f6f1;">
 <!-- ===== PAGE HEADER ===== -->
 <div class="w-full max-w-[1120px] mx-auto px-5">
   <div class="pt-8 pb-7">
@@ -93,13 +95,18 @@
         </div>
         {% endif %}
         <h3 class="text-[1.05rem] font-extrabold font-display text-ink tracking-tight">{{ profile.nama }}</h3>
+        {% owner_rating user as owner_summary %}
+        <a href="{% url 'review_report:owner_reviews' user.pk %}" class="mt-1 block text-sm font-semibold text-green hover:underline">{% if owner_summary.count %}★ {{ owner_summary.average|floatformat:1 }} · {{ owner_summary.count }} ulasan{% else %}Belum ada ulasan{% endif %}</a>
         <p class="mt-0.5 text-[0.8125rem] text-ink-soft">{{ profile.faculty }} {{ profile.angkatan }}</p>
       </div>
 
       <!-- Sidebar Navigation -->
       <nav class="sidebar-nav bg-white border border-line rounded-xl p-2" aria-label="Menu profil">
+        <a href="{% url 'review_report:my_reviews' %}" class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-paper">Ulasan Saya</a>
+        <a href="{% url 'review_report:my_reports' %}" class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-paper">Laporan Saya</a>
+        <a href="{% url 'review_report:transactions' %}" class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-paper">Semua Transaksi</a>
         <button type="button" data-profile-tab="profile" aria-controls="panel-profile" aria-selected="true"
-          class="active flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          class="active w-full flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
           <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -108,31 +115,13 @@
           Profil &amp; kontak
         </button>
         <button type="button" data-profile-tab="history" aria-controls="panel-history" aria-selected="false"
-          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          class="w-full flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
           <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
           Riwayat transaksi
-        </button>
-        <button type="button" data-profile-tab="items" aria-controls="panel-items" aria-selected="false"
-          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-          </svg>
-          Barang saya
-        </button>
-        <button type="button" data-profile-tab="saved" aria-controls="panel-saved" aria-selected="false"
-          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
-          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-          Tersimpan
         </button>
       </nav>
     </aside>
@@ -156,26 +145,9 @@
           Memuat riwayat transaksi...
         </div>
       </section>
-
-      <!-- Barang User -->
-      <section class="bg-white border border-line rounded-xl p-7" id="panel-items" data-profile-panel="items" hidden>
-        <h2 class="text-[1.2rem] font-extrabold font-display text-ink tracking-tight">Barang saya</h2>
-        <p class="mt-1 text-sm text-ink-muted">Daftar barang yang kamu pasang akan tampil di sini.</p>
-        <div class="mt-8 py-10 text-center text-sm text-ink-muted border border-dashed border-line rounded-[10px]">
-          Belum ada daftar barang untuk ditampilkan.
-        </div>
-      </section>
-
-      <!-- Tersimpan -->
-      <section class="bg-white border border-line rounded-xl p-7" id="panel-saved" data-profile-panel="saved" hidden>
-        <h2 class="text-[1.2rem] font-extrabold font-display text-ink tracking-tight">Tersimpan</h2>
-        <p class="mt-1 text-sm text-ink-muted">Barang yang kamu simpan akan tampil di sini.</p>
-        <div class="mt-8 py-10 text-center text-sm text-ink-muted border border-dashed border-line rounded-[10px]">
-          Belum ada barang tersimpan.
-        </div>
-      </section>
     </div>
   </div>
+</div>
 </div>
 {% endblock content_auth %}
 

@@ -149,7 +149,7 @@ def profile_page(request):
         ItemRequest.objects.filter(
             Q(requester=request.user) | Q(item__owner=request.user)
         )
-        .select_related("item", "item__owner", "requester")
+        .select_related("item", "item__owner", "requester", "review")
         .order_by("-created_at")[:3]
     )
 
@@ -171,7 +171,7 @@ def profile_history(request):
         ItemRequest.objects.filter(
             Q(requester=request.user) | Q(item__owner=request.user)
         )
-        .select_related("item", "item__owner", "requester")
+        .select_related("item", "item__owner", "requester", "review")
         .order_by("-created_at")
     )
     page_obj = Paginator(riwayat, 5).get_page(request.GET.get("page"))

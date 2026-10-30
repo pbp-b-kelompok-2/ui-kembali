@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261028-4">{% endblock extra_css %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261030-6">{% endblock extra_css %}
 
 {% block content %}
 <div class="forum-beranda" data-uikembali-semantic-mode="light">
@@ -9,22 +9,34 @@
     <div class="area-diskusi">
       <aside class="navigasi-forum" aria-label="Navigasi forum">
         <span class="label-bagian">RUANG KOMUNITAS</span>
-        <a class="menu-forum{% if not selected_mine and not selected_saved and not selected_category %} aktif{% endif %}" href="{% url 'forum:forum_list' %}"{% if not selected_mine and not selected_saved and not selected_category %} aria-current="page"{% endif %}><span class="vector-wrapper">▣</span><span class="div">Semua diskusi</span></a>
+        <a class="menu-forum{% if not selected_mine and not selected_saved and not selected_category %} aktif{% endif %}" href="{% url 'forum:forum_list' %}"{% if not selected_mine and not selected_saved and not selected_category %} aria-current="page"{% endif %}>
+          <span class="vector-wrapper"><img src="{% static 'images/forum/icons/messages-square.svg' %}" alt="" aria-hidden="true"></span>
+          <span class="div">Semua diskusi</span>
+        </a>
         {% if request.user.is_authenticated %}
-        <a class="menu-forum-2{% if selected_mine %} aktif{% endif %}" href="?mine=1&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}"{% if selected_mine %} aria-current="page"{% endif %}><span class="vector-wrapper">▤</span><span class="label-2">Posting Saya</span></a>
-        <a class="menu-forum-2{% if selected_saved %} aktif{% endif %}" href="?saved=1&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}"{% if selected_saved %} aria-current="page"{% endif %}><span class="vector-wrapper">▱</span><span class="label-2">Tersimpan</span></a>
+        <a class="menu-forum-2{% if selected_mine %} aktif{% endif %}" href="?mine=1&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}"{% if selected_mine %} aria-current="page"{% endif %}>
+          <span class="vector-wrapper"><img src="{% static 'images/forum/icons/file-text.svg' %}" alt="" aria-hidden="true"></span>
+          <span class="label-2">Postingan Saya</span>
+        </a>
+        <a class="menu-forum-2{% if selected_saved %} aktif{% endif %}" href="?saved=1&amp;q={{ query|urlencode }}&amp;category={{ selected_category|urlencode }}&amp;sort={{ selected_sort }}"{% if selected_saved %} aria-current="page"{% endif %}>
+          <span class="vector-wrapper"><img src="{% static 'images/forum/icons/bookmark.svg' %}" alt="" aria-hidden="true"></span>
+          <span class="label-2">Tersimpan</span>
+        </a>
         {% endif %}
         <div class="pemisah" aria-hidden="true"></div>
         <span class="label-kategori">JELAJAHI TOPIK</span>
-        {% for value, label in categories %}
-        <a class="topik" href="?category={{ value|urlencode }}&amp;q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"><span class="nama-topik">{{ label }}</span></a>
+        {% for value, label, count in categories %}
+        <a class="topik{% if value == selected_category %} aktif{% endif %}" href="?category={{ value|urlencode }}&amp;q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if value == selected_category %} aria-current="page"{% endif %}>
+          <span class="nama-topik">{{ label }}</span>
+          <span class="jumlah">{{ count }}</span>
+        </a>
         {% endfor %}
       </aside>
 
       <section class="daftar-diskusi" aria-labelledby="forum-title">
         <div class="div-2">
-          <h1 class="judul" id="forum-title">{% if selected_mine %}Posting Saya{% elif selected_saved %}Tersimpan{% elif selected_category %}{% for value, label in categories %}{% if value == selected_category %}{{ label }}{% endif %}{% endfor %}{% else %}Semua diskusi{% endif %}</h1>
-          <a class="label-wrapper" href="{% url 'forum:post_create' %}"><span class="label-3">＋&nbsp;&nbsp;Buat posting</span></a>
+          <h1 class="judul" id="forum-title">{% if selected_mine %}Postingan Saya{% elif selected_saved %}Tersimpan{% elif selected_category %}{% for value, label, count in categories %}{% if value == selected_category %}{{ label }}{% endif %}{% endfor %}{% else %}Semua diskusi{% endif %}</h1>
+          <a class="label-wrapper" href="{% url 'forum:post_create' %}"><span class="label-3">＋&nbsp;&nbsp;Buat postingan</span></a>
         </div>
         <form class="kolom-isian" role="search" action="{% url 'forum:forum_list' %}" method="get">
           <label class="label-4" for="discussion-search">Cari diskusi</label>
@@ -36,7 +48,7 @@
         </form>
         <nav class="filter-kategori" aria-label="Filter kategori">
           <a class="filter" href="?q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if not selected_category %} aria-current="true"{% endif %}><span class="label-5">Semua</span></a>
-          {% for value, label in categories %}<a class="div-wrapper" href="?category={{ value|urlencode }}&amp;q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if value == selected_category %} aria-current="true"{% endif %}><span class="label-6">{{ label }}</span></a>{% endfor %}
+          {% for value, label, count in categories %}<a class="div-wrapper" href="?category={{ value|urlencode }}&amp;q={{ query|urlencode }}&amp;sort={{ selected_sort }}{% if selected_mine %}&amp;mine=1{% endif %}{% if selected_saved %}&amp;saved=1{% endif %}"{% if value == selected_category %} aria-current="true"{% endif %}><span class="label-6">{{ label }}</span></a>{% endfor %}
         </nav>
         <div class="div-2">
           <p class="text-wrapper-3">{{ post_count }} diskusi</p>
@@ -77,9 +89,9 @@
               </span>
             </div>
             <div class="interaksi" aria-label="{{ post.like_count }} suka dan {{ post.comment_count }} komentar">
-              <span class="img-wrapper" aria-hidden="true">♡</span>
+              <span class="img-wrapper" aria-hidden="true"><img src="{% static 'images/forum/icons/heart.svg' %}" alt=""></span>
               <span class="text-wrapper-4">{{ post.like_count }}</span>
-              <span class="img-wrapper" aria-hidden="true">◯</span>
+              <span class="img-wrapper" aria-hidden="true"><img src="{% static 'images/forum/icons/message-circle.svg' %}" alt=""></span>
               <span class="text-wrapper-4">{{ post.comment_count }}</span>
             </div>
           </div>
@@ -103,7 +115,7 @@
       </section>
 
       <aside class="tentang-komunitas" aria-label="Tentang komunitas">
-        <div class="ajakan-berbagi"><span class="sprout">✦</span><strong class="text-wrapper-5">Punya barang tak terpakai?</strong><p class="deskripsi">Temukan pemilik berikutnya lewat katalog UIKembali.</p><a class="text-wrapper-5" href="{% url 'katalog:item_create' %}">Pasang barang →</a></div>
+        <div class="ajakan-berbagi"><span class="sprout">✦</span><strong class="text-wrapper-5">Punya barang tak terpakai?</strong><p class="deskripsi">Temukan pemilik berikutnya lewat katalog UIKembali.</p><a class="text-wrapper-5" href="{% url 'katalog:catalog' %}#pasang">Pasang barang →</a></div>
       </aside>
     </div>
   </main>
