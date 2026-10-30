@@ -71,6 +71,35 @@ python manage.py test katalog --exclude-tag=functional
 python manage.py test katalog.tests.test_functional
 ```
 
+### Modul 3 — Chat
+
+- **Penanggung jawab:** Axel Sebastian Saragih
+- **Model utama:** `Conversation`, `Message`
+
+Modul ini menyediakan komunikasi langsung antara pemilik barang dan calon pengadopsi atau pembeli untuk membahas segala hal mengenai transaksi.
+
+#### Fitur
+
+- Percakapan dapat dimulai dari halaman barang. Satu calon pembeli hanya memiliki satu percakapan untuk setiap barang; percakapan yang sudah ada akan digunakan kembali.
+- Inbox menampilkan daftar percakapan, nama barang, pratinjau pesan terakhir, dan jumlah percakapan.
+- Pencarian percakapan berdasarkan nama barang atau username peserta.
+- Pesan dikirim tanpa memuat ulang halaman dan diperbarui otomatis setiap 3 detik (3000 ms).
+- Status pesan masuk diperbarui menjadi telah dibaca saat percakapan dibuka atau pesannya dimuat dan isi pesan wajib diisi, dibatasi maksimal 2.000 karakter.
+
+#### Keamanan
+
+- Pengguna harus login untuk membuka inbox, memulai percakapan, atau mengirim pesan.
+- Hanya pemilik barang dan calon pembeli yang menjadi peserta percakapan yang dapat membaca atau mengirim pesan.
+- Pemilik barang tidak dapat memulai percakapan dengan dirinya sendiri.
+
+#### Pengujian
+
+Modul diuji dengan unit test untuk model percakapan dan pesan, serta view terkait autentikasi, pembuatan percakapan, validasi, dan akses peserta:
+
+```bash
+python manage.py test chat
+```
+
 ---
 
 ## 👤 Jenis dan Peran Pengguna
@@ -177,3 +206,10 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 - **Penggunaan:** perencanaan, penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Keputusan fitur tetap dari saya, dan hasilnya saya periksa lewat diff, test, dan browser.
 - **Perbaikan manual:** test urutan yang tidak stabil karena timestamp sama, pembulatan koordinat untuk tamu, dan penyederhanaan kode agar lebih mudah dibaca.
 - **Keterbatasan:** versi awal upload foto belum menolak gambar beresolusi sangat besar, bug URL form Edit lolos dari test dan baru terlihat saat dicoba langsung, dan masalah di PWS baru ketahuan setelah deploy.
+
+### Modul 3 — Chat (Axel)
+
+- **Tool:** GitHub Copilot (gpt-6-luna).
+- **Penggunaan:** Penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Membantu menyusun dokumentasi Modul 3 berdasarkan implementasi yang ada, disertai berbagai revisi.
+- **Revisi:** Background color bubble messages beserta ukurannya tidak sesuai sehingga saya perbaiki. Tulisan "Dibaca" pada pesan juga awalnya salah posisi tetapi sudah dibetulkan. Semua keputusan fitur berasal dari saya beserta rembukan kelompok.
+- **Keterbatasan:** Kurang polish: scrollbar pada aplikasi chat umumnya hanya di container chat, bukan keseluruhan halaman.
