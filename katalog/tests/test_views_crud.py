@@ -17,7 +17,6 @@ VALID_POST = {
     "description": "Lampu meja, cahaya putih, kabel masih bagus.",
     "category": Item.Category.ELEKTRONIK,
     "condition": Item.Condition.BAIK,
-    "photo_url": "",
     "location_name": "Kukusan",
     "transaction_type": Item.TransactionType.JUAL,
     "price": "35000",
@@ -232,8 +231,13 @@ class OwnerControlsTests(CrudTestCase):
         detail = self.client.get(reverse("katalog:item_detail", args=[self.item.pk]))
         self.assertContains(detail, reverse("katalog:item_update", args=[self.item.pk]))
 
-    def test_pasang_barang_button(self):
+    def test_catalog_has_no_pasang_barang_button_of_its_own(self):
+        # Only the navbar has the button; the page just listens for its click.
         create_url = reverse("katalog:item_create")
-        self.assertNotContains(self.client.get(reverse("katalog:catalog")), create_url)
+        anonymous = self.client.get(reverse("katalog:catalog"))
+        self.assertNotContains(anonymous, create_url)
+        self.assertNotContains(anonymous, "+ Pasang barang")
         self.client.force_login(self.other)
-        self.assertContains(self.client.get(reverse("katalog:catalog")), create_url)
+        logged_in = self.client.get(reverse("katalog:catalog"))
+        self.assertContains(logged_in, create_url)
+        self.assertNotContains(logged_in, "+ Pasang barang")

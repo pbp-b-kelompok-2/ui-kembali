@@ -10,7 +10,6 @@ def form_data(**overrides):
         "description": "Rice cooker 1 liter, masih normal semua fungsinya.",
         "category": Item.Category.DAPUR,
         "condition": Item.Condition.SEPERTI_BARU,
-        "photo_url": "",
         "location_name": "Pondok Cina",
         "transaction_type": Item.TransactionType.ADOPSI,
         "price": "",
@@ -55,11 +54,6 @@ class ItemFormTests(TestCase):
         form = ItemForm(data=form_data(name="", contact=""))
         self.assertEqual(form.errors["name"], ["Wajib diisi."])
         self.assertEqual(form.errors["contact"], ["Wajib diisi."])
-
-    def test_bad_photo_url_is_invalid(self):
-        form = ItemForm(data=form_data(photo_url="bukan url"))
-        self.assertFalse(form.is_valid())
-        self.assertIn("photo_url", form.errors)
 
     def test_html_is_stripped_from_text_fields(self):
         form = ItemForm(
