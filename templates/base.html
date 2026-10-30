@@ -48,6 +48,7 @@
         <a href="{% url 'katalog:requests_page' %}">Transaksi</a>
         <a href="{% url 'chat:inbox' %}">Pesan</a>
         <a href="{% url 'forum:forum_list' %}">Forum</a>
+        <a href="{% url 'review_report:home' %}"{% if request.resolver_match.app_name == 'review_report' %} class="active" aria-current="true"{% endif %}>Ulasan &amp; Laporan</a>
       </nav>
 
       <form class="header-search" method="get" action="{% url 'katalog:catalog' %}" role="search">
@@ -116,11 +117,9 @@
         </span>
       </a>
 
-      <nav class="main-nav main-nav-guest" aria-label="Navigasi utama">
+      <nav class="main-nav" aria-label="Navigasi utama">
         <a href="{% url 'main:lobby' %}">Beranda</a>
         <a href="{% url 'katalog:catalog' %}">Jelajahi</a>
-        <a href="{% url 'katalog:requests_page' %}">Transaksi</a>
-        <a href="{% url 'chat:inbox' %}">Pesan</a>
         <a href="{% url 'forum:forum_list' %}">Forum</a>
         <a href="{% url 'auth_ssoui:login' %}" class="btn btn-small">Masuk dengan SSO UI</a>
       </nav>

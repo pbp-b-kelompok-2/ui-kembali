@@ -1,5 +1,6 @@
 {% extends "katalog/base_katalog.html" %}
 {% load static katalog_extras %}
+{% load review_report_tags %}
 
 {% block meta %}<title>{{ item.name }} · UIKembali</title>{% endblock meta %}
 
@@ -64,18 +65,25 @@
         <p class="mt-3 text-sm text-muted">Lokasi ini belum ada di peta.</p>
       {% endif %}
 
-      <div class="mt-5 flex items-center gap-3 rounded-xl border border-line bg-surface p-4">
-        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success-bg font-semibold uppercase text-brand" aria-hidden="true">{{ item.owner.username|slice:":2" }}</span>
+      <div class="mt-5 flex items-center gap-4 rounded-xl border border-line bg-surface p-4">
+        {% if item.owner.profile.pfp %}
+          <img src="{{ item.owner.profile.pfp.url }}" alt="" class="h-11 w-11 shrink-0 rounded-full object-cover">
+        {% else %}
+          <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-green font-display text-xl font-extrabold uppercase text-white" aria-hidden="true">{{ item.owner.profile.inisial }}</span>
+        {% endif %}
         <div class="min-w-0 flex-1">
-          <p class="font-semibold">{{ item.owner.username }}</p>
+          <p class="font-display text-base font-extrabold text-ink">{{ item.owner.profile.nama|default:item.owner.username }}</p>
+          {% owner_rating item.owner as owner_summary %}
+          <a href="{% url 'review_report:owner_reviews' item.owner_id %}" class="text-sm font-semibold text-green underline">{% if owner_summary.count %}★ {{ owner_summary.average|floatformat:1 }} · {{ owner_summary.count }} ulasan{% else %}Belum ada ulasan{% endif %}</a>
           {% if show_contact %}
-            <p class="text-sm text-ink-2">Kontak: <span class="font-medium text-ink">{{ item.contact }}</span></p>
+            <p class="mt-2 text-sm text-ink-2">Kontak: <span class="font-medium text-ink">{{ item.contact }}</span></p>
           {% else %}
-            <p class="text-sm text-ink-2"><a href="{% url 'auth_ssoui:login' %}" class="font-medium text-green">Masuk untuk melihat kontak</a></p>
+            <p class="text-sm text-ink-2"><a href="{% url 'auth_ssoui:login' %}" class="font-medium text-green">Masuk untuk melihat kontak</a></p>  
           {% endif %}
         </div>
       </div>
 
+      {% item_review_actions item %}
       {% if user.is_authenticated and user.id != item.owner_id %}
         {# start-chat.js (chat app) POSTs to chat:start, then opens the conversation. #}
         <button type="button" data-chat-start-url="{% url 'chat:start' item.pk %}" data-csrf-token="{{ csrf_token }}"

@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'katalog',
     'chat',
     'forum',
+    'review_report',
 ]
 
 MIDDLEWARE = [
