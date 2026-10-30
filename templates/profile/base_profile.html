@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block meta %}
+{% block meta_auth %}
+{% endblock meta_auth %}
+{% endblock meta %}
+
+{% block extra_css %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    theme: {
+    extend: {
+        colors: {
+        ink: '#14213d',
+        'ink-soft': '#4a5468',
+        'ink-muted': '#7a8194',
+        paper: '#f6f7f9',
+        yellow: '#ffc800',
+        'yellow-light': '#fff3cc',
+        green: '#1f7a4d',
+        'green-tint': '#dff1e6',
+        'green-dark': '#186038',
+        line: '#d8dce4',
+        'line-light': '#e8ebf0',
+        orange: '#e67e22',
+        'orange-tint': '#fef3e2',
+        red: '#b71111',
+        'red-dark': '#860e0e',
+        },
+        fontFamily: {
+        display: ['Bricolage Grotesque', 'Segoe UI', 'system-ui', 'sans-serif'],
+        body: ['Figtree', 'Segoe UI', 'system-ui', 'sans-serif'],
+        },
+        borderRadius: {
+        DEFAULT: '10px',
+        lg: '16px',
+        xl: '20px',
+        },
+        boxShadow: {
+        sm: '0 1px 3px rgba(20,33,61,0.06)',
+        md: '0 4px 12px rgba(20,33,61,0.08)',
+        lg: '0 8px 24px rgba(20,33,61,0.1)',
+        },
+    },
+    },
+}
+</script>
+{% block extra_css_auth %}
+{% endblock extra_css_auth%}
+{% endblock extra_css %}
+
+{% block content %}
+{% block content_auth %}
+{% endblock content_auth %}
+{% endblock content %}
+
+{% block extra_js %}
+{% block extra_js_auth %}
+{% endblock extra_js_auth %}
+{% endblock extra_js %}
