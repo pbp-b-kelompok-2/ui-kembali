@@ -1,5 +1,5 @@
 {% extends "katalog/base_katalog.html" %}
-{% load static katalog_extras review_report_tags %}
+{% load static katalog_extras %}
 
 {% block meta %}<title>{{ item.name }} · UIKembali</title>{% endblock meta %}
 
@@ -68,8 +68,6 @@
         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success-bg font-semibold uppercase text-brand" aria-hidden="true">{{ item.owner.username|slice:":2" }}</span>
         <div class="min-w-0 flex-1">
           <p class="font-semibold">{{ item.owner.username }}</p>
-          {% owner_rating item.owner as owner_summary %}
-          <a href="{% url 'review_report:owner_reviews' item.owner_id %}" class="text-sm font-semibold text-green underline">{% if owner_summary.count %}★ {{ owner_summary.average|floatformat:1 }} · {{ owner_summary.count }} ulasan{% else %}Belum ada ulasan{% endif %}</a>
           {% if show_contact %}
             <p class="text-sm text-ink-2">Kontak: <span class="font-medium text-ink">{{ item.contact }}</span></p>
           {% else %}
@@ -77,8 +75,6 @@
           {% endif %}
         </div>
       </div>
-
-      {% item_review_actions item %}
 
       {% if user.is_authenticated and user.id != item.owner_id %}
         {# start-chat.js (chat app) POSTs to chat:start, then opens the conversation. #}

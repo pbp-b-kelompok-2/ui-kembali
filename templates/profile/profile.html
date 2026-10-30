@@ -1,5 +1,5 @@
 {% extends "profile/base_profile.html" %}
-{% load static review_report_tags %}
+{% load static %}
 {% block meta_auth %}
 <title>Profil saya — UIKembali</title>
 {% endblock meta_auth %}
@@ -93,8 +93,6 @@
         </div>
         {% endif %}
         <h3 class="text-[1.05rem] font-extrabold font-display text-ink tracking-tight">{{ profile.nama }}</h3>
-        {% owner_rating user as owner_summary %}
-        <a href="{% url 'review_report:owner_reviews' user.pk %}" class="mt-1 block text-sm font-semibold text-green hover:underline">{% if owner_summary.count %}★ {{ owner_summary.average|floatformat:1 }} · {{ owner_summary.count }} ulasan{% else %}Belum ada ulasan{% endif %}</a>
         <p class="mt-0.5 text-[0.8125rem] text-ink-soft">{{ profile.faculty }} {{ profile.angkatan }}</p>
       </div>
 
@@ -136,9 +134,6 @@
           </svg>
           Tersimpan
         </button>
-        <a href="{% url 'review_report:my_reviews' %}" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink hover:bg-paper">Ulasan Saya</a>
-        <a href="{% url 'review_report:my_reports' %}" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink hover:bg-paper">Laporan Saya</a>
-        <a href="{% url 'review_report:transactions' %}" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink hover:bg-paper">Semua Transaksi</a>
       </nav>
     </aside>
 
@@ -153,7 +148,6 @@
       <!-- Riwayat Terbaru -->
       <section class="bg-white border border-line rounded-xl p-7" id="riwayat-terbaru" data-profile-panel="profile">
         {% include "profile/components/_riwayat_slice_modal.html" with riwayat_terbaru=riwayat_terbaru %}
-        <a href="{% url 'review_report:transactions' %}" class="mt-4 inline-block text-sm font-semibold text-green hover:underline">Lihat semua</a>
       </section>
 
       <!-- Full Riwayat -->
