@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261028-13">
+<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261030-2">
 {% endblock extra_css %}
 
 {% block content %}
@@ -11,7 +11,6 @@
     <header class="forum-page-heading">
       <p class="forum-breadcrumb"><a href="{% url 'forum:forum_list' %}">← Kembali ke forum</a></p>
       <div>
-        <span class="forum-heading-label">FORUM UIKEMBALI</span>
         <h1 id="form-title">{% if mode == "edit" %}Edit posting{% else %}Mulai percakapan baru{% endif %}</h1>
         <p class="forum-page-description">Bagikan pengalaman atau pertanyaanmu kepada komunitas.</p>
       </div>
@@ -50,7 +49,7 @@
         <div class="forum-form-actions">
           <a class="forum-btn secondary" href="{% url 'forum:forum_list' %}">Batal</a>
           <button class="forum-btn" type="submit">
-            {% if mode == "edit" %}Simpan perubahan{% else %}Terbitkan posting{% endif %}
+            {% if mode == "edit" %}Simpan perubahan{% else %}Posting{% endif %}
           </button>
         </div>
       </form>

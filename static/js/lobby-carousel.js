@@ -62,7 +62,7 @@
       const pivot = getTagPivot(activeTag);
       const pointerAngle = Math.atan2(event.clientY - pivot.y, event.clientX - pivot.x) * 180 / Math.PI;
       const pointerDelta = ((pointerAngle - lastPointerAngle + 540) % 360) - 180;
-      const angle = Math.max(-360, Math.min(360, state.angle + pointerDelta));
+      const angle = state.angle + pointerDelta;
       state.velocity = Math.max(-180, Math.min(180, (angle - state.angle) / elapsed));
       state.angle = angle;
       lastPointerAngle = pointerAngle;

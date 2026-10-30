@@ -288,8 +288,12 @@ textarea {
   border-radius: 50%;
 }
 
-/* Navbar tamu: nav jadi elemen terakhir, dorong ke kanan */
-.header-inner > .main-nav:last-child {
+/* Pada navbar tamu, sisakan ruang agar hanya tombol login terdorong ke kanan. */
+.main-nav-guest {
+  flex: 1;
+}
+
+.main-nav-guest .btn {
   margin-left: auto;
 }
 
@@ -461,8 +465,11 @@ textarea {
     margin-left: 0;
   }
 
-  .header-inner > .main-nav:last-child {
-    width: 100%;
+  .main-nav-guest {
+    flex: initial;
+  }
+
+  .main-nav-guest .btn {
     margin-left: 0;
   }
 
