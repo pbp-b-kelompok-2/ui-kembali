@@ -8,6 +8,11 @@ User = get_user_model()
 
 
 class SiteNavigationTests(TestCase):
+    def test_every_page_has_the_tab_icon(self):
+        response = self.client.get(reverse("main:lobby"))
+        self.assertContains(response, 'rel="icon" type="image/svg+xml"')
+        self.assertContains(response, "images/favicon.svg")
+
     def test_lobby_hero_links_to_the_catalog(self):
         response = self.client.get(reverse("main:lobby"))
         # Check the link, not its CSS class, so lobby redesigns don't break this test.
