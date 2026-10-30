@@ -71,6 +71,7 @@ python manage.py test katalog --exclude-tag=functional
 python manage.py test katalog.tests.test_functional
 ```
 
+
 ### Modul 3 — Chat
 
 - **Penanggung jawab:** Axel Sebastian Saragih
@@ -98,6 +99,39 @@ Modul diuji dengan unit test untuk model percakapan dan pesan, serta view terkai
 
 ```bash
 python manage.py test chat
+```
+
+
+### Modul 4 — Forum
+
+**Penanggung jawab:** Dimas Bayu Nugroho  
+**Model utama:** `ForumPost`, `ForumAttachment`, `Comment`  
+**Public API:** Tidak menggunakan public API eksternal
+
+Modul Forum menyediakan ruang bagi pengguna untuk berbagi diskusi, bertanya, dan bertukar pengalaman seputar barang bekas serta kehidupan kampus.
+
+#### Fitur
+
+- CRUD posting forum dengan judul, isi, dan kategori **Tips**, **Tanya**, **Pengalaman**, atau **Lainnya**.
+- Upload satu atau beberapa lampiran pada posting, melihat lampiran, dan menghapus lampiran dari posting milik sendiri.
+- Daftar posting dengan pencarian berdasarkan judul atau isi, filter kategori, filter posting milik sendiri atau tersimpan, pengurutan terbaru/terlama/populer, dan pagination.
+- Halaman detail posting dengan komentar dan balasan bertingkat, pengurutan komentar, serta daftar posting terkait.
+- Like posting dan komentar, serta simpan atau batal-simpan posting.
+
+#### Keamanan
+
+- Membuat posting, berkomentar, memberi like, dan menyimpan posting memerlukan login.
+- Hanya pemilik posting yang dapat mengubah atau menghapus posting dan lampirannya.
+- Aksi yang mengubah data menggunakan metode POST; redirect setelah aksi like/simpan dibatasi ke host aplikasi.
+
+#### Pengujian
+
+Test mencakup pencarian, filter, pengurutan, pagination, CRUD posting, unggah dan penghapusan lampiran, komentar dan balasan, like, simpan posting, serta pemeriksaan login dan kepemilikan.
+
+Jalankan seluruh test modul Forum dengan:
+
+```bash
+python manage.py test forum
 ```
 
 ---
@@ -174,7 +208,7 @@ Desain antarmuka UIKembali dibuat menggunakan Figma.
 Aplikasi UIKembali telah di-deploy menggunakan PWS.
 
 **PWS:**  
-[Masukkan tautan deployment PWS di sini]
+[LINK](https://elvis-sestomi-ui-kembali.pws.cs.ui.ac.id/)
 
 
 ---
@@ -207,9 +241,18 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 - **Perbaikan manual:** test urutan yang tidak stabil karena timestamp sama, pembulatan koordinat untuk tamu, dan penyederhanaan kode agar lebih mudah dibaca.
 - **Keterbatasan:** versi awal upload foto belum menolak gambar beresolusi sangat besar, bug URL form Edit lolos dari test dan baru terlihat saat dicoba langsung, dan masalah di PWS baru ketahuan setelah deploy.
 
+
 ### Modul 3 — Chat (Axel)
 
 - **Tool:** GitHub Copilot (gpt-6-luna).
 - **Penggunaan:** Penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Membantu menyusun dokumentasi Modul 3 berdasarkan implementasi yang ada, disertai berbagai revisi.
 - **Revisi:** Background color bubble messages beserta ukurannya tidak sesuai sehingga saya perbaiki. Tulisan "Dibaca" pada pesan juga awalnya salah posisi tetapi sudah dibetulkan. Semua keputusan fitur berasal dari saya beserta rembukan kelompok.
 - **Keterbatasan:** Kurang polish: scrollbar pada aplikasi chat umumnya hanya di container chat, bukan keseluruhan halaman.
+
+
+### Modul 4 - Forum (Dimas)
+
+- **Tool:** Codex (OpenAI, gpt-6-luna).
+- **Penggunaan:** membantu perencanaan dan implementasi fitur forum, penulisan serta perbaikan test, refactor, dan debugging. Cakupan fitur forum meliputi CRUD posting dan lampiran, pencarian/filter/pengurutan, komentar bertingkat, like, dan simpan posting.
+- **Perbaikan manual:** keputusan fitur dan penyesuaian akhir tetap saya lakukan. Saya meninjau perubahan kode dan hasil test agar sesuai kebutuhan project.
+- **Keterbatasan:** test otomatis mencakup banyak perilaku backend, tetapi belum membuktikan semua variasi tampilan, browser, dan unggahan file di penggunaan nyata; pemeriksaan manual tetap diperlukan.
