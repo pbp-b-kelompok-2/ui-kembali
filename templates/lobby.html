@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block meta %}
   <title>UIKembali - Pakai lagi, berarti lagi</title>
@@ -46,10 +46,10 @@
           </li>
           <li class="lobby-tag lobby-tag-four">
             <span class="lobby-tag-hole" aria-hidden="true"></span>
-            <span class="lobby-tag-badge is-free">Gratis</span>
-            <h2>Setrika uap</h2>
-            <p>Sering dipakai, semua fungsi normal.</p>
-            <span class="lobby-tag-place">Pondok Cina</span>
+            <span class="lobby-tag-badge is-price">Rp 50.000</span>
+            <h2>Kalkulator saintifik</h2>
+            <p>Baru beli banget, dijual karena ternyata ujian Statprob gaboleh pake ini.</p>
+            <span class="lobby-tag-place">Asrama UI</span>
           </li>
           <li class="lobby-tag lobby-tag-five">
             <span class="lobby-tag-hole" aria-hidden="true"></span>
@@ -114,7 +114,9 @@
       <article class="lobby-forum-card">
         <div class="lobby-forum-card-top">
           <span class="lobby-forum-category">{{ post.get_category_display }}</span>
+          {% language 'id' %}
           <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} lalu</time>
+          {% endlanguage %}
         </div>
         <h3><a href="{% url 'forum:post_detail' post.pk %}">{{ post.title }}</a></h3>
         <p class="lobby-forum-excerpt">{{ post.content|truncatechars:150 }}</p>

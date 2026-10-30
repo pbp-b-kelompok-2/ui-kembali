@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261028-12">
+<link rel="stylesheet" href="{% static 'css/forum.css' %}?v=20261030-4">
 {% endblock extra_css %}
 
 {% block content %}
@@ -70,17 +70,24 @@
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ request.path }}">
               <button class="forum-btn forum-like-button{% if is_liked_by_user %} is-liked{% endif %}" type="submit" aria-pressed="{% if is_liked_by_user %}true{% else %}false{% endif %}">
-                ♡ {% if is_liked_by_user %}Disukai{% else %}Suka{% endif %} · {{ post.like_count }}
+                <span class="forum-action-icon" aria-hidden="true"><img src="{% static 'images/forum/detail-icons/heart.svg' %}" alt=""></span>
+                <span>{% if is_liked_by_user %}Disukai{% else %}Suka{% endif %} · {{ post.like_count }}</span>
               </button>
             </form>
             {% if request.user.is_authenticated %}
             <form method="post" action="{% url 'forum:post_save_toggle' post.pk %}">
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ request.path }}">
-              <button class="forum-btn forum-action-link{% if is_saved_by_user %} is-saved{% endif %}" type="submit">{% if is_saved_by_user %}▱ Tersimpan{% else %}▱ Simpan{% endif %}</button>
+              <button class="forum-btn forum-action-link{% if is_saved_by_user %} is-saved{% endif %}" type="submit">
+                <span class="forum-action-icon" aria-hidden="true"><img src="{% static 'images/forum/detail-icons/bookmark.svg' %}" alt=""></span>
+                <span>{% if is_saved_by_user %}Tersimpan{% else %}Simpan{% endif %}</span>
+              </button>
             </form>
             {% endif %}
-            <button class="forum-btn forum-action-link" type="button" id="forum-share-button">Bagikan</button>
+            <button class="forum-btn forum-action-link" type="button" id="forum-share-button">
+              <span class="forum-action-icon" aria-hidden="true"><img src="{% static 'images/forum/detail-icons/share-2.svg' %}" alt=""></span>
+              <span class="forum-action-label">Bagikan</span>
+            </button>
           </div>
         </article>
 
@@ -119,18 +126,18 @@
       <aside class="forum-sidebar" aria-label="Informasi forum">
         {% if request.user == post.author %}
         <div class="forum-sidebar-card forum-owner-tools">
-          <p class="forum-sidebar-eyebrow">KELOLA POSTING ANDA</p>
+          <p class="forum-sidebar-eyebrow">KELOLA POSTINGAN ANDA</p>
           <a class="forum-owner-action" href="{% url 'forum:post_update' post.pk %}">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m15 5 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z" />
             </svg>
-            Edit posting
+            Edit postingan
           </a>
           <button class="forum-owner-action danger" type="button" data-open-delete>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 5v5m4-5v5" />
             </svg>
-            Hapus posting
+            Hapus postingan
           </button>
         </div>
         {% endif %}
@@ -187,8 +194,8 @@
         </svg>
       </div>
       <button class="forum-delete-close" type="button" data-close-delete aria-label="Tutup dialog">×</button>
-      <h2 id="forum-delete-title">Hapus posting ini?</h2>
-      <p class="forum-muted">Posting akan dihapus dari forum beserta seluruh komentar dan suka. Tindakan ini tidak dapat dibatalkan.</p>
+      <h2 id="forum-delete-title">Hapus postingan ini?</h2>
+      <p class="forum-muted">Postingan akan dihapus dari forum beserta seluruh komentar dan suka. Tindakan ini tidak dapat dibatalkan.</p>
       <div class="forum-delete-preview">
         <strong>{{ post.title }}</strong>
         <span>{{ post.get_category_display }} · {{ post.like_count }} suka · {{ post.comments.count }} komentar</span>
@@ -196,7 +203,7 @@
       <form method="post" action="{% url 'forum:post_delete' post.pk %}" class="forum-delete-actions">
         {% csrf_token %}
         <button class="forum-btn secondary" type="button" data-close-delete>Batal</button>
-        <button class="forum-btn danger" type="submit">Ya, hapus posting</button>
+        <button class="forum-btn danger" type="submit">Ya, hapus postingan</button>
       </form>
     </dialog>
     {% endif %}
@@ -209,10 +216,11 @@
   document.addEventListener("DOMContentLoaded", () => {
     const shareButton = document.getElementById("forum-share-button");
     if (shareButton) {
+      const shareLabel = shareButton.querySelector(".forum-action-label");
       shareButton.addEventListener("click", async () => {
         try {
           await navigator.clipboard.writeText(window.location.href);
-          shareButton.textContent = "Tautan disalin";
+          if (shareLabel) shareLabel.textContent = "Tautan disalin";
         } catch {
           window.prompt("Salin tautan diskusi ini:", window.location.href);
         }
