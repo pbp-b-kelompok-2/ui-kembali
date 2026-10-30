@@ -28,6 +28,51 @@ A web platform for UI students to give away or sell reusable second-hand items, 
 
 ---
 
+## 📝 Detail Modul
+
+### Modul 2 — Posting & Katalog Barang
+
+**Penanggung jawab:** Owen Viriya Chandra  
+**Model utama:** `Item`, `ItemRequest`  
+**Public API:** OpenStreetMap (Nominatim dan tile peta melalui Leaflet)
+
+Modul ini menjadi pusat katalog barang bekas yang diberikan atau dijual oleh mahasiswa UI, sekaligus mengatur alur permintaan barang dari pengajuan sampai serah terima.
+
+#### Fitur
+
+- CRUD barang melalui modal tanpa memuat ulang halaman, dengan data nama, deskripsi, kategori, kondisi, foto, lokasi temu, jenis penawaran (adopsi/jual), harga, dan kontak.
+- Upload foto JPG, PNG, atau WEBP (maksimal 5 MB). Foto diperkecil, disimpan sebagai WEBP, dan metadata EXIF-nya dihapus.
+- Validasi form: panjang minimum nama dan deskripsi, penghapusan tag HTML, serta aturan harga (wajib untuk barang dijual, kosong untuk barang adopsi).
+- Halaman katalog dengan 52 data barang awal, pagination, dan halaman detail barang.
+- Pencarian langsung, filter kategori, kondisi, jenis penawaran, lokasi, dan rentang harga, serta pengurutan hasil.
+- Soft delete dengan tombol urungkan, dan halaman "Barang saya" dengan aksi massal (hapus, tandai selesai, kembalikan).
+- Pengajuan adopsi atau pembelian dengan status **Menunggu → Diterima → Selesai**, atau **Ditolak** dan **Dibatalkan**.
+- Pusat permintaan untuk melihat permintaan masuk dan keluar. Saat satu permintaan diterima, permintaan lain untuk barang yang sama otomatis ditolak.
+- Endpoint JSON untuk daftar barang (`/katalog/json/`) dan detail barang (`/katalog/<id>/json/`).
+
+#### Keamanan
+
+- Hanya pemilik yang dapat mengubah atau menghapus barangnya. Pengguna lain mendapat respons 403.
+- Kontak pemilik dan titik lokasi yang tepat hanya tampil untuk pengguna yang sudah login. Tamu hanya melihat area perkiraan.
+- Rate limit 10 aksi per menit untuk membuat barang, mengajukan permintaan, dan aksi massal.
+
+#### Pemanfaatan Public API
+
+- **Nominatim (OpenStreetMap)** mengubah nama lokasi temu menjadi koordinat saat barang disimpan. Hasilnya di-cache selama 30 hari. Jika layanan tidak tersedia, aplikasi memakai daftar tempat di sekitar kampus UI, dan barang tetap tersimpan walaupun lokasinya tidak ditemukan.
+- **Leaflet dan OpenStreetMap** menampilkan lokasi barang pada peta di halaman detail.
+- Koordinat tersebut dipakai untuk filter radius (1, 2, 5, atau 10 km) dan pengurutan berdasarkan jarak terdekat.
+
+#### Pengujian
+
+Modul diuji dengan unit test untuk model, form, view, dan geocoding (API dimock), serta functional test Selenium:
+
+```bash
+python manage.py test katalog --exclude-tag=functional
+python manage.py test katalog.tests.test_functional
+```
+
+---
+
 ## 👤 Jenis dan Peran Pengguna
 
 UIKembali memiliki satu jenis pengguna utama, yaitu **User**. Setiap pengguna dapat menjalankan dua peran sekaligus, yaitu sebagai **Pemilik/Penjual** dan **Pengadopsi/Pembeli**.
@@ -121,3 +166,14 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 8. Pemilik dan calon pengadopsi/pembeli dapat berkomunikasi melalui chat.
 9. Setelah transaksi selesai, pengguna dapat memberikan review dan rating.
 10. Pengguna dapat melaporkan barang atau akun yang dianggap bermasalah.
+
+---
+
+## 🤖 AI Disclosure
+
+### Modul 2 — Posting & Katalog Barang (Owen)
+
+- **Tool:** Claude Code (Anthropic).
+- **Penggunaan:** perencanaan, penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Keputusan fitur tetap dari saya, dan hasilnya saya periksa lewat diff, test, dan browser.
+- **Perbaikan manual:** test urutan yang tidak stabil karena timestamp sama, pembulatan koordinat untuk tamu, dan penyederhanaan kode agar lebih mudah dibaca.
+- **Keterbatasan:** versi awal upload foto belum menolak gambar beresolusi sangat besar, bug URL form Edit lolos dari test dan baru terlihat saat dicoba langsung, dan masalah di PWS baru ketahuan setelah deploy.
