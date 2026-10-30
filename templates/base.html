@@ -119,9 +119,9 @@
       </a>
 
       <nav class="main-nav main-nav-guest" aria-label="Navigasi utama">
-        <a href="{% url 'main:lobby' %}">Beranda</a>
-        <a href="{% url 'katalog:catalog' %}">Jelajahi</a>
-        <a href="{% url 'forum:forum_list' %}">Forum</a>
+        <a href="{% url 'main:lobby' %}"{% if request.resolver_match.app_name == 'main' %} class="active" aria-current="page"{% endif %}>Beranda</a>
+        <a href="{% url 'katalog:catalog' %}"{% if request.resolver_match.app_name == 'katalog' and request.resolver_match.url_name != 'requests_page' %} class="active" aria-current="page"{% endif %}>Jelajahi</a>
+        <a href="{% url 'forum:forum_list' %}"{% if request.resolver_match.app_name == 'forum' %} class="active" aria-current="page"{% endif %}>Forum</a>
         <a href="{% url 'auth_ssoui:login' %}" class="btn btn-small">Masuk dengan SSO UI</a>
       </nav>
 
