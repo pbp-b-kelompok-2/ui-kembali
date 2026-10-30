@@ -48,9 +48,14 @@
   });
 
   // Network errors or 5xx that the view didn't turn into a toast.
+  const ERRORS = {
+    403: "Kamu tidak punya akses untuk aksi ini.",
+    404: "Data tidak ditemukan atau sudah berubah. Muat ulang halaman.",
+  };
   document.body.addEventListener("htmx:responseError", function (event) {
-    if (!event.detail.xhr.getResponseHeader("HX-Trigger")) {
-      showToast("Terjadi kesalahan, coba lagi.", "error");
+    const xhr = event.detail.xhr;
+    if (!xhr.getResponseHeader("HX-Trigger")) {
+      showToast(ERRORS[xhr.status] || "Terjadi kesalahan, coba lagi.", "error");
     }
   });
   document.body.addEventListener("htmx:sendError", function () {

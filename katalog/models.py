@@ -78,10 +78,10 @@ class Item(models.Model):
             models.Index(fields=["transaction_type"]),
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
-    def clean(self) -> None:
+    def clean(self):
         super().clean()
         if self.transaction_type == self.TransactionType.JUAL:
             if self.price is None:
@@ -93,12 +93,12 @@ class Item(models.Model):
         elif self.price is not None:
             raise ValidationError({"price": "Barang adopsi tidak boleh punya harga."})
 
-    def soft_delete(self) -> None:
+    def soft_delete(self):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.save(update_fields=["is_deleted", "deleted_at", "updated_at"])
 
-    def restore(self) -> None:
+    def restore(self):
         self.is_deleted = False
         self.deleted_at = None
         self.save(update_fields=["is_deleted", "deleted_at", "updated_at"])
@@ -136,5 +136,5 @@ class ItemRequest(models.Model):
             )
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"{self.requester} → {self.item} ({self.status})"
