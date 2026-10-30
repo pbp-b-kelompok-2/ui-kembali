@@ -1,5 +1,5 @@
 {% extends "profile/base_profile.html" %}
-{% load static review_report_tags %}
+{% load static %}
 {% block meta_auth %}
 <title>Profil saya — UIKembali</title>
 {% endblock meta_auth %}
@@ -93,8 +93,6 @@
         </div>
         {% endif %}
         <h3 class="text-[1.05rem] font-extrabold font-display text-ink tracking-tight">{{ profile.nama }}</h3>
-        {% owner_rating user as owner_summary %}
-        <a href="{% url 'review_report:owner_reviews' user.pk %}" class="mt-1 block text-sm font-semibold text-green hover:underline">{% if owner_summary.count %}★ {{ owner_summary.average|floatformat:1 }} · {{ owner_summary.count }} ulasan{% else %}Belum ada ulasan{% endif %}</a>
         <p class="mt-0.5 text-[0.8125rem] text-ink-soft">{{ profile.faculty }} {{ profile.angkatan }}</p>
       </div>
 
@@ -118,9 +116,24 @@
           </svg>
           Riwayat transaksi
         </button>
-        <a href="{% url 'review_report:my_reviews' %}" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink hover:bg-paper">Ulasan Saya</a>
-        <a href="{% url 'review_report:my_reports' %}" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink hover:bg-paper">Laporan Saya</a>
-        <a href="{% url 'review_report:transactions' %}" class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink hover:bg-paper">Semua Transaksi</a>
+        <button type="button" data-profile-tab="items" aria-controls="panel-items" aria-selected="false"
+          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          </svg>
+          Barang saya
+        </button>
+        <button type="button" data-profile-tab="saved" aria-controls="panel-saved" aria-selected="false"
+          class="flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
+          <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          Tersimpan
+        </button>
       </nav>
     </aside>
 
@@ -135,7 +148,6 @@
       <!-- Riwayat Terbaru -->
       <section class="bg-white border border-line rounded-xl p-7" id="riwayat-terbaru" data-profile-panel="profile">
         {% include "profile/components/_riwayat_slice_modal.html" with riwayat_terbaru=riwayat_terbaru %}
-        <a href="{% url 'review_report:transactions' %}" class="mt-4 inline-block text-sm font-semibold text-green hover:underline">Lihat semua</a>
       </section>
 
       <!-- Full Riwayat -->
