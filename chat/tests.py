@@ -22,7 +22,6 @@ def make_item(owner, **overrides):
         "description": "Kipas meja masih berfungsi dengan baik.",
         "category": Item.Category.ELEKTRONIK,
         "condition": Item.Condition.BAIK,
-        "photo_url": "https://example.com/kipas.jpg",
         "location_name": "Stasiun UI",
         "transaction_type": Item.TransactionType.JUAL,
         "price": 85_000,

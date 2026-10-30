@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
+from auth_ssoui.models import Profile
 from katalog.models import Item
 
 from .test_models import make_item
@@ -65,9 +66,11 @@ class KatalogBrowserTests(StaticLiveServerTestCase):
         self.assertTrue(self.browser.execute_script("return window.notReloaded"))
 
     def test_owner_creates_an_item_in_the_modal(self):
+        # The navbar's button only shows once the SSO profile is complete.
+        Profile.objects.create(user=self.owner, nama="Owen Pemilik", is_complete=True)
         self.login(self.owner)
         self.browser.get(self.live_server_url + "/katalog/")
-        self.browser.find_element(By.XPATH, "//button[contains(., 'Pasang barang')]").click()
+        self.browser.find_element(By.CSS_SELECTOR, "a.btn-pasang").click()
 
         form = self.wait.until(EC.visibility_of_element_located((By.ID, "item-form")))
         form.find_element(By.NAME, "name").send_keys("Rak sepatu")

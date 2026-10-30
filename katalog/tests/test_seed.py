@@ -40,11 +40,18 @@ class SeedKatalogTests(TestCase):
 
 
 class SeedMigrationTests(TestCase):
-    """Migration 0003 seeds PWS on deploy, since PWS has no shell to run seed_katalog."""
+    """Migration 0005 seeds PWS on deploy, since PWS has no shell to run seed_katalog."""
 
     def run_migration(self):
-        migration = import_module("katalog.migrations.0003_seed_production")
+        migration = import_module("katalog.migrations.0005_seed_production")
         migration.seed_production(apps=None, schema_editor=None)
+
+    def test_seed_runs_after_the_photo_column_exists(self):
+        # seed_katalog uses the real Item model, so it needs every column of it.
+        migration = import_module("katalog.migrations.0005_seed_production")
+        self.assertIn(("katalog", "0004_replace_photo_url_with_photo"), migration.Migration.dependencies)
+        earlier = import_module("katalog.migrations.0003_seed_production")
+        self.assertEqual(earlier.Migration.operations, [])
 
     @override_settings(PRODUCTION=True)
     def test_seeds_in_production(self):
