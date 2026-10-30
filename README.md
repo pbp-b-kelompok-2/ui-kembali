@@ -1,4 +1,7 @@
 # ♻️ UIKembali
+
+Dokumentasi modul **Review & Report** (fitur, aturan akses, integrasi, TDD,
+pengujian browser, dan demo lokal): [docs/REVIEW_REPORT.md](docs/REVIEW_REPORT.md).
 A web platform for UI students to give away or sell reusable second-hand items, making it easier to find affordable goods while reducing waste and extending product lifecycles.
 
 ---

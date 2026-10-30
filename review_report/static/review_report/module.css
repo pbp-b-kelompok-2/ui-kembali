@@ -1,0 +1,15 @@
+/* Only behavior that needs a selector; layout and colors use Tailwind. */
+.rr-module .rr-saving { display: none; }
+.rr-module .rr-saving.htmx-request { display: block; }
+.rr-module .errorlist { color: var(--color-danger); margin-top: .5rem; padding-left: 1.25rem; }
+.rr-module input[type="radio"] { accent-color: var(--color-green); }
+.rr-module button, .rr-module input, .rr-module select, .rr-module textarea { font: inherit; }
+.rr-module a:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+/* Scope the shared header's phone layout adjustment to this module. */
+@media (max-width: 640px) {
+  body:has(.rr-module) .header-inner { gap: .75rem; }
+  body:has(.rr-module) .header-search,
+  body:has(.rr-module) .main-nav,
+  body:has(.rr-module) .btn-pasang { display: none; }
+  body:has(.rr-module) .header-actions { margin-left: auto; gap: .5rem; }
+}

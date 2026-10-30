@@ -48,6 +48,7 @@
         <a href="{% url 'katalog:requests_page' %}">Transaksi</a>
         <a href="{% url 'chat:inbox' %}">Pesan</a>
         <a href="{% url 'forum:forum_list' %}">Forum</a>
+        <a href="{% url 'review_report:home' %}"{% if request.resolver_match.app_name == 'review_report' %} class="active" aria-current="{% if request.resolver_match.url_name == 'home' %}page{% else %}true{% endif %}"{% endif %}>Ulasan &amp; Laporan</a>
       </nav>
 
       <form class="header-search" method="get" action="{% url 'katalog:catalog' %}" role="search">
