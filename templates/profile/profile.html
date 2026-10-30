@@ -1,5 +1,6 @@
 {% extends "profile/base_profile.html" %}
 {% load static %}
+{% load review_report_tags %}
 {% block meta_auth %}
 <title>Profil saya — UIKembali</title>
 {% endblock meta_auth %}
@@ -94,11 +95,16 @@
         </div>
         {% endif %}
         <h3 class="text-[1.05rem] font-extrabold font-display text-ink tracking-tight">{{ profile.nama }}</h3>
+        {% owner_rating user as owner_summary %}
+        <a href="{% url 'review_report:owner_reviews' user.pk %}" class="mt-1 block text-sm font-semibold text-green hover:underline">{% if owner_summary.count %}★ {{ owner_summary.average|floatformat:1 }} · {{ owner_summary.count }} ulasan{% else %}Belum ada ulasan{% endif %}</a>
         <p class="mt-0.5 text-[0.8125rem] text-ink-soft">{{ profile.faculty }} {{ profile.angkatan }}</p>
       </div>
 
       <!-- Sidebar Navigation -->
       <nav class="sidebar-nav bg-white border border-line rounded-xl p-2" aria-label="Menu profil">
+        <a href="{% url 'review_report:my_reviews' %}" class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-paper">Ulasan Saya</a>
+        <a href="{% url 'review_report:my_reports' %}" class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-paper">Laporan Saya</a>
+        <a href="{% url 'review_report:transactions' %}" class="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-paper">Semua Transaksi</a>
         <button type="button" data-profile-tab="profile" aria-controls="panel-profile" aria-selected="true"
           class="active w-full flex items-center gap-[0.7rem] px-[0.85rem] py-[0.65rem] rounded-[10px] text-sm font-medium text-ink transition-all duration-150 hover:bg-paper">
           <svg class="flex-shrink-0 opacity-65" width="18" height="18" viewBox="0 0 24 24" fill="none"

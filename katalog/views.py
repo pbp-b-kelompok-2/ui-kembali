@@ -293,7 +293,7 @@ INCOMING_TABS = {
 def requests_page(request):
     # The template reads the item, its owner and the requester of every row,
     # so join them all up front (one query instead of one per row).
-    requests = ItemRequest.objects.select_related("item", "item__owner", "requester")
+    requests = ItemRequest.objects.select_related("item", "item__owner", "requester", "review")
 
     if request.GET.get("tab") == "keluar":
         context = {"tab": "keluar", "rows": requests.filter(requester=request.user)}
