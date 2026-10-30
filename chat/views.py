@@ -54,14 +54,12 @@ def _display_name(user):
     return (profile.nama if profile else "") or user.get_full_name() or user.username
 
 
-@login_required(login_url="/auth/login/")
-@require_GET
-def inbox(request):
+def _conversations_for_user(user, query=""):
     latest_body = Message.objects.filter(
         conversation_id=OuterRef("pk")
     ).order_by("-sent_at").values("body")[:1]
     conversations = (
-        Conversation.objects.filter(Q(buyer=request.user) | Q(item__owner=request.user))
+        Conversation.objects.filter(Q(buyer=user) | Q(item__owner=user))
         .select_related(
             "item", "item__owner", "buyer", "buyer__profile", "item__owner__profile"
         )
@@ -70,18 +68,38 @@ def inbox(request):
             unread_count=Count(
                 "messages",
                 filter=Q(messages__read_at__isnull=True)
-                & ~Q(messages__sender_id=request.user.pk),
+                & ~Q(messages__sender_id=user.pk),
             ),
         )
     )
-    query = request.GET.get("q", "").strip()
     if query:
         conversations = conversations.filter(
             Q(item__name__icontains=query)
             | Q(buyer__username__icontains=query)
             | Q(item__owner__username__icontains=query)
         )
-    return render(request, "chat/inbox.html", {"conversations": conversations})
+    return conversations
+
+
+def _unread_message_count(user):
+    return Message.objects.filter(
+        Q(conversation__buyer=user) | Q(conversation__item__owner=user),
+        read_at__isnull=True,
+    ).exclude(sender=user).count()
+
+
+@login_required(login_url="/auth/login/")
+@require_GET
+def inbox(request):
+    query = request.GET.get("q", "").strip()
+    return render(
+        request,
+        "chat/inbox.html",
+        {
+            "conversations": _conversations_for_user(request.user, query),
+            "total_unread_count": _unread_message_count(request.user),
+        },
+    )
 
 
 @login_required(login_url="/auth/login/")
@@ -141,9 +159,11 @@ def conversation_detail(request, conversation_id):
         request,
         "chat/inbox.html",
         {
+            "conversations": _conversations_for_user(request.user),
             "conversation": conversation,
             "other_user": other_user,
             "messages": messages,
+            "total_unread_count": _unread_message_count(request.user),
         },
     )
 

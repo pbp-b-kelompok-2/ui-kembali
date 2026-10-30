@@ -13,8 +13,9 @@
   );
 
   function appendMessage(message) {
+    const isOwn = message.sender_id === Number(thread.closest("main").dataset.userId);
     if (knownIds.has(message.id)) {
-      if (message.is_read) {
+      if (isOwn && message.is_read) {
         const existing = list.querySelector('[data-message-id="' + message.id + '"] time');
         if (existing && !existing.textContent.includes("Dibaca")) {
           existing.textContent += " · Dibaca";
@@ -25,13 +26,11 @@
     knownIds.add(message.id);
 
     const bubble = document.createElement("article");
-    const isOwn = message.sender_id === Number(thread.closest("main").dataset.userId);
     bubble.className =
-      "message-bubble max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2 shadow-sm [&>p]:[overflow-wrap:anywhere] [&>p]:whitespace-pre-wrap [&>p]:text-xs [&>p]:leading-normal [&>time]:mt-1 [&>time]:block [&>time]:text-right [&>time]:text-[0.65rem] [&>time]:text-muted" +
-      (isOwn
-        ? " message-own self-end border-brand bg-brand text-white [&>time]:text-[#c9e5d3]"
-        : "");
+      "message-bubble max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2 shadow-sm [&>p]:[overflow-wrap:anywhere] [&>p]:whitespace-pre-wrap [&>p]:text-xs [&>p]:leading-normal [&>time]:mt-1 [&>time]:block [&>time]:text-right [&>time]:text-[0.65rem] [&>time]:text-muted data-[message-own=true]:self-end data-[message-own=false]:self-start data-[message-own=true]:border-brand data-[message-own=true]:bg-brand data-[message-own=true]:text-white data-[message-own=true]:[&>time]:text-[#c9e5d3]";
+    if (isOwn) bubble.classList.add("message-own");
     bubble.dataset.messageId = message.id;
+    bubble.dataset.messageOwn = String(isOwn);
 
     const body = document.createElement("p");
     body.textContent = message.body;
