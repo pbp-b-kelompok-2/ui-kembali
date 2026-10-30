@@ -1,6 +1,7 @@
 from django import forms
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.html import strip_tags
+from PIL import Image
 
 from .models import Item
 
@@ -10,6 +11,7 @@ INPUT_CLASS = (
     "outline-none focus:border-green focus:ring-2 focus:ring-green/20"
 )
 MAX_PHOTO_BYTES = 5 * 1024 * 1024
+MAX_PHOTO_PIXELS = 25_000_000
 PHOTO_FORMATS = {"JPEG", "PNG", "WEBP"}
 
 
@@ -76,6 +78,16 @@ class ItemForm(forms.ModelForm):
                 raise forms.ValidationError("Ukuran foto maksimal 5 MB.")
             if photo.image.format not in PHOTO_FORMATS:
                 raise forms.ValidationError("Format harus JPG, PNG, atau WEBP.")
+            # A small file can still decode into a huge image in memory.
+            if photo.image.width * photo.image.height > MAX_PHOTO_PIXELS:
+                raise forms.ValidationError("Resolusi foto terlalu besar.")
+            # ImageField only checks the header; a cut-off file fails on decoding.
+            try:
+                with Image.open(photo) as image:
+                    image.load()
+            except (OSError, ValueError):
+                raise forms.ValidationError("Berkas harus berupa gambar.")
+            photo.seek(0)
         return photo
 
     def clean(self):
