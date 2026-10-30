@@ -71,8 +71,8 @@ class KatalogBrowserTests(StaticLiveServerTestCase):
         self.login(self.owner)
         self.browser.get(self.live_server_url + "/katalog/")
         edit = self.browser.find_element(By.XPATH, "//button[contains(., 'Edit')]")
-        self.browser.execute_script("arguments[0].scrollIntoView({block: 'center'})", edit)
-        edit.click()
+        # The page scrolls smoothly, so a normal click can land before it stops.
+        self.browser.execute_script("arguments[0].click()", edit)
 
         self.wait.until(EC.visibility_of_element_located((By.ID, "item-form")))
         self.assertTrue(self.browser.current_url.endswith("/katalog/"))
