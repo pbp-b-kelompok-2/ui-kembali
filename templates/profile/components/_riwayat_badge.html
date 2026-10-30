@@ -35,6 +35,7 @@
 
   <!-- Status badge + chevron -->
   <div class="flex items-center gap-[0.65rem] flex-shrink-0">
+    {% include 'review_report/_transaction_link.html' %}
     <span class="inline-block px-[0.65rem] py-[0.2rem] rounded-full text-xs font-semibold whitespace-nowrap {{ badge_bg }} {{ badge_text }}">
       {{ req.get_status_display }}
     </span>

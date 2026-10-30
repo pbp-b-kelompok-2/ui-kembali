@@ -25,6 +25,7 @@
   </div>
 
   <div class="flex flex-col gap-2">
+    {% include 'review_report/_transaction_link.html' %}
     {% if req.item.owner_id == user.id and req.status == "PENDING" %}
       <button type="button" hx-post="{% url 'katalog:request_accept' req.pk %}" hx-swap="none"
               hx-confirm="Terima {{ req.requester.username }}? Permintaan lain untuk barang ini akan ditolak otomatis."
