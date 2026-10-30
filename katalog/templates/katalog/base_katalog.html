@@ -80,14 +80,5 @@
 {% block extra_js %}
 <script src="{% static 'katalog/js/modal.js' %}" defer></script>
 <script src="{% static 'katalog/js/optimistic.js' %}" defer></script>
-<script src="{% static 'chat/js/start-chat.js' %}" defer></script>
 {% block katalog_js %}{% endblock %}
-{# Django messages (Tutorial 03) shown as toasts after a full page load. #}
-{% if messages %}
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    {% for message in messages %}showToast("{{ message|escapejs }}", "{{ message.tags }}");{% endfor %}
-  });
-</script>
-{% endif %}
 {% endblock extra_js %}

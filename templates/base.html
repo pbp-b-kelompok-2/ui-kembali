@@ -14,7 +14,9 @@
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/root.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'css/lobby.css' %}"> -->
   <link rel="stylesheet" href="{% static 'css/toast.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'css/profile/profile.css' %}"> -->
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
   {% block meta %}
   {% endblock meta %}
@@ -23,12 +25,11 @@
 </head>
 
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-  <header class="site-header">
-    <div class="container header-inner" style="max-width: 100vw;">
-      {% if request.user.is_authenticated %}
-      {% if request.user.profile.is_complete %}
-      <!-- Navbar untuk user yang sudah login & profil lengkap -->
 
+  {% if request.user.is_authenticated and request.user.profile.is_complete %}
+  <!-- Navbar untuk user yang sudah login & profil lengkap -->
+  <header class="site-header">
+    <div class="container header-inner">
       <a class="brand" href="{% url 'main:lobby' %}" aria-label="UIKembali, beranda">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="16" fill="#ffc800" />
@@ -44,30 +45,28 @@
 
       <nav class="main-nav" aria-label="Navigasi utama">
         <a href="{% url 'main:lobby' %}">Beranda</a>
-        <a href="{% url 'katalog:catalog' %}">Jelajahi</a>
-        <a href="{% url 'katalog:requests_page' %}">Transaksi</a>
-        <a href="{% url 'chat:inbox' %}">Pesan</a>
-        <a href="{% url 'forum:forum_list' %}">Forum</a>
+        <a href="#">Jelajahi</a>
+        <a href="#">Transaksi</a>
       </nav>
 
-      <form class="header-search" method="get" action="{% url 'katalog:catalog' %}" role="search">
+      <div class="header-search">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <input type="search" name="q" placeholder="Cari buku, elektronik, furnitur kos..." aria-label="Pencarian">
-      </form>
+        <input type="search" placeholder="Cari buku, elektronik, furnitur kos..." aria-label="Pencarian">
+      </div>
 
       <div class="header-actions">
-        <a class="btn-pasang" href="{% url 'katalog:catalog' %}#pasang">
+        <button class="btn-pasang" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           Pasang barang
-        </a>
+        </button>
         <button class="btn-icon" type="button" aria-label="Notifikasi">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -77,55 +76,39 @@
         </button>
         <a href="{% url 'auth_ssoui:profile' %}" class="avatar-header" aria-label="Menu akun">
           {% if request.user.profile.pfp %}
-          {% include "components/_pfp.html" with oob=True pfp_id="navbar-pfp" size=32 img_class="nav-image" %}
+          <img src="{{ request.user.profile.pfp.url }}" alt="Foto profil"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
           {% else %}
-          <div id="navbar-pfp">
-            {{ request.user.profile.inisial }}
-          </div>
+          {{ request.user.profile.inisial }}
           {% endif %}
         </a>
       </div>
-      {% else %}
-      <a class="brand" href="" aria-label="UIKembali, beranda">
+    </div>
+  </header>
+
+  {% else %}
+  <!-- Navbar untuk tamu / user yang belum lengkapi profil -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#" aria-label="UIKembali, beranda">
         <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="16" fill="#ffc800" />
           <path d="M16 7.5a8.5 8.5 0 1 0 8.2 10.7" fill="none" stroke="#14213d" stroke-width="3"
             stroke-linecap="round" />
           <path d="M20 4.5l5.2 3.4-4.6 4.6z" fill="#14213d" />
         </svg>
-        <span>
-          UIKembali
-          <span class="brand-tagline">Pakai lagi, berarti lagi</span>
-        </span>
-      </a>
-
-      {% endif %}
-
-      {% else %}
-      <!-- Navbar untuk tamu / user yang belum lengkapi profil -->
-      <a class="brand" href="" aria-label="UIKembali, beranda">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-          <circle cx="16" cy="16" r="16" fill="#ffc800" />
-          <path d="M16 7.5a8.5 8.5 0 1 0 8.2 10.7" fill="none" stroke="#14213d" stroke-width="3"
-            stroke-linecap="round" />
-          <path d="M20 4.5l5.2 3.4-4.6 4.6z" fill="#14213d" />
-        </svg>
-        <span>
-          UIKembali
-          <span class="brand-tagline">Pakai lagi, berarti lagi</span>
-        </span>
+        <span>UIKembali</span>
       </a>
 
       <nav class="main-nav" aria-label="Navigasi utama">
         <a href="#cara-kerja">Cara kerja</a>
         <a href="#fitur">Fitur</a>
-        <a href="{% url 'forum:forum_list' %}">Forum</a>
         <a href="{% url 'auth_ssoui:login' %}" class="btn btn-small">Masuk dengan SSO UI</a>
       </nav>
-
-      {% endif %}
     </div>
   </header>
+  {% endif %}
+
   {% block content %}
   {% endblock content%}
 

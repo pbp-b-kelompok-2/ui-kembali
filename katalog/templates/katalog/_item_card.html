@@ -19,7 +19,7 @@
   <div class="p-4">
     <div class="flex items-center justify-between gap-2 text-xs">
       <span class="font-semibold text-green">{{ item.get_condition_display }}</span>
-      <span class="truncate text-muted">{% if item.distance_km is not None %}{{ item.distance_km|jarak }} · {% endif %}{{ item.location_name }}</span>
+      <span class="truncate text-muted">{{ item.location_name }}</span>
     </div>
     <h3 class="mt-1.5 text-base font-semibold leading-snug">
       {# The stretched link makes the whole card clickable but keeps one tab stop. #}

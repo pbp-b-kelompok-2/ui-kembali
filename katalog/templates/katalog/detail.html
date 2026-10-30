@@ -1,5 +1,5 @@
 {% extends "katalog/base_katalog.html" %}
-{% load static katalog_extras %}
+{% load katalog_extras %}
 
 {% block meta %}<title>{{ item.name }} · UIKembali</title>{% endblock meta %}
 
@@ -51,19 +51,6 @@
         </div>
       </dl>
 
-      {% if map_lat %}
-        {# relative z-0: Leaflet's panes use z-index 400+; keep them under the header and modal. #}
-        <div id="item-map" data-lat="{{ map_lat }}" data-lng="{{ map_lng }}"
-             data-exact="{% if map_exact %}true{% else %}false{% endif %}" data-label="{{ item.location_name }}"
-             role="img" aria-label="Peta lokasi temu: {{ item.location_name }}"
-             class="relative z-0 mt-4 h-64 overflow-hidden rounded-xl border border-line bg-subtle"></div>
-        {% if not map_exact %}
-          <p class="mt-2 text-sm text-ink-2">Lingkaran = perkiraan area. <a href="{% url 'auth_ssoui:login' %}" class="font-medium text-green">Masuk</a> untuk melihat titik temu persis.</p>
-        {% endif %}
-      {% else %}
-        <p class="mt-3 text-sm text-muted">Lokasi ini belum ada di peta.</p>
-      {% endif %}
-
       <div class="mt-5 flex items-center gap-3 rounded-xl border border-line bg-surface p-4">
         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success-bg font-semibold uppercase text-brand" aria-hidden="true">{{ item.owner.username|slice:":2" }}</span>
         <div class="min-w-0 flex-1">
@@ -75,15 +62,6 @@
           {% endif %}
         </div>
       </div>
-
-      {% if user.is_authenticated and user.id != item.owner_id %}
-        {# start-chat.js (chat app) POSTs to chat:start, then opens the conversation. #}
-        <button type="button" data-chat-start-url="{% url 'chat:start' item.pk %}" data-csrf-token="{{ csrf_token }}"
-                class="mt-3 w-full cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-green">
-          Hubungi pemilik lewat chat
-        </button>
-        <p id="chat-start-feedback" class="mt-1 text-sm text-danger" role="status"></p>
-      {% endif %}
 
       <p class="mt-4 flex gap-2 rounded-xl bg-warning-bg p-4 text-sm">
         <span aria-hidden="true">🛡️</span>
@@ -102,13 +80,3 @@
   </div>
 </div>
 {% endblock katalog_content %}
-
-{% block katalog_js %}
-{% if map_lat %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
-<script src="{% static 'katalog/js/map.js' %}" defer></script>
-{% endif %}
-{% endblock katalog_js %}

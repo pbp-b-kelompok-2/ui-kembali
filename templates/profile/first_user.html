@@ -1,83 +1,55 @@
-{% extends "profile/base_profile.html" %}
+{% extends "base.html" %}
 {% load static %}
-{% block meta_auth %}
+{% block meta %}
 <title>Profil saya — UIKembali</title>
-{% endblock meta_auth %}
+{% endblock meta %}
 
-{% block extra_css_auth %}
-<style>
-  /* Style tambahan untuk form focus yang tidak bisa dicapai dengan utility classes */
-  .form-group input:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #1f7a4d;
-    box-shadow: 0 0 0 3px #dff1e6;
-  }
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile/profile.css' %}">
+{% endblock extra_css %}
 
-  /* file input custom */
-  .pfp-file-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    overflow: hidden;
-  }
-</style>
-{% endblock extra_css_auth %}
-
-{% block content_auth %}
+{% block content %}
+<!-- ===== HEADER / NAVBAR ===== -->
 <!-- ===== PAGE HEADER ===== -->
-<div class="w-full max-w-[1120px] mx-auto px-5">
-  <div class="pt-8 pb-7">
-    <div class="flex items-start justify-between gap-4 flex-wrap">
-      <div>
-        <div class="text-xs font-semibold text-green uppercase tracking-[0.06em] mb-1">
-          Akun terverifikasi
-        </div>
-        <h1 class="text-[1.85rem] font-extrabold font-display text-ink leading-tight tracking-tight">
-          Lengkapi profilmu
-        </h1>
-        <p class="mt-1.5 text-ink-soft text-[0.9375rem]">
-          Isi identitas komunitas, preferensi titik temu, dan rekam jejak transaksimu.
-        </p>
-      </div>
+<div class="container page-header">
+  <div class="page-header-inner">
+    <div>
+      <div class="label-verif">Akun terverifikasi</div>
+      <h1>Lengkapi profilmu</h1>
+      <p class="page-desc">Isi identitas komunitas, preferensi titik temu, dan rekam jejak transaksimu.</p>
     </div>
   </div>
 </div>
 
 <!-- ===== MAIN CONTENT ===== -->
-<div class="w-full max-w-[1120px] mx-auto px-5 pb-12">
-  <!-- Profile Layout: Sidebar + Main -->
-  <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-7 items-start">
+<div class="container">
+  <div class="profile-layout">
 
-    <!-- ===== SIDEBAR ===== -->
-    <aside class="flex flex-col gap-4">
-
+    <!-- Sidebar -->
+    <aside class="sidebar">
       <!-- Profile Card -->
-      <div class="bg-white border border-line rounded-xl p-7 text-center">
-        <div
-          class="w-20 h-20 rounded-full bg-green text-white flex items-center justify-center font-display font-extrabold text-[1.6rem] mx-auto mb-4 overflow-hidden tracking-tight">
-          {{ profile.inisial }}
-        </div>
-        <h3 class="text-[1.05rem] font-extrabold font-display text-ink tracking-tight">{{ profile.nama }}</h3>
-        <p class="mt-0.5 text-[0.8125rem] text-ink-soft">{{ profile.faculty }} {{ profile.angkatan }}</p>
+      <div class="profile-card">
+        <div class="profile-avatar">{{ profile.inisial }}</div>
+        <h3>{{ profile.nama }}</h3>
+        <p class="profile-detail">{{ profile.faculty }} {{ profile.angkatan }}</p>
       </div>
     </aside>
 
-    <!-- ===== MAIN CONTENT AREA ===== -->
-    <div class="flex flex-col gap-7">
+    <!-- Main Content Area -->
+    <div class="main-content">
 
       <!-- Informasi Profil -->
-      <section class="bg-white border border-line rounded-xl p-7" id="informasi-profil">
+      <section class="info-section" id="informasi-profil">
         {% include "profile/components/profile_form_modal.html" %}
       </section>
+
+      <!-- Riwayat Terbaru -->
 
     </div>
   </div>
 </div>
-{% endblock content_auth %}
-
-{% block extra_js_auth %}
+{% endblock content %}
+{% block extra_js %}
 <script>
   document.body.addEventListener("redirectLater", function (e) {
     setTimeout(function () {
@@ -85,4 +57,4 @@
     }, e.detail.delay || 1000);
   });
 </script>
-{% endblock extra_js_auth %}
+{% endblock extra_js %}
