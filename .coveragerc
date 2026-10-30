@@ -1,15 +1,8 @@
 [run]
 branch = True
-source =
-    main
-    auth_ssoui
-    katalog
-    chat
-    forum
-    review_report
+source = review_report
 omit =
     */tests/*
-    */tests.py
     */migrations/*
 
 [report]
