@@ -1,4 +1,0 @@
-<section class="mt-5 space-y-3" aria-label="Ulasan dan pelaporan">
-  {% for req in deals %}{% include 'review_report/_transaction_link.html' %}{% endfor %}
-  {% if user.pk != item.owner_id %}<div class="flex flex-wrap gap-3 text-sm font-semibold text-danger"><a href="{% url 'review_report:report_item' item.pk %}" class="underline">Laporkan Barang</a><a href="{% url 'review_report:report_user' item.owner_id %}" class="underline">Laporkan Pengguna</a></div>{% endif %}
-</section>
