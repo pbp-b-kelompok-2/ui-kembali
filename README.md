@@ -176,6 +176,90 @@ Jalankan seluruh test modul Forum dengan:
 python manage.py test forum
 ```
 
+### Modul 5 — Review & Report
+
+**Proyek:** UIKembali
+
+**Penanggung jawab:** Muhammad Rifky Padjri — 2506585800
+
+**Model utama:** `Review`, `Report`, `ReportSubmission`
+
+**Relasi modul:** `katalog.ItemRequest`, `katalog.Item`, dan `settings.AUTH_USER_MODEL`
+
+**Antarmuka:** Django Template, Tailwind CSS, dan HTMX
+
+Modul ini memungkinkan pengadopsi atau pembeli memberikan ulasan setelah transaksi
+selesai, serta melaporkan barang atau pengguna yang bermasalah. Ulasan menjadi
+informasi reputasi publik, sedangkan laporan ditangani secara privat oleh petugas
+berizin.
+
+#### Fitur
+
+- CRUD ulasan dengan rating bilangan bulat 1–5 dan teks 10–1.000 karakter.
+- Satu ulasan per transaksi, dijaga dengan relasi OneToOne dan constraint database.
+- Halaman **Ulasan Saya**, detail ulasan, dan daftar ulasan yang diterima pemilik.
+- Rata-rata rating dan jumlah ulasan dihitung dari data aktual, termasuk setelah
+  ulasan diedit atau dihapus. Kondisi kosong menampilkan **Belum ada ulasan**.
+- Filter ulasan berdasarkan rating dan jenis transaksi adopsi/pembelian, serta
+  pagination 10 data per halaman.
+- Pelaporan barang atau pengguna tanpa harus menyelesaikan transaksi terlebih dahulu.
+  Satu laporan harus memiliki tepat satu target, kategori, dan deskripsi 20–2.000 karakter.
+- Halaman **Laporan Saya** dengan filter status, pagination, detail privat, serta
+  edit/hapus selama laporan masih **PENDING**.
+- Moderasi melalui Django admin dengan alur
+  **PENDING → IN_REVIEW → RESOLVED / REJECTED**.
+- Pencatatan petugas, waktu pemeriksaan/penutupan, catatan internal, dan hasil
+  penanganan yang dapat dibaca pelapor.
+- Layout responsif menggunakan Tailwind CSS 4.1.13 tanpa preflight, mewarisi
+  `base.html` melalui `base_review_report.html`.
+
+#### Keamanan dan aturan akses
+
+- Hanya requester aktif pada `ItemRequest` berstatus **SELESAI** yang dapat
+  memberikan ulasan kepada pemilik barang. Status barang selesai saja tidak cukup.
+- Penulis dan penerima ulasan ditentukan dari transaksi di server; pengguna tidak
+  dapat menentukan identitas tersebut melalui formulir.
+- Review diri sendiri dilarang. Hanya penulis boleh mengubah atau menghapus ulasannya.
+- Laporan hanya dapat dibaca pelapor atau staff aktif dengan izin khusus
+  `review_report.moderate_report`. Pihak terlapor tidak otomatis mendapatkan akses.
+- Pelapor, status awal, dan identitas petugas ditentukan server. Pelaporan diri
+  sendiri maupun barang sendiri dilarang.
+- Pelapor tidak dapat mengedit atau menghapus laporan setelah pemeriksaan dimulai.
+  Catatan internal tidak ditampilkan pada halaman pelapor.
+- Duplikasi laporan aktif dari pelapor ke target yang sama dicegah oleh constraint.
+  Maksimal lima pengiriman berhasil per akun dalam satu jam; `ReportSubmission`
+  mempertahankan hitungan meskipun laporan PENDING dihapus.
+- Tidak ada pemblokiran barang atau akun otomatis berdasarkan jumlah laporan.
+- Aksi perubahan memakai POST dan proteksi CSRF. Teks pengguna di-escape oleh Django.
+  Sesi kedaluwarsa pada HTMX diarahkan melalui navigasi penuh ke login.
+- Soft-delete barang tetap mempertahankan riwayat. Relasi PROTECT mencegah
+  penghapusan permanen yang merusak data review/laporan terkait.
+
+
+#### Pengujian
+
+Pengembangan memakai TDD (Red → Green → Refactor). Pengujian mencakup validasi
+model/form, constraint database, kelayakan transaksi, CRUD, hak akses, privasi,
+moderasi, agregat rating, filter, pagination, CSRF, soft-delete, dan respons HTMX.
+Functional test Selenium memeriksa alur browser dan tampilan responsif.
+
+Jalankan dari root repository setelah memasang dependensi pengembangan:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+python manage.py test review_report --exclude-tag=browser
+
+python -m coverage run --source=review_report --omit="*/tests/*,*/migrations/*" manage.py test review_report --exclude-tag=browser
+python -m coverage report
+
+$env:RUN_BROWSER_TESTS = "1"
+python manage.py test review_report.tests.test_browser
+Remove-Item Env:RUN_BROWSER_TESTS
+```
+
+Test unit/integrasi tidak menghubungi SSO atau Nominatim sungguhan. Test browser
+memerlukan Chrome serta akses ke CDN yang dipakai antarmuka. 
+
 ---
 
 ## 👤 Jenis dan Peran Pengguna
@@ -306,3 +390,15 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 - **Penggunaan:** membantu perencanaan dan implementasi fitur forum, penulisan serta perbaikan test, refactor, dan debugging. Cakupan fitur forum meliputi CRUD posting dan lampiran, pencarian/filter/pengurutan, komentar bertingkat, like, dan simpan posting.
 - **Perbaikan manual:** keputusan fitur dan penyesuaian akhir tetap saya lakukan. Saya meninjau perubahan kode dan hasil test agar sesuai kebutuhan project.
 - **Keterbatasan:** test otomatis mencakup banyak perilaku backend, tetapi belum membuktikan semua variasi tampilan, browser, dan unggahan file di penggunaan nyata; pemeriksaan manual tetap diperlukan.
+
+### Modul 5 - Review Report (Padjri)
+- **Tool:** Codex (OpenAI, gpt-6.1-sol).
+- **Penggunaan:** membantu perencanaan, implementasi model/form/services/view/template,
+  dan penulisan test.
+- **Perbaikan selama pengembangan:** penanganan error validasi model pada form,
+  resolusi target laporan, URL tujuan setelah swap HTMX, indikator menyimpan,
+  serta navigasi dan layout responsif.
+- **Batas verifikasi:** pengujian lokal menggunakan SQLite; locking konkuren pada
+  PostgreSQL dan autentikasi SSO sungguhan belum dibuktikan oleh test lokal tersebut.
+  Test browser mencakup skenario yang ditulis, bukan seluruh kombinasi perangkat.
+
