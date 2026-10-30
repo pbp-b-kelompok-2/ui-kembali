@@ -4,8 +4,8 @@
   Invalid input comes back as 422 and the view retargets it here.
 {% endcomment %}
 {% if item %}{% url 'katalog:item_update' item.pk as action %}{% else %}{% url 'katalog:item_create' as action %}{% endif %}
-<form id="item-form" method="post" action="{{ action }}" novalidate
-      hx-post="{{ action }}"
+<form id="item-form" method="post" action="{{ action }}" enctype="multipart/form-data" novalidate
+      hx-post="{{ action }}" hx-encoding="multipart/form-data"
       {# On the detail page there is no #item-list; the view answers with HX-Redirect there. #}
       {% if from_detail %}hx-target="#modal-body" hx-swap="innerHTML"{% else %}hx-target="#item-list" hx-swap="afterbegin"{% endif %}
       class="flex flex-col gap-4">
@@ -50,7 +50,7 @@
     {% include "katalog/_field.html" with field=form.location_name %}
     {% include "katalog/_field.html" with field=form.contact %}
   </div>
-  {% include "katalog/_field.html" with field=form.photo_url %}
+  {% include "katalog/_field.html" with field=form.photo %}
 
   <div class="flex justify-end gap-3 pt-2">
     <button type="button" data-modal-close class="cursor-pointer rounded-lg border border-line bg-surface px-4 py-2.5 font-semibold text-green">Batal</button>

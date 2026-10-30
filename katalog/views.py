@@ -155,7 +155,7 @@ def _card_response(request, item):
 def item_create(request):
     if request.limited:
         return toast_only(TOO_FAST, status=429)
-    form = ItemForm(request.POST or None)
+    form = ItemForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST" and form.is_valid():
         item = form.save(commit=False)
@@ -178,7 +178,7 @@ def item_update(request, pk):
     # Only the owner may edit (same check as Tutorial 04).
     if item.owner != request.user:
         raise PermissionDenied
-    form = ItemForm(request.POST or None, instance=item)
+    form = ItemForm(request.POST or None, request.FILES or None, instance=item)
 
     if request.method == "POST" and form.is_valid():
         item = form.save(commit=False)

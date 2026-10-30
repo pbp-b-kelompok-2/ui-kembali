@@ -1,13 +1,21 @@
 import uuid
+from io import BytesIO
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.core.validators import MinLengthValidator
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
+from PIL import Image, ImageOps
 
 MIN_PRICE = 1
 MAX_PRICE = 100_000_000
+MAX_PHOTO_SIDE = 1200
+
+
+def item_photo_path(instance, filename):
+    return f"katalog/{uuid.uuid4().hex}.webp"
 
 
 class ActiveItemManager(models.Manager):
@@ -50,7 +58,7 @@ class Item(models.Model):
     description = models.TextField(validators=[MinLengthValidator(10)])
     category = models.CharField(max_length=20, choices=Category.choices)
     condition = models.CharField(max_length=20, choices=Condition.choices)
-    photo_url = models.URLField(blank=True)
+    photo = models.ImageField(upload_to=item_photo_path, blank=True)
     location_name = models.CharField(max_length=120)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -80,6 +88,29 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def photo_url(self):
+        return self.photo.url if self.photo else ""
+
+    def save(self, *args, **kwargs):
+        old_name = Item.all_objects.filter(pk=self.pk).values_list("photo", flat=True).first()
+
+        # Same as Profile.pfp: a new upload is shrunk and saved as WEBP. Saving
+        # it again also drops EXIF data, which can hold the phone's GPS location.
+        photo = self.photo
+        if photo and not photo._committed:
+            image = ImageOps.exif_transpose(Image.open(photo)).convert("RGB")
+            image.thumbnail((MAX_PHOTO_SIDE, MAX_PHOTO_SIDE))
+            buffer = BytesIO()
+            image.save(buffer, format="WEBP", quality=80)
+            photo.save("x.webp", ContentFile(buffer.getvalue()), save=False)
+
+        super().save(*args, **kwargs)
+
+        if old_name and old_name != self.photo.name:
+            storage = self.photo.storage
+            transaction.on_commit(lambda: storage.delete(old_name))
 
     def clean(self):
         super().clean()
