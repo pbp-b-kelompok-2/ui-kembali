@@ -171,7 +171,7 @@ Desain antarmuka UIKembali dibuat menggunakan Figma.
 Aplikasi UIKembali telah di-deploy menggunakan PWS.
 
 **PWS:**  
-[Masukkan tautan deployment PWS di sini]
+[LINK](https://elvis-sestomi-ui-kembali.pws.cs.ui.ac.id/)
 
 
 ---
