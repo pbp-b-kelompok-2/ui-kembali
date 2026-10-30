@@ -23,12 +23,14 @@
       Urutkan:
       <select name="sort" class="border-0 bg-transparent font-semibold text-ink outline-none">
         {% for value, label in form.sort.field.choices %}
-          <option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>
+          <option value="{{ value }}" {% if form.effective_sort == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
     </label>
     {% if user.is_authenticated %}
+      {# The navbar's "Pasang barang" links to /katalog/#pasang: open the form right away. #}
       <button type="button" hx-get="{% url 'katalog:item_create' %}" hx-target="#modal-body" hx-swap="innerHTML"
+              hx-trigger="click, load[location.hash === '#pasang']"
               class="cursor-pointer rounded-lg border-0 bg-action px-5 py-3 font-semibold text-ink">+ Pasang barang</button>
     {% else %}
       <a href="{% url 'auth_ssoui:login' %}" class="rounded-lg bg-action px-5 py-3 text-center font-semibold text-ink no-underline">+ Pasang barang</a>
