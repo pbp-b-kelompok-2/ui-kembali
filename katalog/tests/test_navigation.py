@@ -10,7 +10,9 @@ User = get_user_model()
 class SiteNavigationTests(TestCase):
     def test_lobby_hero_links_to_the_catalog(self):
         response = self.client.get(reverse("main:lobby"))
-        self.assertContains(response, f'href="{reverse("katalog:catalog")}" class="btn btn-ghost"')
+        # Check the link, not its CSS class, so lobby redesigns don't break this test.
+        self.assertContains(response, f'href="{reverse("katalog:catalog")}"')
+        self.assertContains(response, "Lihat katalog")
 
     def test_logged_in_navbar_links_to_katalog_pages(self):
         # The full navbar only shows once the SSO profile is complete.
