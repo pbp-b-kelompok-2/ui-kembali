@@ -1,8 +1,9 @@
+from importlib import import_module
 from io import StringIO
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from katalog.models import Item
 
@@ -36,3 +37,21 @@ class SeedKatalogTests(TestCase):
         conditions = set(Item.objects.values_list("condition", flat=True))
         self.assertEqual(types, set(Item.TransactionType.values))
         self.assertEqual(conditions, set(Item.Condition.values))
+
+
+class SeedMigrationTests(TestCase):
+    """Migration 0003 seeds PWS on deploy, since PWS has no shell to run seed_katalog."""
+
+    def run_migration(self):
+        migration = import_module("katalog.migrations.0003_seed_production")
+        migration.seed_production(apps=None, schema_editor=None)
+
+    @override_settings(PRODUCTION=True)
+    def test_seeds_in_production(self):
+        self.run_migration()
+        self.assertGreaterEqual(Item.objects.count(), 50)
+
+    @override_settings(PRODUCTION=False)
+    def test_does_nothing_locally(self):
+        self.run_migration()
+        self.assertEqual(Item.objects.count(), 0)

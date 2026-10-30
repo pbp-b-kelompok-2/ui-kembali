@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from auth_ssoui.models import Profile
 from katalog.models import Item
@@ -213,6 +214,40 @@ class ChatViewTests(ChatTestCase):
         self.assertContains(response, self.item.name)
         self.assertContains(response, message.body)
         self.assertContains(response, self.buyer.profile.nama)
+        self.assertContains(
+            response,
+            f'href="{reverse("chat:conversation", args=[conversation.pk])}"',
+        )
+
+    def test_read_status_is_only_rendered_for_own_messages(self):
+        conversation = Conversation.objects.create(
+            item=self.item, buyer=self.buyer
+        )
+        read_at = timezone.now()
+        Message.objects.create(
+            conversation=conversation,
+            sender=self.buyer,
+            body="Pesan dari pembeli",
+            read_at=read_at,
+        )
+        Message.objects.create(
+            conversation=conversation,
+            sender=self.owner,
+            body="Pesan dari pemilik",
+            read_at=read_at,
+        )
+        self.client.force_login(self.owner)
+
+        response = self.client.get(
+            reverse("chat:conversation", args=[conversation.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "· Dibaca", count=1)
+        self.assertContains(response, "data-message-own=\"true\"")
+        self.assertContains(response, "data-message-own=\"false\"")
+        self.assertContains(response, "data-[message-own=false]:self-start")
+        self.assertContains(response, "data-[message-own=true]:bg-brand")
 
     def test_chat_page_loads_tailwind_utilities_without_chat_stylesheet(self):
         self.client.force_login(self.owner)

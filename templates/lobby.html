@@ -1,128 +1,149 @@
 {% extends "base.html" %}
 {% load static %}
-{% block meta %}
-  <title>UIKembali - Barang bekas anak UI, dipakai lagi</title>
-{% endblock meta %}
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/lobby.css' %}">
-{% endblock extra_css %}
-{% block content %}
-<main>
-  <!-- HERO -->
-  <section class="hero">
-    <div class="container hero-grid">
-      <div class="hero-copy">
-        <h1>Barang lamamu masih berguna buat anak UI lain.</h1>
-        <p class="hero-sub">
-          UIKembali mempertemukan mahasiswa UI yang ingin memberikan atau menjual barang bekas
-          dengan teman yang sedang mencarinya, dari perabot kost sampai buku kuliah.
-        </p>
-        <div class="hero-actions">
-          {% if request.user.is_authenticated and request.user.profile.is_complete %}
-          {% else %}
-          <a href="{% url 'auth_ssoui:login' %}" class="btn">Masuk dengan SSO UI</a>
-          {% endif %}
-          <a href="#" class="btn btn-ghost">Lihat katalog</a>
-        </div>
-        <p class="hero-note">Masuk memakai akun SSO UI-mu. Tidak perlu daftar terpisah.</p>
-      </div>
 
-      <div class="hero-visual" aria-label="Contoh barang di UIKembali">
-        <div class="rope" aria-hidden="true"></div>
-        <ul class="tags">
-          <li class="tag" style="--tilt:-4deg; --delay:0s">
-            <span class="badge badge-free">Gratis</span>
-            <h3>Kipas angin mini</h3>
+{% block meta %}
+  <title>UIKembali - Pakai lagi, berarti lagi</title>
+{% endblock meta %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/lobby.css' %}?v=20261029-11">
+{% endblock extra_css %}
+
+{% block content %}
+<main class="lobby-page">
+  <section class="lobby-hero" aria-labelledby="lobby-title">
+    <div class="lobby-hero-copy">
+      <h1 id="lobby-title">Barang lamamu masih berguna<br>buat anak UI lain.</h1>
+      <p>UIKembali mempertemukan mahasiswa UI yang ingin memberikan atau menjual barang bekas<br class="lobby-desktop-break"> dengan teman yang sedang mencarinya, dari perabot kost sampai buku kuliah.</p>
+      <a class="lobby-catalog-link" href="{% url 'katalog:catalog' %}">Lihat katalog <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="lobby-scene-scroll" aria-label="Contoh barang yang bisa dipakai kembali">
+      <div class="lobby-hero-scene">
+        <div class="lobby-rope" aria-hidden="true"></div>
+        <div class="lobby-tag-carousel" aria-label="Tag barang, geser untuk melihat lainnya" tabindex="0">
+        <ul class="lobby-hanging-tags">
+          <li class="lobby-tag lobby-tag-one">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-free">Gratis</span>
+            <h2>Kipas angin mini</h2>
             <p>Kondisi baik, masih kencang.</p>
-            <p class="tag-place">Kukusan</p>
+            <span class="lobby-tag-place">Kukusan</span>
           </li>
-          <li class="tag tag-raised" style="--tilt:3deg; --delay:.12s">
-            <span class="badge badge-price">Rp 60.000</span>
-            <h3>Rak buku lipat</h3>
+          <li class="lobby-tag lobby-tag-two">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-price">Rp 60.000</span>
+            <h2>Rak buku lipat</h2>
             <p>Tiga tingkat, ada lecet kecil.</p>
-            <p class="tag-place">Beji</p>
+            <span class="lobby-tag-place">Beji</span>
           </li>
-          <li class="tag" style="--tilt:-2deg; --delay:.24s">
-            <span class="badge badge-free">Gratis</span>
-            <h3>Setrika uap</h3>
+          <li class="lobby-tag lobby-tag-three">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-free">Gratis</span>
+            <h2>Setrika uap</h2>
             <p>Sering dipakai, semua fungsi normal.</p>
-            <p class="tag-place">Pondok Cina</p>
+            <span class="lobby-tag-place">Pondok Cina</span>
+          </li>
+          <li class="lobby-tag lobby-tag-four">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-free">Gratis</span>
+            <h2>Setrika uap</h2>
+            <p>Sering dipakai, semua fungsi normal.</p>
+            <span class="lobby-tag-place">Pondok Cina</span>
+          </li>
+          <li class="lobby-tag lobby-tag-five">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-price">Rp 60.000</span>
+            <h2>Rak buku lipat</h2>
+            <p>Tiga tingkat, ada lecet kecil.</p>
+            <span class="lobby-tag-place">Beji</span>
+          </li>
+          <li class="lobby-tag">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-free">Gratis</span>
+            <h2>Buku kuliah</h2>
+            <p>Masih rapi, cocok untuk semester awal.</p>
+            <span class="lobby-tag-place">Depok</span>
+          </li>
+          <li class="lobby-tag">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-price">Rp 35.000</span>
+            <h2>Lampu belajar</h2>
+            <p>Cahaya terang, semua fungsi normal.</p>
+            <span class="lobby-tag-place">Beji</span>
+          </li>
+          <li class="lobby-tag">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-free">Gratis</span>
+            <h2>Meja kecil</h2>
+            <p>Pas untuk kamar kost, kondisi baik.</p>
+            <span class="lobby-tag-place">Kukusan</span>
+          </li>
+          <li class="lobby-tag">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-price">Rp 25.000</span>
+            <h2>Setrika</h2>
+            <p>Ringan dan cepat panas.</p>
+            <span class="lobby-tag-place">Pondok Cina</span>
+          </li>
+          <li class="lobby-tag">
+            <span class="lobby-tag-hole" aria-hidden="true"></span>
+            <span class="lobby-tag-badge is-free">Gratis</span>
+            <h2>Alat makan</h2>
+            <p>Satu set, bersih dan siap dipakai.</p>
+            <span class="lobby-tag-place">Depok</span>
           </li>
         </ul>
+        </div>
+
+        <div class="lobby-floor" aria-hidden="true">
+          <img class="lobby-floor-illustration" src="{% static 'images/lobby-items.png' %}" alt="">
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- CARA KERJA -->
-  <section class="section" id="cara-kerja">
-    <div class="container">
-      <h2>Cara kerjanya</h2>
-      <ol class="steps">
-        <li>
-          <h3>Masuk dengan SSO UI</h3>
-          <p>Pakai akun UI-mu. Lengkapi profil dengan fakultas dan angkatan.</p>
-        </li>
-        <li>
-          <h3>Pasang atau cari barang</h3>
-          <p>Unggah barang yang mau kamu lepas, atau telusuri katalog berdasarkan kategori, kondisi, dan lokasi.</p>
-        </li>
-        <li>
-          <h3>Ajukan adopsi atau beli</h3>
-          <p>Pemilik menerima atau menolak permintaan, lalu kalian sepakat lewat chat.</p>
-        </li>
-        <li>
-          <h3>Beri ulasan</h3>
-          <p>Setelah barang berpindah tangan, saling beri rating supaya yang lain bisa percaya.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
+  <section class="lobby-forum" aria-labelledby="latest-forum-title">
+    <header class="lobby-forum-heading">
+      <h2 id="latest-forum-title">Forum Terbaru</h2>
+      <p>Punya tips, pengalaman, atau pertanyaan seputar barang bekas? Yuk,<br class="lobby-desktop-break"> berbagi cerita dan temukan inspirasi dari komunitas!</p>
+    </header>
 
-  <!-- FITUR -->
-  <section class="section section-alt" id="fitur">
-    <div class="container features">
-      <div class="features-intro">
-        <h2>Satu akun, dua peran</h2>
-        <p>
-          Kamu bisa jadi pemberi sekaligus pencari. Barang yang kamu lepas hari ini
-          tidak menghalangi kamu mengadopsi barang orang lain besok.
-        </p>
-      </div>
-
-      <dl class="feature-list">
-        <div class="feature">
-          <dt>Katalog dan pencarian</dt>
-          <dd>Cari barang, saring berdasarkan kategori, kondisi, jenis transaksi, dan lokasi.</dd>
+    <div class="lobby-forum-list">
+      {% for post in latest_forum_posts %}
+      <article class="lobby-forum-card">
+        <div class="lobby-forum-card-top">
+          <span class="lobby-forum-category">{{ post.get_category_display }}</span>
+          <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} lalu</time>
         </div>
-        <div class="feature">
-          <dt>Peta lokasi</dt>
-          <dd>Lihat di mana barang berada lewat OpenStreetMap sebelum memutuskan mengajukan.</dd>
+        <h3><a href="{% url 'forum:post_detail' post.pk %}">{{ post.title }}</a></h3>
+        <p class="lobby-forum-excerpt">{{ post.content|truncatechars:150 }}</p>
+        <div class="lobby-forum-card-bottom">
+          <div class="lobby-forum-author">
+            <span class="lobby-forum-avatar" aria-hidden="true">{% if post.author.profile.inisial %}{{ post.author.profile.inisial }}{% else %}{{ post.author.username|slice:":2"|upper }}{% endif %}</span>
+            <span>
+              {% if post.author.profile.nama %}{{ post.author.profile.nama }}{% elif post.author.get_full_name %}{{ post.author.get_full_name }}{% else %}{{ post.author.username }}{% endif %}
+              {% if post.author.profile.faculty %} · {{ post.author.profile.faculty }}{% endif %}
+              {% if request.user == post.author %} · Anda{% endif %}
+            </span>
+          </div>
+          <div class="lobby-forum-stats" aria-label="{{ post.like_count }} suka dan {{ post.comment_count }} komentar">
+            <span aria-hidden="true">♡</span><span>{{ post.like_count }}</span>
+            <span class="comment-icon" aria-hidden="true"></span><span>{{ post.comment_count }}</span>
+          </div>
         </div>
-        <div class="feature">
-          <dt>Chat</dt>
-          <dd>Bicara langsung dengan pemilik atau calon pengadopsi untuk atur waktu dan tempat.</dd>
-        </div>
-        <div class="feature">
-          <dt>Forum</dt>
-          <dd>Tanya tips kehidupan kost, bagikan pengalaman, dan diskusi soal memakai kembali barang.</dd>
-        </div>
-        <div class="feature">
-          <dt>Ulasan dan laporan</dt>
-          <dd>Beri rating setelah transaksi, dan laporkan barang atau akun yang bermasalah.</dd>
-        </div>
-      </dl>
+      </article>
+      {% empty %}
+      <article class="lobby-forum-empty">
+        <p>Belum ada diskusi. Jadilah yang pertama berbagi cerita di forum.</p>
+      </article>
+      {% endfor %}
     </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="cta">
-    <div class="container cta-inner">
-      <h2>Mulai dari barang yang ada di kamarmu.</h2>
-      {% if request.user.is_authenticated and request.user.profile.is_complete %}
-      {% else %}
-      <a href="{% url 'auth_ssoui:login' %}" class="btn btn-on-dark">Masuk dengan SSO UI</a>
-      {% endif %}
-    </div>
+    <a class="lobby-forum-link" href="{% url 'forum:forum_list' %}">Lihat forum <span aria-hidden="true">→</span></a>
   </section>
 </main>
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/lobby-carousel.js' %}?v=20261029-5" defer></script>
+{% endblock extra_js %}
