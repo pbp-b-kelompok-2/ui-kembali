@@ -106,6 +106,25 @@ class ItemPhotoFormTests(PhotoTestCase):
         form = self.form_with(image_file(fmt="GIF", name="a.gif"))
         self.assertEqual(form.errors["photo"], ["Format harus JPG, PNG, atau WEBP."])
 
+    def test_rejects_a_truncated_jpeg(self):
+        whole = image_file(fmt="JPEG", size=(400, 400), name="a.jpg").read()
+        form = self.form_with(SimpleUploadedFile("a.jpg", whole[: len(whole) // 2]))
+        self.assertEqual(form.errors["photo"], ["Berkas harus berupa gambar."])
+
+    def test_rejects_too_many_pixels(self):
+        # Few bytes but huge once decoded, so the 5 MB limit can't catch it.
+        form = self.form_with(image_file(size=(6000, 5000)))
+        self.assertEqual(form.errors["photo"], ["Resolusi foto terlalu besar."])
+
+    def test_valid_upload_can_still_be_saved_after_the_checks(self):
+        form = self.form_with(image_file(fmt="JPEG", name="a.jpg"))
+        self.assertTrue(form.is_valid(), form.errors)
+        item = form.save(commit=False)
+        item.owner = self.owner
+        item.save()
+        with Image.open(item.photo.path) as saved:
+            self.assertEqual(saved.format, "WEBP")
+
     def test_rejects_a_photo_over_the_size_limit(self):
         photo = image_file()
         photo.size = 5 * 1024 * 1024 + 1
