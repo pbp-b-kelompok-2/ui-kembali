@@ -71,6 +71,37 @@ python manage.py test katalog --exclude-tag=functional
 python manage.py test katalog.tests.test_functional
 ```
 
+
+### Modul 3 — Chat
+
+- **Penanggung jawab:** Axel Sebastian Saragih
+- **Model utama:** `Conversation`, `Message`
+
+Modul ini menyediakan komunikasi langsung antara pemilik barang dan calon pengadopsi atau pembeli untuk membahas segala hal mengenai transaksi.
+
+#### Fitur
+
+- Percakapan dapat dimulai dari halaman barang. Satu calon pembeli hanya memiliki satu percakapan untuk setiap barang; percakapan yang sudah ada akan digunakan kembali.
+- Inbox menampilkan daftar percakapan, nama barang, pratinjau pesan terakhir, dan jumlah percakapan.
+- Pencarian percakapan berdasarkan nama barang atau username peserta.
+- Pesan dikirim tanpa memuat ulang halaman dan diperbarui otomatis setiap 3 detik (3000 ms).
+- Status pesan masuk diperbarui menjadi telah dibaca saat percakapan dibuka atau pesannya dimuat dan isi pesan wajib diisi, dibatasi maksimal 2.000 karakter.
+
+#### Keamanan
+
+- Pengguna harus login untuk membuka inbox, memulai percakapan, atau mengirim pesan.
+- Hanya pemilik barang dan calon pembeli yang menjadi peserta percakapan yang dapat membaca atau mengirim pesan.
+- Pemilik barang tidak dapat memulai percakapan dengan dirinya sendiri.
+
+#### Pengujian
+
+Modul diuji dengan unit test untuk model percakapan dan pesan, serta view terkait autentikasi, pembuatan percakapan, validasi, dan akses peserta:
+
+```bash
+python manage.py test chat
+```
+
+
 ### Modul 4 — Forum
 
 **Penanggung jawab:** Dimas Bayu Nugroho  
@@ -96,6 +127,12 @@ Modul Forum menyediakan ruang bagi pengguna untuk berbagi diskusi, bertanya, dan
 #### Pengujian
 
 Test mencakup pencarian, filter, pengurutan, pagination, CRUD posting, unggah dan penghapusan lampiran, komentar dan balasan, like, simpan posting, serta pemeriksaan login dan kepemilikan.
+
+Jalankan seluruh test modul Forum dengan:
+
+```bash
+python manage.py test forum
+```
 
 ---
 
@@ -197,8 +234,6 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 
 ## 🤖 AI Disclosure
 
-
-
 ### Modul 2 — Posting & Katalog Barang (Owen)
 
 - **Tool:** Claude Code (Anthropic).
@@ -207,9 +242,17 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 - **Keterbatasan:** versi awal upload foto belum menolak gambar beresolusi sangat besar, bug URL form Edit lolos dari test dan baru terlihat saat dicoba langsung, dan masalah di PWS baru ketahuan setelah deploy.
 
 
+### Modul 3 — Chat (Axel)
+
+- **Tool:** GitHub Copilot (gpt-6-luna).
+- **Penggunaan:** Penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Membantu menyusun dokumentasi Modul 3 berdasarkan implementasi yang ada, disertai berbagai revisi.
+- **Revisi:** Background color bubble messages beserta ukurannya tidak sesuai sehingga saya perbaiki. Tulisan "Dibaca" pada pesan juga awalnya salah posisi tetapi sudah dibetulkan. Semua keputusan fitur berasal dari saya beserta rembukan kelompok.
+- **Keterbatasan:** Kurang polish: scrollbar pada aplikasi chat umumnya hanya di container chat, bukan keseluruhan halaman.
+
+
 ### Modul 4 - Forum (Dimas)
 
-- **Tool:** Codex (OpenAI).
+- **Tool:** Codex (OpenAI, gpt-6-luna).
 - **Penggunaan:** membantu perencanaan dan implementasi fitur forum, penulisan serta perbaikan test, refactor, dan debugging. Cakupan fitur forum meliputi CRUD posting dan lampiran, pencarian/filter/pengurutan, komentar bertingkat, like, dan simpan posting.
 - **Perbaikan manual:** keputusan fitur dan penyesuaian akhir tetap saya lakukan. Saya meninjau perubahan kode dan hasil test agar sesuai kebutuhan project.
 - **Keterbatasan:** test otomatis mencakup banyak perilaku backend, tetapi belum membuktikan semua variasi tampilan, browser, dan unggahan file di penggunaan nyata; pemeriksaan manual tetap diperlukan.
