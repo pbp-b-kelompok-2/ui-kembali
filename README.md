@@ -171,9 +171,19 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 
 ## 🤖 AI Disclosure
 
+
+
 ### Modul 2 — Posting & Katalog Barang (Owen)
 
 - **Tool:** Claude Code (Anthropic).
 - **Penggunaan:** perencanaan, penulisan kode dan test (Red-Green-Refactor), refactor, serta debugging. Keputusan fitur tetap dari saya, dan hasilnya saya periksa lewat diff, test, dan browser.
 - **Perbaikan manual:** test urutan yang tidak stabil karena timestamp sama, pembulatan koordinat untuk tamu, dan penyederhanaan kode agar lebih mudah dibaca.
 - **Keterbatasan:** versi awal upload foto belum menolak gambar beresolusi sangat besar, bug URL form Edit lolos dari test dan baru terlihat saat dicoba langsung, dan masalah di PWS baru ketahuan setelah deploy.
+
+
+### Modul 4 - Forum (Dimas)
+
+- **Tool:** Codex (OpenAI).
+- **Penggunaan:** membantu perencanaan dan implementasi fitur forum, penulisan serta perbaikan test, refactor, dan debugging. Cakupan fitur forum meliputi CRUD posting dan lampiran, pencarian/filter/pengurutan, komentar bertingkat, like, dan simpan posting.
+- **Perbaikan manual:** keputusan fitur dan penyesuaian akhir tetap saya lakukan. Saya meninjau perubahan kode dan hasil test agar sesuai kebutuhan project.
+- **Keterbatasan:** test otomatis mencakup banyak perilaku backend, tetapi belum membuktikan semua variasi tampilan, browser, dan unggahan file di penggunaan nyata; pemeriksaan manual tetap diperlukan.
