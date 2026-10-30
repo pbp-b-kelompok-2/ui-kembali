@@ -28,3 +28,9 @@ class SiteNavigationTests(TestCase):
         self.assertContains(response, "load[location.hash === '#pasang']")
         # Already on the catalog the link only changes the hash, so listen for the click too.
         self.assertContains(response, "click from:.btn-pasang")
+
+    def test_card_buttons_do_not_inherit_the_filter_forms_url_push(self):
+        # Otherwise opening the Edit form changes the URL to /edit/, and a
+        # refresh there shows the bare form without the site around it.
+        response = self.client.get(reverse("katalog:catalog"))
+        self.assertContains(response, 'hx-push-url="true" hx-disinherit="hx-push-url"')
