@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Avg, Count
 from django.utils import timezone
 from katalog.models import Item, ItemRequest
-from .models import Review
+from .models import Review, Report
 
 
 def require_user(user):
@@ -62,3 +62,83 @@ def rating_summary(owner):
     return Review.objects.filter(item_request__item__owner=owner).aggregate(average=Avg('rating'), count=Count('pk'))
 
 
+def create_report(user, *, category, description, target_item=None, target_user=None):
+    require_user(user)
+    try:
+        with transaction.atomic():
+            # Serialize creation per reporter, including reports for different targets.
+            get_user_model().objects.select_for_update().get(pk=user.pk)
+            if bool(target_item) == bool(target_user):
+                raise ValidationError('Pilih tepat satu target laporan.')
+            if target_item:
+                target_item = Item.all_objects.get(pk=target_item.pk)
+                if target_item.owner_id == user.pk:
+                    raise PermissionDenied('Tidak dapat melaporkan barang sendiri.')
+                if target_item.is_deleted:
+                    raise ValidationError('Barang sudah dihapus. Laporan baru tidak dapat dibuat.')
+            elif target_user.pk == user.pk:
+                raise PermissionDenied('Tidak dapat melaporkan diri sendiri.')
+            if Report.objects.filter(reporter=user, created_at__gte=timezone.now()-timedelta(hours=1)).count() >= 5:
+                raise ValidationError('Maksimal 5 laporan per jam. Coba lagi nanti.')
+            report = Report(reporter=user, target_item=target_item, target_user=target_user,
+                            category=category, description=description.strip())
+            report.full_clean()
+            report.save()
+            return report
+    except IntegrityError as exc:
+        raise ValidationError('Kamu sudah memiliki laporan aktif untuk target ini.') from exc
+
+
+def _pending_reporter(report, user):
+    require_user(user)
+    if report.reporter_id != user.pk:
+        raise PermissionDenied('Laporan ini bukan milikmu.')
+    if report.status != Report.Status.PENDING:
+        raise ValidationError('Pemeriksaan sudah dimulai; laporan tidak dapat diubah atau dihapus.')
+
+
+@transaction.atomic
+def update_report(report, user, *, category, description):
+    report = Report.objects.select_for_update().get(pk=report.pk)
+    _pending_reporter(report, user)
+    report.category, report.description = category, description.strip()
+    report.full_clean()
+    report.save(update_fields=['category', 'description', 'updated_at'])
+    return report
+
+
+@transaction.atomic
+def delete_report(report, user):
+    report = Report.objects.select_for_update().get(pk=report.pk)
+    _pending_reporter(report, user)
+    report.delete()
+
+
+def can_moderate(user):
+    return user.is_authenticated and user.is_active and user.is_staff and user.has_perm('review_report.moderate_report')
+
+
+def validate_transition(current, target, public_result=''):
+    allowed = {'PENDING': {'IN_REVIEW'}, 'IN_REVIEW': {'RESOLVED', 'REJECTED'}}
+    if target not in allowed.get(current, set()):
+        raise ValidationError('Transisi status tidak diizinkan. Mulai pemeriksaan sebelum menutup laporan.')
+    if target in {'RESOLVED', 'REJECTED'} and not public_result.strip():
+        raise ValidationError('Hasil penanganan untuk pelapor wajib diisi.')
+
+
+@transaction.atomic
+def moderate_report(report, user, status, *, internal_notes='', public_result=''):
+    if not can_moderate(user):
+        raise PermissionDenied('Izin moderasi laporan diperlukan.')
+    report = Report.objects.select_for_update().get(pk=report.pk)
+    validate_transition(report.status, status, public_result)
+    now = timezone.now()
+    if status == Report.Status.IN_REVIEW:
+        report.reviewed_at = now
+    else:
+        report.resolved_at = now
+    report.status, report.reviewed_by = status, user
+    report.internal_notes, report.public_result = internal_notes.strip(), public_result.strip()
+    report.full_clean()
+    report.save()
+    return report
