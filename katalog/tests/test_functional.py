@@ -65,6 +65,18 @@ class KatalogBrowserTests(StaticLiveServerTestCase):
         self.assertIn("q=kipas", self.browser.current_url)
         self.assertTrue(self.browser.execute_script("return window.notReloaded"))
 
+    def test_opening_the_edit_form_keeps_the_catalog_url(self):
+        make_item(self.owner, name="Kipas angin meja")
+        Profile.objects.create(user=self.owner, nama="Owen Pemilik", is_complete=True)
+        self.login(self.owner)
+        self.browser.get(self.live_server_url + "/katalog/")
+        edit = self.browser.find_element(By.XPATH, "//button[contains(., 'Edit')]")
+        # The page scrolls smoothly, so a normal click can land before it stops.
+        self.browser.execute_script("arguments[0].click()", edit)
+
+        self.wait.until(EC.visibility_of_element_located((By.ID, "item-form")))
+        self.assertTrue(self.browser.current_url.endswith("/katalog/"))
+
     def test_owner_creates_an_item_in_the_modal(self):
         # The navbar's button only shows once the SSO profile is complete.
         Profile.objects.create(user=self.owner, nama="Owen Pemilik", is_complete=True)

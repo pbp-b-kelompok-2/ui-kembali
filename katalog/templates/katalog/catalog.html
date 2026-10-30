@@ -8,7 +8,7 @@
       hx-get="{% url 'katalog:catalog' %}"
       hx-trigger="input delay:400ms, submit"
       hx-target="#grid" hx-swap="outerHTML"
-      hx-push-url="true" hx-sync="this:replace"
+      hx-push-url="true" hx-disinherit="hx-push-url" hx-sync="this:replace"
       class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
