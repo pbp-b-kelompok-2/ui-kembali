@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import patch
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
@@ -52,8 +53,8 @@ class ReportRuleTests(ModuleCase):
             self.create(target_item=self.make_item(self.owner, name=f'Barang {n}'))
         with self.assertRaises(ValidationError):
             self.create(target_user=self.other)
-        Report.objects.update(created_at=timezone.now()-timedelta(hours=2))
-        self.create(target_user=self.other)
+        with patch('review_report.services.timezone.now', return_value=timezone.now()+timedelta(hours=2)):
+            self.create(target_user=self.other)
 
     def test_deleted_item_cannot_be_new_report_target(self):
         self.item.soft_delete()

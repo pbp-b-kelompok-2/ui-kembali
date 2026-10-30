@@ -1,6 +1,7 @@
 """Transaction-derived review identities and private, retained reports."""
 import uuid
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, MaxLengthValidator, MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -12,6 +13,11 @@ class Review(models.Model):
     comment = models.TextField(validators=[MinLengthValidator(10), MaxLengthValidator(1000)])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def clean_fields(self, exclude=None):
+        if 'rating' not in (exclude or ()) and (isinstance(self.rating, bool) or not isinstance(self.rating, (int, str))):
+            raise ValidationError({'rating': 'Rating harus berupa bilangan bulat 1–5.'})
+        super().clean_fields(exclude=exclude)
 
     class Meta:
         ordering = ['-created_at', '-pk']
@@ -63,3 +69,13 @@ class Report(models.Model):
 
     def __str__(self):
         return f'{self.get_category_display()} · {self.get_status_display()}'
+
+
+class ReportSubmission(models.Model):
+    """Short-lived rate-limit ledger, independent of report deletion."""
+    id = models.BigAutoField(primary_key=True)
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['reporter', 'created_at'], name='rr_submission_user_time')]

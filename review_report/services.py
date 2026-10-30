@@ -6,11 +6,11 @@ from django.db import IntegrityError, transaction
 from django.db.models import Avg, Count
 from django.utils import timezone
 from katalog.models import Item, ItemRequest
-from .models import Review, Report
+from .models import Review, Report, ReportSubmission
 
 
 def require_user(user):
-    if not user.is_authenticated:
+    if not user.is_authenticated or not user.is_active:
         raise PermissionDenied('Silakan masuk terlebih dahulu.')
 
 
@@ -78,12 +78,15 @@ def create_report(user, *, category, description, target_item=None, target_user=
                     raise ValidationError('Barang sudah dihapus. Laporan baru tidak dapat dibuat.')
             elif target_user.pk == user.pk:
                 raise PermissionDenied('Tidak dapat melaporkan diri sendiri.')
-            if Report.objects.filter(reporter=user, created_at__gte=timezone.now()-timedelta(hours=1)).count() >= 5:
+            cutoff = timezone.now() - timedelta(hours=1)
+            ReportSubmission.objects.filter(reporter=user, created_at__lt=cutoff).delete()
+            if ReportSubmission.objects.filter(reporter=user).count() >= 5:
                 raise ValidationError('Maksimal 5 laporan per jam. Coba lagi nanti.')
             report = Report(reporter=user, target_item=target_item, target_user=target_user,
                             category=category, description=description.strip())
             report.full_clean()
             report.save()
+            ReportSubmission.objects.create(reporter=user)
             return report
     except IntegrityError as exc:
         raise ValidationError('Kamu sudah memiliki laporan aktif untuk target ini.') from exc
