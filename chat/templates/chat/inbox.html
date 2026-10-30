@@ -98,11 +98,12 @@
          href="{% url 'katalog:item_detail' conversation.item.pk %}">Detail barang</a>
     </header>
 
-    <div class="message-list flex flex-1 flex-col gap-2 overflow-y-auto p-4 max-[640px]:p-3" id="message-list" aria-live="polite" aria-label="Riwayat pesan">
+    <div class="message-list flex flex-1 flex-col gap-2 overflow-y-auto p-4 max-[640px]:p-3 data-[message-own=true]:self-end data-[message-own=false]:self-start data-[message-own=true]:border-brand data-[message-own=true]:bg-brand data-[message-own=true]:text-white data-[message-own=true]:[&>time]:text-[#c9e5d3]" id="message-list" aria-live="polite" aria-label="Riwayat pesan">
       <p class="date-divider mb-1 self-center text-[0.65rem] uppercase text-muted">Percakapan</p>
       {% for message in messages %}
-      <article class="message-bubble max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2 shadow-sm [&>p]:[overflow-wrap:anywhere] [&>p]:whitespace-pre-wrap [&>p]:text-xs [&>p]:leading-normal [&>time]:mt-1 [&>time]:block [&>time]:text-right [&>time]:text-[0.65rem] [&>time]:text-muted{% if message.sender_id == request.user.pk %} message-own self-end border-brand bg-brand text-white [&>time]:text-[#c9e5d3]{% endif %}"
-               data-message-id="{{ message.pk }}">
+      <article class="message-bubble max-w-[78%] rounded-2xl border border-line bg-surface px-3 py-2 shadow-sm [&>p]:[overflow-wrap:anywhere] [&>p]:whitespace-pre-wrap [&>p]:text-xs [&>p]:leading-normal [&>time]:mt-1 [&>time]:block [&>time]:text-right [&>time]:text-[0.65rem] [&>time]:text-muted data-[message-own=true]:self-end data-[message-own=false]:self-start data-[message-own=true]:border-brand data-[message-own=true]:bg-brand data-[message-own=true]:text-white data-[message-own=true]:[&>time]:text-[#c9e5d3]{% if message.sender_id == request.user.pk %} message-own{% endif %}"
+               data-message-id="{{ message.pk }}"
+               data-message-own="{% if message.sender_id == request.user.pk %}true{% else %}false{% endif %}">
         <p>{{ message.body }}</p>
         <time datetime="{{ message.sent_at|date:'c' }}">{{ message.sent_at|date:"H:i" }}{% if message.sender_id == request.user.pk and message.read_at %} · Dibaca{% endif %}</time>
       </article>
