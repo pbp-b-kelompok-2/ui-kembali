@@ -1,0 +1,3 @@
+{% if req.requester_id == user.pk and req.item.owner_id != user.pk and req.status == 'SELESAI' %}
+  {% if req.review %}<a class="inline-block rounded-lg border border-line bg-surface px-4 py-2 font-semibold text-brand" href="{% url 'review_report:review_detail' req.review.pk %}">Lihat/Edit Ulasan</a>{% else %}<a class="inline-block rounded-lg bg-action px-4 py-2 font-semibold text-ink" href="{% url 'review_report:review_create' req.pk %}">Beri Ulasan</a>{% endif %}
+{% endif %}
