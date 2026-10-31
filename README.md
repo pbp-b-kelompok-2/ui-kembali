@@ -360,7 +360,7 @@ Secara umum, alur penggunaan UIKembali adalah sebagai berikut:
 
 ## 🤖 AI Disclosure
 
-### Modul 2 — Posting & Katalog Barang (Owen)
+### Modul 1 — Profile (Elvis)
 
 - **Tool:** Codex (gpt-6-luna).
 - **Penggunaan:** perencanaan, pembangunan page html, penulisan kode dan test, refactor, serta debugging error. Preferensi fitur dipilih oleh saya dan beberapa kode awal masih ditulis oleh saya.
