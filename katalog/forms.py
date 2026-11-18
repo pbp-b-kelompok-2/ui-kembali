@@ -15,6 +15,27 @@ MAX_PHOTO_PIXELS = 25_000_000
 PHOTO_FORMATS = {"JPEG", "PNG", "WEBP"}
 
 
+def validate_photo_upload(photo):
+    """Shared by ItemForm and the REST ItemSerializer."""
+    # Only a new upload needs checking, not the photo already saved.
+    if isinstance(photo, UploadedFile):
+        if photo.size > MAX_PHOTO_BYTES:
+            raise forms.ValidationError("Ukuran foto maksimal 5 MB.")
+        if photo.image.format not in PHOTO_FORMATS:
+            raise forms.ValidationError("Format harus JPG, PNG, atau WEBP.")
+        # A small file can still decode into a huge image in memory.
+        if photo.image.width * photo.image.height > MAX_PHOTO_PIXELS:
+            raise forms.ValidationError("Resolusi foto terlalu besar.")
+        # ImageField only checks the header; a cut-off file fails on decoding.
+        try:
+            with Image.open(photo) as image:
+                image.load()
+        except (OSError, ValueError):
+            raise forms.ValidationError("Berkas harus berupa gambar.")
+        photo.seek(0)
+    return photo
+
+
 class PhotoInput(forms.ClearableFileInput):
     initial_text = "Foto sekarang"
     input_text = "Ganti foto"
@@ -71,24 +92,7 @@ class ItemForm(forms.ModelForm):
                 field.widget.attrs.setdefault("placeholder", placeholders[name])
 
     def clean_photo(self):
-        photo = self.cleaned_data.get("photo")
-        # Only a new upload needs checking, not the photo already saved.
-        if isinstance(photo, UploadedFile):
-            if photo.size > MAX_PHOTO_BYTES:
-                raise forms.ValidationError("Ukuran foto maksimal 5 MB.")
-            if photo.image.format not in PHOTO_FORMATS:
-                raise forms.ValidationError("Format harus JPG, PNG, atau WEBP.")
-            # A small file can still decode into a huge image in memory.
-            if photo.image.width * photo.image.height > MAX_PHOTO_PIXELS:
-                raise forms.ValidationError("Resolusi foto terlalu besar.")
-            # ImageField only checks the header; a cut-off file fails on decoding.
-            try:
-                with Image.open(photo) as image:
-                    image.load()
-            except (OSError, ValueError):
-                raise forms.ValidationError("Berkas harus berupa gambar.")
-            photo.seek(0)
-        return photo
+        return validate_photo_upload(self.cleaned_data.get("photo"))
 
     def clean(self):
         cleaned = super().clean()
