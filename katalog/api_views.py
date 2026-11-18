@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
@@ -13,7 +14,7 @@ from . import geocoding
 from .filters import filter_items
 from .models import Item, ItemRequest
 from .permissions import IsOwnerOrReadOnly
-from .serializers import ItemRequestSerializer, ItemSerializer
+from .serializers import ItemRequestSerializer, ItemSerializer, TransactionSerializer
 
 PAGE_SIZE = 12
 
@@ -32,11 +33,32 @@ class ItemPagination(PageNumberPagination):
         })
 
 
-def _paginated_items(request, items):
+def _paginated(request, rows, serializer_class):
     paginator = ItemPagination()
-    page = paginator.paginate_queryset(items, request)
-    serializer = ItemSerializer(page, many=True, context={"request": request})
+    page = paginator.paginate_queryset(rows, request)
+    serializer = serializer_class(page, many=True, context={"request": request})
     return paginator.get_paginated_response(serializer.data)
+
+
+def _paginated_items(request, items):
+    return _paginated(request, items, ItemSerializer)
+
+
+@api_view(["GET"])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def transaction_list(request):
+    """Riwayat transaksi: requests I made or received. ?type=ADOPSI|JUAL filters."""
+    rows = (
+        ItemRequest.objects
+        .filter(Q(requester=request.user) | Q(item__owner=request.user))
+        .select_related("item", "item__owner", "requester")
+        .order_by("-updated_at")
+    )
+    kind = request.query_params.get("type", "")
+    if kind in Item.TransactionType.values:
+        rows = rows.filter(item__transaction_type=kind)
+    return _paginated(request, rows, TransactionSerializer)
 
 
 @api_view(["GET", "HEAD", "POST"])

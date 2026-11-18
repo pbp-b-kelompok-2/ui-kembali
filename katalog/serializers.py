@@ -115,3 +115,32 @@ class ItemRequestSerializer(serializers.ModelSerializer):
 
     def validate_message(self, value):
         return strip_tags(value).strip()
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    """One row of "Riwayat transaksi": a request seen by its requester or owner."""
+
+    item = ItemSerializer(read_only=True)
+    status_label = serializers.CharField(source="get_status_display", read_only=True)
+    role = serializers.SerializerMethodField()
+    counterpart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ItemRequest
+        fields = [
+            "id", "item", "role", "counterpart",
+            "status", "status_label", "message", "created_at", "updated_at",
+        ]
+        read_only_fields = fields
+
+    def _user(self):
+        return self.context["request"].user
+
+    def get_role(self, obj):
+        return "requester" if obj.requester_id == self._user().pk else "owner"
+
+    def get_counterpart(self, obj):
+        """The other person in the transaction."""
+        if obj.requester_id == self._user().pk:
+            return obj.item.owner.username
+        return obj.requester.username

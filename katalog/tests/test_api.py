@@ -232,6 +232,48 @@ class ItemAPITest(APITestCase):
         self.assertEqual(self.client.post(self.request_url).status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(ItemRequest.objects.count(), 0)
 
+    # --- transactions (riwayat transaksi) ----------------------------------
+
+    def test_transactions_require_login(self):
+        url = reverse("api:transaction-list")
+        self.assertEqual(self.client.get(url).status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_transactions_show_both_roles_and_hide_strangers(self):
+        free = make_item(self.owner, name="Lampu Belajar", transaction_type="ADOPSI")
+        mine = ItemRequest.objects.create(item=self.item, requester=self.other)
+        theirs = ItemRequest.objects.create(item=free, requester=self.other)
+        seller = User.objects.create_user(username="seller", password="test-password")
+        buyer = User.objects.create_user(username="buyer", password="test-password")
+        ItemRequest.objects.create(item=make_item(seller, name="Bukan Urusan"), requester=buyer)
+
+        self.client.force_authenticate(user=self.other)
+        rows = {r["id"]: r for r in self.client.get(reverse("api:transaction-list")).data["results"]}
+        self.assertEqual(set(rows), {str(mine.id), str(theirs.id)})
+        self.assertEqual(rows[str(mine.id)]["role"], "requester")
+        self.assertEqual(rows[str(mine.id)]["counterpart"], "owner")
+        self.assertEqual(rows[str(mine.id)]["status_label"], "Menunggu")
+        self.assertEqual(rows[str(mine.id)]["item"]["name"], "Buku Kalkulus")
+
+        self.client.force_authenticate(user=self.owner)
+        rows = self.client.get(reverse("api:transaction-list")).data["results"]
+        self.assertEqual({r["role"] for r in rows}, {"owner"})
+        self.assertEqual({r["counterpart"] for r in rows}, {"other"})
+
+    def test_transactions_filter_by_offer_type(self):
+        free = make_item(self.owner, name="Lampu Belajar", transaction_type="ADOPSI")
+        sale = make_item(self.owner, name="Kipas", transaction_type="JUAL", price=85000)
+        ItemRequest.objects.create(item=free, requester=self.other)
+        ItemRequest.objects.create(item=sale, requester=self.other)
+        self.client.force_authenticate(user=self.other)
+        url = reverse("api:transaction-list")
+
+        def names(query):
+            return [r["item"]["name"] for r in self.client.get(url, query).data["results"]]
+
+        self.assertEqual(names({"type": "ADOPSI"}), ["Lampu Belajar"])
+        self.assertEqual(names({"type": "JUAL"}), ["Kipas"])
+        self.assertEqual(len(names({})), 2)
+
     # --- CSRF (session auth) -----------------------------------------------
 
     def test_session_write_without_csrf_is_rejected(self):
