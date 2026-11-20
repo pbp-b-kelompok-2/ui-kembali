@@ -13,6 +13,8 @@ urlpatterns = [
     path("review-report/", include("review_report.urls")),
     path("api/v1/", include("katalog.api_urls")),
     path("api/v1/auth/", include("auth_ssoui.api_urls")),
+    path("api/v1/chat/", include("chat.api_urls", namespace="chat_api")),
+    path("api/v1/review-report/", include("review_report.api_urls")),
     path("api-auth/", include("rest_framework.urls")),
 ]
 

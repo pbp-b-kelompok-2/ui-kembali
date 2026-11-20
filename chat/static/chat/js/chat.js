@@ -72,6 +72,11 @@
       input.focus();
       return;
     }
+    if (input.value.trim().length < 3) {
+      feedback.textContent = "Pesan harus memiliki minimal 3 karakter.";
+      input.focus();
+      return;
+    }
 
     submit.disabled = true;
     feedback.textContent = "";
