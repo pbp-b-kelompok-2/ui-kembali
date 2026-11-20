@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     'chat',
     'forum',
     'review_report',
-    'rest_framework',
 ]
 
 MIDDLEWARE = [
