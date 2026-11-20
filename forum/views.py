@@ -55,7 +55,6 @@ def forum_list(request):
     posts = ForumPost.objects.select_related("author", "author__profile").annotate(
         comment_count=Count("comments", distinct=True),
         like_count=Count("liked_by", distinct=True),
-        popular = Count("comments", distinct=True)+Count("liked_by", distinct=True)
     )
     
     query = request.GET.get("q", "").strip()
@@ -64,7 +63,7 @@ def forum_list(request):
     if category not in valid_categories:
         category = ""
     selected_sort = request.GET.get("sort", "newest")
-    if selected_sort not in {"newest", "oldest", "popular", "unpopular"}:
+    if selected_sort not in {"newest", "oldest", "popular"}:
         selected_sort = "newest"
     selected_mine = request.GET.get("mine") == "1" and request.user.is_authenticated
     selected_saved = request.GET.get("saved") == "1" and request.user.is_authenticated
@@ -91,9 +90,7 @@ def forum_list(request):
     if selected_sort == "oldest":
         posts = posts.order_by("created_at", "pk")
     elif selected_sort == "popular":
-        posts = posts.order_by("-popular", "-created_at", "-pk")
-    elif selected_sort == "unpopular":
-            posts = posts.order_by("popular", "created_at", "pk")
+        posts = posts.order_by("-like_count", "-created_at", "-pk")
     else:
         posts = posts.order_by("-created_at", "-pk")
 
