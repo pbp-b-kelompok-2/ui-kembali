@@ -56,6 +56,7 @@ def forum_list(request):
         comment_count=Count("comments", distinct=True),
         like_count=Count("liked_by", distinct=True),
     )
+    
     query = request.GET.get("q", "").strip()
     category = request.GET.get("category", "")
     valid_categories = {value for value, _label in ForumPost.Category.choices}

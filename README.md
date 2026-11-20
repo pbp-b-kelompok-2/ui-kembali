@@ -170,6 +170,23 @@ Modul Forum menyediakan ruang bagi pengguna untuk berbagi diskusi, bertanya, dan
 
 Test mencakup pencarian, filter, pengurutan, pagination, CRUD posting, unggah dan penghapusan lampiran, komentar dan balasan, like, simpan posting, serta pemeriksaan login dan kepemilikan.
 
+#### API Forum untuk aplikasi mobile
+
+API Django REST Framework tersedia di prefix `/api/forum/`:
+
+| Method | Endpoint | Akses / kegunaan |
+|---|---|---|
+| `GET` | `/api/forum/posts/` | Daftar posting; publik. Menerima `search` dan `ordering`. |
+| `POST` | `/api/forum/posts/` | Membuat posting; perlu login. |
+| `GET` | `/api/forum/posts/<id>/` | Detail posting; publik. |
+| `PATCH`, `DELETE` | `/api/forum/posts/<id>/` | Mengubah/menghapus posting sendiri; perlu login. |
+| `POST` | `/api/forum/posts/<id>/like/` | Toggle like; perlu login. |
+| `POST` | `/api/forum/posts/<id>/save/` | Toggle simpan; perlu login. |
+| `GET` | `/api/forum/comments/?post=<id>` | Daftar komentar untuk posting; publik. |
+| `POST` | `/api/forum/comments/` | Membuat komentar/balasan; perlu login. Body: `post`, `content`, opsional `parent`. |
+
+Endpoint memakai autentikasi session Django standar DRF. Untuk request tulis dari Flutter, klien harus mengirim autentikasi yang didukung backend dan token CSRF untuk session authentication.
+
 Jalankan seluruh test modul Forum dengan:
 
 ```bash
