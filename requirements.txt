@@ -10,3 +10,4 @@ django-sso-ui
 pillow
 django-ratelimit
 requests
+djangorestframework~=3.18.3

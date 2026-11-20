@@ -25,7 +25,11 @@ class SiteNavigationTests(TestCase):
         Profile.objects.create(user=user, nama="Owen Pemilik", is_complete=True)
         self.client.force_login(user)
         response = self.client.get(reverse("katalog:catalog"))
-        self.assertContains(response, f'<a href="{reverse("katalog:catalog")}">Jelajahi</a>')
+        # On the catalog page the nav link is marked active, so it carries extra attributes.
+        self.assertContains(
+            response,
+            f'<a href="{reverse("katalog:catalog")}" class="active" aria-current="page">Jelajahi</a>',
+        )
         self.assertContains(response, f'<a href="{reverse("katalog:requests_page")}">Transaksi</a>')
         self.assertContains(response, f'href="{reverse("katalog:catalog")}#pasang"')
         # The header search is a real form that searches the catalog.
