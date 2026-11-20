@@ -8,7 +8,7 @@ from .permissions import IsProfileComplete, IsProfileIncomplete
 from .serializers import ProfileCompletionSerializer, ProfileEditSerializer, ProfileSerializer
 
 
-@api_view(["GET"])
+@api_view(["GET", "HEAD", "POST"])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def profile_detail(request):
@@ -17,7 +17,7 @@ def profile_detail(request):
     return Response(ProfileSerializer(profile, context={"request": request}).data)
 
 
-@api_view(["PATCH"])
+@api_view(["PATCH", "POST"])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated, IsProfileComplete])
 def profile_edit(request):
@@ -34,7 +34,7 @@ def profile_edit(request):
     return Response(ProfileSerializer(profile, context={"request": request}).data)
 
 
-@api_view(["PATCH"])
+@api_view(["PATCH", "POST"])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated, IsProfileIncomplete])
 def profile_complete(request):
