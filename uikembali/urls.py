@@ -12,6 +12,8 @@ urlpatterns = [
     path("forum/", include("forum.urls")),
     path("api/forum/", include("forum.api_urls")),
     path("review-report/", include("review_report.urls")),
+    path("api/v1/", include("katalog.api_urls")),
+    path("api-auth/", include("rest_framework.urls")),
 ]
 
 if settings.SERVE_MEDIA:
