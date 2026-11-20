@@ -10,6 +10,7 @@ urlpatterns = [
     path("katalog/", include("katalog.urls")),
     path("chat/", include("chat.urls")),
     path("forum/", include("forum.urls")),
+    path("api/forum/", include("forum.api_urls")),
     path("review-report/", include("review_report.urls")),
 ]
 
