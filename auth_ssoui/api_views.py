@@ -1,11 +1,12 @@
-﻿from rest_framework import serializers, status
-from rest_framework.authentication import SessionAuthentication
+﻿from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Profile
-from .serializers import *
+from .permissions import IsProfileComplete, IsProfileIncomplete
+from .serializers import ProfileCompletionSerializer, ProfileEditSerializer, ProfileSerializer
+
 
 @api_view(["GET"])
 @authentication_classes([SessionAuthentication])
@@ -18,16 +19,10 @@ def profile_detail(request):
 
 @api_view(["PATCH"])
 @authentication_classes([SessionAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsProfileComplete])
 def profile_edit(request):
     """Update only the fields available in the normal profile edit form."""
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    if not profile.is_complete:
-        return Response(
-            {"detail": "Lengkapi profil terlebih dahulu."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
-
     serializer = ProfileEditSerializer(
         profile,
         data=request.data,
@@ -41,16 +36,10 @@ def profile_edit(request):
 
 @api_view(["PATCH"])
 @authentication_classes([SessionAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsProfileIncomplete])
 def profile_complete(request):
     """Complete an SSO user's profile without accepting SSO-owned fields."""
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    if profile.is_complete:
-        return Response(
-            {"detail": "Profil sudah lengkap."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
     serializer = ProfileCompletionSerializer(
         profile,
         data=request.data,
